@@ -1,19 +1,23 @@
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types';
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import {
   LayoutDashboard,
   Package,
@@ -27,7 +31,6 @@ import {
   ListTodo,
   Globe,
   MessageSquare,
-  LogOut,
   ChevronDown,
   Warehouse,
   Settings,
@@ -43,8 +46,6 @@ import {
   FileText,
   IndianRupee,
   Receipt,
-  Database,
-  Blocks,
   Code,
   Camera,
   Gavel,
@@ -52,14 +53,6 @@ import {
   MessageCircle,
   Building2,
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface NavItem {
   title: string;
@@ -155,16 +148,11 @@ const navigationGroups: NavGroup[] = [
 ];
 
 export function AppSidebar() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   const filteredGroups = navigationGroups.map(group => ({
     ...group,
@@ -187,99 +175,56 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2 py-4 scrollbar-thin">
-        {filteredGroups.map((group) => (
-          <SidebarGroup key={group.label}>
-            {!isCollapsed && (
-              <SidebarGroupLabel className="text-xs font-medium text-sidebar-foreground/50 uppercase tracking-wider px-3 mb-2">
-                {group.label}
-              </SidebarGroupLabel>
-            )}
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => {
-                  const isActive = location.pathname === item.url;
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive}
-                        tooltip={item.title}
-                      >
-                        <a
-                          href={item.url}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            navigate(item.url);
-                          }}
-                          className={`
-                            flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
-                            ${isActive 
-                              ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium' 
-                              : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                            }
-                          `}
-                        >
-                          <item.icon className="w-4 h-4 shrink-0" />
-                          {!isCollapsed && <span>{item.title}</span>}
-                        </a>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+      <SidebarContent className="px-2 py-2 scrollbar-thin">
+        {filteredGroups.map((group, index) => (
+          <Collapsible key={group.label} defaultOpen={index === 0} className="group/collapsible">
+            <SidebarGroup className="p-0">
+              {!isCollapsed ? (
+                <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2 text-xs font-medium text-sidebar-foreground/50 uppercase tracking-wider hover:text-sidebar-foreground/80 transition-colors">
+                  {group.label}
+                  <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-data-[state=closed]/collapsible:rotate-[-90deg]" />
+                </CollapsibleTrigger>
+              ) : null}
+              <CollapsibleContent className="transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden">
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {group.items.map((item) => {
+                      const isActive = location.pathname === item.url;
+                      return (
+                        <SidebarMenuItem key={item.title}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive}
+                            tooltip={item.title}
+                          >
+                            <a
+                              href={item.url}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                navigate(item.url);
+                              }}
+                              className={`
+                                flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
+                                ${isActive 
+                                  ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium' 
+                                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                                }
+                              `}
+                            >
+                              <item.icon className="w-4 h-4 shrink-0" />
+                              {!isCollapsed && <span>{item.title}</span>}
+                            </a>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    })}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
         ))}
       </SidebarContent>
-
-      <SidebarFooter className="p-3 border-t border-sidebar-border">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-sidebar-accent transition-colors">
-              <Avatar className="w-8 h-8">
-                <AvatarImage src={user?.avatar} alt={user?.name} />
-                <AvatarFallback className="bg-sidebar-primary text-sidebar-primary-foreground text-xs">
-                  {user?.name?.split(' ').map(n => n[0]).join('')}
-                </AvatarFallback>
-              </Avatar>
-              {!isCollapsed && (
-                <>
-                  <div className="flex-1 text-left">
-                    <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name}</p>
-                    <p className="text-xs text-sidebar-foreground/60 capitalize">{user?.role}</p>
-                  </div>
-                  <ChevronDown className="w-4 h-4 text-sidebar-foreground/60" />
-                </>
-              )}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <div className="px-2 py-1.5">
-              <p className="text-sm font-medium">{user?.name}</p>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate('/system-settings')}>
-              <Settings className="w-4 h-4 mr-2" />
-              System Settings
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/system-architecture')}>
-              <Blocks className="w-4 h-4 mr-2" />
-              System Architecture
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/data-configuration')}>
-              <Database className="w-4 h-4 mr-2" />
-              Data Configuration
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarFooter>
     </Sidebar>
   );
 }

@@ -1,18 +1,20 @@
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, LogOut, Settings, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AIAccessBanner, AIAccessControl } from '@/components/AIAccessControl';
 
 interface AppLayoutProps {
@@ -20,11 +22,17 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const lastSynced = new Date();
   lastSynced.setMinutes(lastSynced.getMinutes() - 3);
@@ -104,10 +112,43 @@ export function AppLayout({ children }: AppLayoutProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Role Badge */}
-              <Badge variant="secondary" className="capitalize hidden sm:flex">
-                {user?.role}
-              </Badge>
+              {/* User Profile Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-accent transition-colors">
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src={user?.avatar} alt={user?.name} />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                        {user?.name?.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="hidden sm:flex flex-col text-left">
+                      <span className="text-sm font-medium leading-tight">{user?.name}</span>
+                      <span className="text-xs text-muted-foreground capitalize">{user?.role}</span>
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-2 py-1.5">
+                    <p className="text-sm font-medium">{user?.name}</p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/system-settings')}>
+                    <User className="w-4 h-4 mr-2" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/system-settings')}>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </header>
 
