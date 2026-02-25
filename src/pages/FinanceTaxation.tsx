@@ -83,6 +83,28 @@ export default function FinanceTaxation() {
   // Invoice form
   const [invForm, setInvForm] = useState({ customer: '', gstin: '', amount: '', gstRate: '18' });
 
+  // Quotation state
+  const [quotationDialog, setQuotationDialog] = useState(false);
+  const [quotationItems, setQuotationItems] = useState([{ product: '', qty: '1', rate: '', gstRate: '18' }]);
+
+  const mockQuotations = [
+    { id: 'QTN-2026-001', customer: 'RetailMart India', date: '2026-02-12', items: 3, total: 67500, status: 'Sent' as const, validTill: '2026-03-12' },
+    { id: 'QTN-2026-002', customer: 'TechZone Solutions', date: '2026-02-10', items: 5, total: 142000, status: 'Accepted' as const, validTill: '2026-03-10' },
+    { id: 'QTN-2026-003', customer: 'GreenLeaf Organics', date: '2026-02-08', items: 2, total: 28000, status: 'Draft' as const, validTill: '2026-03-08' },
+    { id: 'QTN-2026-004', customer: 'HomeStyle Decor', date: '2026-02-05', items: 4, total: 95000, status: 'Expired' as const, validTill: '2026-02-20' },
+  ];
+
+  const addQuotationItem = () => setQuotationItems(prev => [...prev, { product: '', qty: '1', rate: '', gstRate: '18' }]);
+  const removeQuotationItem = (idx: number) => setQuotationItems(prev => prev.filter((_, i) => i !== idx));
+  const updateQuotationItem = (idx: number, field: string, value: string) => setQuotationItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item));
+
+  const quotationTotal = quotationItems.reduce((sum, item) => {
+    const qty = parseFloat(item.qty) || 0;
+    const rate = parseFloat(item.rate) || 0;
+    const gst = parseFloat(item.gstRate) || 0;
+    return sum + qty * rate * (1 + gst / 100);
+  }, 0);
+
   const toggleInvSort = (field: string) => {
     setInvoiceSort(prev => prev.field === field ? { field, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { field, dir: 'asc' });
   };
@@ -184,6 +206,7 @@ export default function FinanceTaxation() {
       <Tabs defaultValue="invoices">
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="invoices" className="gap-1.5"><FileText className="w-4 h-4" />Invoices</TabsTrigger>
+          <TabsTrigger value="quotations" className="gap-1.5"><FileText className="w-4 h-4" />Quotations</TabsTrigger>
           <TabsTrigger value="purchase" className="gap-1.5"><Receipt className="w-4 h-4" />Purchase Bills</TabsTrigger>
           <TabsTrigger value="gstr1" className="gap-1.5"><Building2 className="w-4 h-4" />GSTR-1 Export</TabsTrigger>
           <TabsTrigger value="pnl" className="gap-1.5"><TrendingUp className="w-4 h-4" />Profit & Loss</TabsTrigger>
@@ -264,6 +287,60 @@ export default function FinanceTaxation() {
                         <Button variant="ghost" size="sm" className="gap-1" onClick={() => toast({ title: 'PDF Downloaded', description: `${inv.id} saved` })}>
                           <Download className="w-3 h-3" />
                         </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ── QUOTATIONS TAB ── */}
+        <TabsContent value="quotations" className="space-y-4 mt-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <Button className="gap-2" onClick={() => setQuotationDialog(true)}><Plus className="w-4 h-4" />New Quotation</Button>
+            <div className="ml-auto flex gap-2">
+              <Button variant="outline" size="sm" className="gap-1" onClick={() => handleExport('Quotations', 'excel')}><FileSpreadsheet className="w-3.5 h-3.5" />Excel</Button>
+            </div>
+          </div>
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="font-semibold">Quotation #</TableHead>
+                    <TableHead className="font-semibold">Customer</TableHead>
+                    <TableHead className="font-semibold">Date</TableHead>
+                    <TableHead className="font-semibold">Items</TableHead>
+                    <TableHead className="font-semibold text-right">Total</TableHead>
+                    <TableHead className="font-semibold">Valid Till</TableHead>
+                    <TableHead className="font-semibold">Status</TableHead>
+                    <TableHead className="font-semibold">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockQuotations.map(q => (
+                    <TableRow key={q.id}>
+                      <TableCell className="font-mono text-sm">{q.id}</TableCell>
+                      <TableCell className="font-medium">{q.customer}</TableCell>
+                      <TableCell className="text-sm">{format(new Date(q.date), 'dd MMM yyyy')}</TableCell>
+                      <TableCell>{q.items} items</TableCell>
+                      <TableCell className="text-right font-semibold">{fmt(q.total)}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{format(new Date(q.validTill), 'dd MMM yyyy')}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={
+                          q.status === 'Accepted' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' :
+                          q.status === 'Sent' ? 'bg-blue-500/10 text-blue-600 border-blue-500/30' :
+                          q.status === 'Draft' ? 'bg-muted text-muted-foreground' :
+                          'bg-rose-500/10 text-rose-600 border-rose-500/30'
+                        }>{q.status}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => toast({ title: 'PDF Downloaded', description: `${q.id} saved` })}><Download className="w-3 h-3" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => toast({ title: 'Converted to Invoice', description: `${q.id} → Invoice created` })}><FileText className="w-3 h-3" /></Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -579,6 +656,46 @@ export default function FinanceTaxation() {
             <Button className="w-full" onClick={handleCreateInvoice}>
               Create {invoiceType} & Download PDF
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Quotation Dialog */}
+      <Dialog open={quotationDialog} onOpenChange={setQuotationDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create Quotation</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2"><Label>Customer Name</Label><Input placeholder="Customer name" /></div>
+              <div className="space-y-2"><Label>GSTIN</Label><Input placeholder="GSTIN" /></div>
+            </div>
+            <div className="space-y-2">
+              <Label>Line Items</Label>
+              {quotationItems.map((item, idx) => (
+                <div key={idx} className="grid grid-cols-12 gap-2 items-end">
+                  <div className="col-span-4"><Input placeholder="Product name" value={item.product} onChange={e => updateQuotationItem(idx, 'product', e.target.value)} /></div>
+                  <div className="col-span-2"><Input type="number" placeholder="Qty" value={item.qty} onChange={e => updateQuotationItem(idx, 'qty', e.target.value)} /></div>
+                  <div className="col-span-2"><Input type="number" placeholder="Rate" value={item.rate} onChange={e => updateQuotationItem(idx, 'rate', e.target.value)} /></div>
+                  <div className="col-span-2">
+                    <select className="w-full border rounded-md px-2 py-2 text-sm bg-background" value={item.gstRate} onChange={e => updateQuotationItem(idx, 'gstRate', e.target.value)}>
+                      <option value="5">5%</option><option value="12">12%</option><option value="18">18%</option><option value="28">28%</option>
+                    </select>
+                  </div>
+                  <div className="col-span-2 flex gap-1">
+                    <p className="text-sm font-medium py-2">{fmt((parseFloat(item.qty) || 0) * (parseFloat(item.rate) || 0) * (1 + (parseFloat(item.gstRate) || 0) / 100))}</p>
+                    {quotationItems.length > 1 && <Button variant="ghost" size="sm" className="text-rose-600" onClick={() => removeQuotationItem(idx)}>×</Button>}
+                  </div>
+                </div>
+              ))}
+              <Button variant="outline" size="sm" className="gap-1" onClick={addQuotationItem}><Plus className="w-3 h-3" />Add Item</Button>
+            </div>
+            <div className="flex justify-end text-lg font-bold">Total: {fmt(quotationTotal)}</div>
+          </div>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setQuotationDialog(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => { toast({ title: 'Quotation Saved as Draft' }); setQuotationDialog(false); }}>Save Draft</Button>
+            <Button onClick={() => { toast({ title: 'Quotation Created & Sent', description: `Total: ${fmt(quotationTotal)}` }); setQuotationDialog(false); }}>Create & Send</Button>
           </div>
         </DialogContent>
       </Dialog>

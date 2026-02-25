@@ -40,6 +40,9 @@ import FinanceTaxation from "./pages/FinanceTaxation";
 import APISettings from "./pages/APISettings";
 import VideoManagement from "./pages/VideoManagement";
 import LegalCompliance from "./pages/LegalCompliance";
+import LeadManagement from "./pages/LeadManagement";
+import WhatsAppAPI from "./pages/WhatsAppAPI";
+import BusinessOnboarding from "./pages/BusinessOnboarding";
 import DemoLayout from "./pages/demo/DemoLayout";
 import DemoDashboard from "./pages/demo/DemoDashboard";
 import DemoSalesAnalysis from "./pages/demo/DemoSalesAnalysis";
@@ -97,6 +100,9 @@ const App = () => (
             <Route path="/api-settings" element={<AppLayout><APISettings /></AppLayout>} />
             <Route path="/video-management" element={<AppLayout><VideoManagement /></AppLayout>} />
             <Route path="/legal-compliance" element={<AppLayout><LegalCompliance /></AppLayout>} />
+            <Route path="/leads" element={<AppLayout><LeadManagement /></AppLayout>} />
+            <Route path="/whatsapp" element={<AppLayout><WhatsAppAPI /></AppLayout>} />
+            <Route path="/onboarding" element={<AppLayout><BusinessOnboarding /></AppLayout>} />
             {/* Demo Routes */}
             <Route path="/demo" element={<DemoLayout><DemoDashboard /></DemoLayout>} />
             <Route path="/demo/sales" element={<DemoLayout><DemoSalesAnalysis /></DemoLayout>} />

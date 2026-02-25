@@ -48,6 +48,9 @@ import {
   Code,
   Camera,
   Gavel,
+  UserPlus,
+  MessageCircle,
+  Building2,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -119,6 +122,8 @@ const navigationGroups: NavGroup[] = [
       { title: 'Alerts', url: '/alerts', icon: Bell, roles: ['admin', 'vendor', 'operations'] },
       { title: 'Tasks', url: '/tasks', icon: ListTodo, roles: ['admin', 'operations'] },
       { title: 'Analytics', url: '/analytics', icon: BarChart3, roles: ['admin', 'vendor'] },
+      { title: 'Lead Management', url: '/leads', icon: UserPlus, roles: ['admin', 'vendor'] },
+      { title: 'WhatsApp API', url: '/whatsapp', icon: MessageCircle, roles: ['admin'] },
     ],
   },
   {
@@ -137,6 +142,7 @@ const navigationGroups: NavGroup[] = [
   {
     label: 'Admin',
     items: [
+      { title: 'Onboarding', url: '/onboarding', icon: Building2, roles: ['admin'] },
       { title: 'System Settings', url: '/system-settings', icon: Settings, roles: ['admin'] },
       { title: 'Permissions', url: '/permissions', icon: Shield, roles: ['admin'] },
       { title: 'API Settings', url: '/api-settings', icon: Code, roles: ['admin'] },
