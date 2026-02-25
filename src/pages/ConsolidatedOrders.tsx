@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { mockConsolidatedOrders, portalConfigs } from '@/services/mockData';
 import { Download, FileSpreadsheet, TrendingUp, TrendingDown, Calendar, ArrowUpRight, ArrowDownRight, Trophy, AlertTriangle, BarChart3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
 
 const portals = ['amazon', 'flipkart', 'meesho', 'firstcry', 'blinkit', 'own_website'] as const;
 
@@ -54,6 +55,7 @@ export default function ConsolidatedOrders() {
   const [dateRange, setDateRange] = useState('7days');
   const [customYear, setCustomYear] = useState('2025');
   const [viewMode, setViewMode] = useState<'normal' | 'comparison'>('normal');
+  const [globalDateRange, setGlobalDateRange] = useState<DateRange>({ from: undefined, to: undefined });
 
   const isYoY = dateRange === 'yoy';
   const activeView = isYoY ? 'comparison' : viewMode;
@@ -146,6 +148,7 @@ export default function ConsolidatedOrders() {
             </Select>
           )}
 
+          <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
           <Button onClick={handleExport} className="gap-2">
             <Download className="w-4 h-4" />
             {exportLabel}

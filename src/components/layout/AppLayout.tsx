@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
-import { Bell, Search, LogOut, Settings, User } from 'lucide-react';
+import { Bell, Search, LogOut, Settings, User, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -65,6 +65,12 @@ export function AppLayout({ children }: AppLayoutProps) {
               <span className="text-xs text-muted-foreground hidden lg:block">
                 {syncLabel}
               </span>
+
+              {/* Mobile Ready Badge */}
+              <Badge variant="outline" className="gap-1 text-xs bg-emerald-500/10 text-emerald-600 border-emerald-500/30 hidden lg:flex">
+                <Smartphone className="w-3 h-3" />
+                Mobile Ready – Responsive & PWA
+              </Badge>
 
               {/* AI Access Control */}
               <AIAccessControl />

@@ -17,6 +17,7 @@ import {
 import { DateFilter, ExportButton, useRowSelection, SelectAllCheckbox, RowCheckbox } from '@/components/TableEnhancements';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
 
 // Return types
 type ReturnType = 'customer_return' | 'courier_return' | 'rto' | 'before_pickup_cancel' | 'upcoming_return' | 'pending_return';
@@ -180,6 +181,7 @@ export default function Returns() {
   const [returnTypeFilter, setReturnTypeFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState('30days');
   const [selectedReturn, setSelectedReturn] = useState<ReturnLifecycle | null>(null);
+  const [globalDateRange, setGlobalDateRange] = useState<DateRange>({ from: undefined, to: undefined });
   const [lifecycleData, setLifecycleData] = useState(mockLifecycleData);
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDir, setSortDir] = useState<SortDir>('desc');
@@ -279,6 +281,7 @@ export default function Returns() {
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleExport('pdf')}>
             <FileDown className="w-4 h-4" />PDF
           </Button>
+          <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
           <ExportButton label={rowSelection.count > 0 ? undefined : `Export – ${dateLabel}`} selectedCount={rowSelection.count} />
         </div>
       </div>

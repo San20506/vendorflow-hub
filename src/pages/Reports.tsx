@@ -9,6 +9,7 @@ import { Download, FileText, Clock, ShoppingCart, Package, BarChart3, Upload, Us
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { TimelineFilter, type TimelineValue, getTimelineLabel } from '@/components/TimelineFilter';
+import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
 
 const daysAgo = (d: number) => { const dt = new Date(); dt.setDate(dt.getDate() - d); return dt.toISOString(); };
 
@@ -58,6 +59,7 @@ export default function Reports() {
   const [sortField, setSortField] = useState<SortField>('generatedAt');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [scheduledReports, setScheduledReports] = useState<Record<string, boolean>>({});
+  const [globalDateRange, setGlobalDateRange] = useState<DateRange>({ from: undefined, to: undefined });
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -97,7 +99,10 @@ export default function Reports() {
           <h1 className="text-2xl font-bold text-foreground">Reports & History</h1>
           <p className="text-muted-foreground">Access reports and view platform activity log</p>
         </div>
-        <TimelineFilter value={timeline} onChange={setTimeline} />
+        <div className="flex items-center gap-2">
+          <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
+          <TimelineFilter value={timeline} onChange={setTimeline} />
+        </div>
       </div>
 
       <Tabs defaultValue="reports">

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
 
 // ── Mock Data ──
 
@@ -71,6 +72,7 @@ function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
 
 export default function FinanceTaxation() {
   const { toast } = useToast();
+  const [globalDateRange, setGlobalDateRange] = useState<DateRange>({ from: undefined, to: undefined });
 
   // Invoice state
   const [invoiceDialog, setInvoiceDialog] = useState(false);
@@ -178,7 +180,8 @@ export default function FinanceTaxation() {
           <h1 className="text-2xl font-bold text-foreground">Finance & Taxation</h1>
           <p className="text-muted-foreground">Invoicing, purchase bills, GST filing & profitability</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
           <Button variant="outline" className="gap-2" onClick={() => handleExport('Finance Data', 'excel')}>
             <FileSpreadsheet className="w-4 h-4" />Excel
           </Button>

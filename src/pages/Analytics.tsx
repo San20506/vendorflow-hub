@@ -3,9 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { mockOrders, mockInventory, mockReturns, mockSalesData, mockSettlements, portalConfigs } from '@/services/mockData';
-import { BarChart3, ShoppingCart, Package, RotateCcw, TrendingUp, TrendingDown, AlertTriangle, IndianRupee, Facebook, Target } from 'lucide-react';
+import { BarChart3, ShoppingCart, Package, RotateCcw, TrendingUp, TrendingDown, AlertTriangle, IndianRupee, Facebook, Target, Trophy, Star, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend, ComposedChart, Area } from 'recharts';
+import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const COLORS = ['hsl(142, 71%, 45%)', 'hsl(217, 91%, 60%)', 'hsl(340, 82%, 52%)', 'hsl(199, 89%, 48%)', 'hsl(45, 100%, 51%)', 'hsl(262, 83%, 58%)'];
 
@@ -13,6 +16,7 @@ export default function Analytics() {
   const [dateRange, setDateRange] = useState('30');
   const [channelFilter, setChannelFilter] = useState('all');
   const [adPlatform, setAdPlatform] = useState<'facebook' | 'google'>('facebook');
+  const [globalDateRange, setGlobalDateRange] = useState<DateRange>({ from: undefined, to: undefined });
 
   // Ad performance mock data
   const adData = useMemo(() => {
@@ -54,15 +58,9 @@ export default function Analytics() {
   const settlementComparison = useMemo(() =>
     mockSettlements.map(s => {
       const portal = portalConfigs.find(p => p.id === s.portal);
-      return {
-        name: portal?.name || s.portal,
-        expected: s.amount,
-        settled: s.netAmount,
-        gap: s.amount - s.netAmount,
-      };
+      return { name: portal?.name || s.portal, expected: s.amount, settled: s.netAmount, gap: s.amount - s.netAmount };
     }), []);
 
-  // Refund rate
   const totalOrders = mockOrders.length;
   const totalReturns = mockReturns.length;
   const refundRate = Math.round((totalReturns / totalOrders) * 100 * 10) / 10;
@@ -123,6 +121,80 @@ export default function Analytics() {
     ];
   }, []);
 
+  // ── NEW: Product-wise sales table ──
+  const productSales = useMemo(() => {
+    const map: Record<string, { name: string; revenue: number; orders: number; cost: number; returnCount: number }> = {};
+    mockOrders.forEach(o => o.items.forEach(item => {
+      if (!map[item.productName]) map[item.productName] = { name: item.productName, revenue: 0, orders: 0, cost: 0, returnCount: 0 };
+      map[item.productName].revenue += item.price * item.quantity;
+      map[item.productName].orders += item.quantity;
+      map[item.productName].cost += item.price * item.quantity * 0.6; // simulated cost 60%
+    }));
+    mockReturns.forEach(r => r.items.forEach(item => {
+      if (map[item.productName]) map[item.productName].returnCount++;
+    }));
+    return Object.values(map)
+      .map(p => ({
+        ...p,
+        profit: p.revenue - p.cost,
+        profitPct: p.revenue > 0 ? Math.round(((p.revenue - p.cost) / p.revenue) * 100) : 0,
+        trend: Math.random() > 0.3 ? 'up' as const : 'down' as const,
+      }))
+      .sort((a, b) => b.revenue - a.revenue);
+  }, []);
+
+  // ── NEW: Category-wise breakdown ──
+  const categoryBreakdown = useMemo(() => {
+    const categories = [
+      { name: 'Electronics', value: 0, color: COLORS[0] },
+      { name: 'Fashion', value: 0, color: COLORS[1] },
+      { name: 'Home & Living', value: 0, color: COLORS[2] },
+      { name: 'Sports & Fitness', value: 0, color: COLORS[3] },
+      { name: 'Baby & Kids', value: 0, color: COLORS[4] },
+      { name: 'Others', value: 0, color: COLORS[5] },
+    ];
+    mockOrders.forEach(o => o.items.forEach(item => {
+      const name = item.productName.toLowerCase();
+      if (name.includes('earbuds') || name.includes('watch') || name.includes('speaker') || name.includes('lamp')) categories[0].value += item.price * item.quantity;
+      else if (name.includes('shirt') || name.includes('cotton')) categories[1].value += item.price * item.quantity;
+      else if (name.includes('bottle') || name.includes('mat')) categories[2].value += item.price * item.quantity;
+      else if (name.includes('fitness') || name.includes('yoga')) categories[3].value += item.price * item.quantity;
+      else if (name.includes('baby') || name.includes('care')) categories[4].value += item.price * item.quantity;
+      else categories[5].value += item.price * item.quantity;
+    }));
+    return categories.filter(c => c.value > 0);
+  }, []);
+
+  // ── NEW: Channel-wise performance table data ──
+  const channelPerformance = useMemo(() => {
+    const channels = ['amazon', 'flipkart', 'meesho', 'own_website'];
+    return channels.map(ch => {
+      const config = portalConfigs.find(p => p.id === ch);
+      const orders = mockOrders.filter(o => o.portal === ch);
+      const revenue = orders.reduce((s, o) => s + o.totalAmount, 0);
+      const returns = mockReturns.filter(r => r.portal === ch);
+      const returnAmt = returns.reduce((s, r) => s + r.refundAmount, 0);
+      const settlements = mockSettlements.filter(s => s.portal === ch);
+      const net = settlements.reduce((s, st) => s + st.netAmount, 0);
+      const roi = revenue > 0 ? ((net / revenue) * 100).toFixed(1) : '0';
+      return {
+        name: config?.name || ch,
+        icon: config?.icon || '📦',
+        orders: orders.length,
+        revenue,
+        returns: returns.length,
+        returnAmt,
+        net,
+        roi,
+      };
+    });
+  }, []);
+
+  // ── NEW: Summary insight cards ──
+  const bestProduct = productSales[0];
+  const highestROIChannel = channelPerformance.reduce((best, ch) => parseFloat(ch.roi) > parseFloat(best.roi) ? ch : best, channelPerformance[0]);
+  const mostReturnedProduct = [...productSales].sort((a, b) => b.returnCount - a.returnCount)[0];
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -130,7 +202,8 @@ export default function Analytics() {
           <h1 className="text-2xl font-bold text-foreground">Operational Analytics</h1>
           <p className="text-muted-foreground">Business performance overview across all channels</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
           <Select value={dateRange} onValueChange={setDateRange}>
             <SelectTrigger className="w-[140px]">
               <SelectValue />
@@ -163,6 +236,46 @@ export default function Analytics() {
         <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-amber-500/10"><IndianRupee className="w-5 h-5 text-amber-600" /></div><div><p className="text-xl font-bold">₹{(totalSettled / 1000).toFixed(0)}K</p><p className="text-xs text-muted-foreground">Net Settled</p></div></div></CardContent></Card>
         <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-rose-500/10"><RotateCcw className="w-5 h-5 text-rose-600" /></div><div><p className="text-xl font-bold">{refundRate}%</p><p className="text-xs text-muted-foreground">Refund Rate</p></div></div></CardContent></Card>
         <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-rose-500/10"><AlertTriangle className="w-5 h-5 text-rose-600" /></div><div><p className="text-xl font-bold">{sellerLoss.length}</p><p className="text-xs text-muted-foreground">Loss Indicators</p></div></div></CardContent></Card>
+      </div>
+
+      {/* ── NEW: Summary Insight Cards ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="bg-emerald-500/5 border-emerald-500/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-emerald-500/10"><Trophy className="w-5 h-5 text-emerald-600" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground">Best Performing Product</p>
+                <p className="text-lg font-bold">{bestProduct?.name}</p>
+                <p className="text-sm text-muted-foreground">₹{(bestProduct?.revenue / 1000).toFixed(0)}K revenue • {bestProduct?.profitPct}% profit</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-blue-500/5 border-blue-500/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-500/10"><Star className="w-5 h-5 text-blue-600" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground">Highest ROI Channel</p>
+                <p className="text-lg font-bold">{highestROIChannel?.icon} {highestROIChannel?.name}</p>
+                <p className="text-sm text-muted-foreground">{highestROIChannel?.roi}% ROI • {highestROIChannel?.orders} orders</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-rose-500/5 border-rose-500/20">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-rose-500/10"><RotateCcw className="w-5 h-5 text-rose-600" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground">Most Returned Product</p>
+                <p className="text-lg font-bold">{mostReturnedProduct?.name}</p>
+                <p className="text-sm text-muted-foreground">{mostReturnedProduct?.returnCount} returns</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Charts Row 1 */}
@@ -203,19 +316,59 @@ export default function Analytics() {
         </Card>
       </div>
 
-      {/* Charts Row 2 */}
+      {/* ── NEW: Product-wise Sales Table ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Product-wise Sales Breakdown</CardTitle>
+          <CardDescription>Revenue, orders, profit % and trend per product</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="font-semibold">Product</TableHead>
+                <TableHead className="font-semibold text-right">Revenue</TableHead>
+                <TableHead className="font-semibold text-right">Orders</TableHead>
+                <TableHead className="font-semibold text-right">Profit %</TableHead>
+                <TableHead className="font-semibold text-center">Trend</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {productSales.map(p => (
+                <TableRow key={p.name}>
+                  <TableCell className="font-medium">{p.name}</TableCell>
+                  <TableCell className="text-right">₹{p.revenue.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">{p.orders}</TableCell>
+                  <TableCell className="text-right">
+                    <Badge variant="outline" className={p.profitPct >= 35 ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' : 'bg-amber-500/10 text-amber-600 border-amber-500/30'}>
+                      {p.profitPct}%
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {p.trend === 'up'
+                      ? <ArrowUpRight className="w-4 h-4 text-emerald-600 inline" />
+                      : <ArrowDownRight className="w-4 h-4 text-rose-600 inline" />}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Charts Row 2 — includes NEW Category Pie */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Category-wise Breakdown (NEW) */}
         <Card>
-          <CardHeader><CardTitle>SKU Performance</CardTitle><CardDescription>Top performing SKUs by revenue</CardDescription></CardHeader>
+          <CardHeader><CardTitle>Category-wise Revenue</CardTitle><CardDescription>Revenue distribution by product category</CardDescription></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={skuPerformance} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis type="number" tick={{ fill: 'hsl(var(--muted-foreground))' }} tickFormatter={v => `₹${(v/1000).toFixed(0)}K`} />
-                <YAxis type="category" dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} width={120} className="text-xs" />
+              <PieChart>
+                <Pie data={categoryBreakdown} cx="50%" cy="50%" innerRadius={60} outerRadius={100} dataKey="value" label={({ name, value }) => `${name}: ₹${(value/1000).toFixed(0)}K`}>
+                  {categoryBreakdown.map((entry, idx) => <Cell key={idx} fill={entry.color} />)}
+                </Pie>
                 <Tooltip formatter={(v: number) => `₹${v.toLocaleString()}`} />
-                <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-              </BarChart>
+              </PieChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
@@ -261,35 +414,89 @@ export default function Analytics() {
         </Card>
       </div>
 
-      {/* Seller Loss Detection */}
+      {/* ── NEW: Channel-wise Performance Table ── */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-rose-600" />Seller Loss Detection</CardTitle>
-              <CardDescription>Identified revenue losses from returns, settlement gaps, and penalties</CardDescription>
-            </div>
-            <Badge variant="outline" className="bg-rose-500/15 text-rose-600 border-rose-500/30">{sellerLoss.length} alerts</Badge>
-          </div>
+          <CardTitle>Channel-wise Performance</CardTitle>
+          <CardDescription>Amazon, Flipkart, Meesho, Own Website — comparative breakdown</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {sellerLoss.map((loss, i) => (
-              <div key={i} className="p-3 border rounded-lg bg-rose-500/5 border-rose-500/20">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium">{loss.product}</span>
-                  <span className="text-sm font-bold text-rose-600">-₹{loss.loss.toLocaleString()}</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>{loss.portal}</span>
-                  <span>•</span>
-                  <span className="capitalize">{loss.reason}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="font-semibold">Channel</TableHead>
+                <TableHead className="font-semibold text-right">Orders</TableHead>
+                <TableHead className="font-semibold text-right">Revenue</TableHead>
+                <TableHead className="font-semibold text-right">Returns</TableHead>
+                <TableHead className="font-semibold text-right">Return ₹</TableHead>
+                <TableHead className="font-semibold text-right">Net Settled</TableHead>
+                <TableHead className="font-semibold text-right">ROI %</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {channelPerformance.map(ch => (
+                <TableRow key={ch.name}>
+                  <TableCell className="font-medium">{ch.icon} {ch.name}</TableCell>
+                  <TableCell className="text-right">{ch.orders}</TableCell>
+                  <TableCell className="text-right">₹{ch.revenue.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">{ch.returns}</TableCell>
+                  <TableCell className="text-right text-rose-600">₹{ch.returnAmt.toLocaleString()}</TableCell>
+                  <TableCell className="text-right font-semibold text-emerald-600">₹{ch.net.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">
+                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">{ch.roi}%</Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
+
+      {/* SKU Performance */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader><CardTitle>SKU Performance</CardTitle><CardDescription>Top performing SKUs by revenue</CardDescription></CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={skuPerformance} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis type="number" tick={{ fill: 'hsl(var(--muted-foreground))' }} tickFormatter={v => `₹${(v/1000).toFixed(0)}K`} />
+                <YAxis type="category" dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} width={120} className="text-xs" />
+                <Tooltip formatter={(v: number) => `₹${v.toLocaleString()}`} />
+                <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Seller Loss Detection */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-rose-600" />Seller Loss Detection</CardTitle>
+                <CardDescription>Revenue losses from returns, settlement gaps</CardDescription>
+              </div>
+              <Badge variant="outline" className="bg-rose-500/15 text-rose-600 border-rose-500/30">{sellerLoss.length} alerts</Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {sellerLoss.map((loss, i) => (
+                <div key={i} className="p-3 border rounded-lg bg-rose-500/5 border-rose-500/20">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium">{loss.product}</span>
+                    <span className="text-sm font-bold text-rose-600">-₹{loss.loss.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{loss.portal}</span><span>•</span><span className="capitalize">{loss.reason}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Sales Analytics: FB vs Google */}
       <Card>

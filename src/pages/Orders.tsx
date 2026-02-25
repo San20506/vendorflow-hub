@@ -25,6 +25,7 @@ import {
   MapPin, Timer, ArrowDownToLine, Ban,
 } from 'lucide-react';
 import { DateFilter, ExportButton, useRowSelection, SelectAllCheckbox, RowCheckbox } from '@/components/TableEnhancements';
+import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
 
 const statusConfig: Record<OrderStatus, { label: string; color: string; icon: React.ElementType }> = {
   pending: { label: 'Pending', color: 'bg-warning/10 text-warning', icon: Clock },
@@ -102,6 +103,7 @@ export default function Orders() {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState('30days');
   const [activeTab, setActiveTab] = useState('orders');
+  const [globalDateRange, setGlobalDateRange] = useState<DateRange>({ from: undefined, to: undefined });
 
   const customerProfiles = useMemo(() => computeCustomerProfiles(mockOrders), []);
 
@@ -174,6 +176,7 @@ export default function Orders() {
             <p className="text-muted-foreground">Manage orders across all sales channels with processing intelligence</p>
           </div>
           <div className="flex items-center gap-2">
+            <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
             <ExportButton label={rowSelection.count > 0 ? undefined : exportLabel} selectedCount={rowSelection.count} />
           </div>
         </div>

@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CreditCard, CheckCircle, Clock, AlertTriangle, TrendingUp, Percent } from 'lucide-react';
 import { DateFilter, ExportButton, useRowSelection, SelectAllCheckbox, RowCheckbox } from '@/components/TableEnhancements';
+import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
 import OrderPaymentSettlement from '@/components/settlements/OrderPaymentSettlement';
 import LandingCostAnalysis from '@/components/settlements/LandingCostAnalysis';
 
@@ -35,6 +36,7 @@ export default function Settlements() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState('30days');
   const [viewTab, setViewTab] = useState('batch');
+  const [globalDateRange, setGlobalDateRange] = useState<DateRange>({ from: undefined, to: undefined });
 
   const filteredSettlements = useMemo(() => {
     return mockSettlements.filter(settlement => {
@@ -84,6 +86,7 @@ export default function Settlements() {
           <h1 className="text-2xl font-bold text-foreground">Payments & Settlements</h1>
           <p className="text-muted-foreground">Track portal-wise settlements and payment cycles</p>
         </div>
+        <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
         <ExportButton label={activeSelection.count > 0 ? undefined : `Export – ${dateLabel}`} selectedCount={activeSelection.count} />
       </div>
 

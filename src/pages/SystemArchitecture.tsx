@@ -2,7 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { 
   Package, ShoppingCart, BoxIcon, RotateCcw, CreditCard, Scale, Users, Warehouse, Upload, BarChart3, 
-  CheckCircle, Plug, AlertTriangle, Shield, TrendingDown, Truck
+  CheckCircle, Plug, AlertTriangle, Shield, TrendingDown, Truck, Globe, Smartphone, Server,
+  Database, Lock, Cloud, Layers, Key, FileText, UserCheck, Eye
 } from 'lucide-react';
 
 const modules = [
@@ -33,6 +34,24 @@ const severityConfig: Record<string, { className: string }> = {
   info: { className: 'bg-blue-500/15 text-blue-600 border-blue-500/30' },
 };
 
+const integrations = [
+  { name: 'Amazon Seller API', icon: '🛒', status: 'Connected' },
+  { name: 'Flipkart API', icon: '🛍️', status: 'Connected' },
+  { name: 'Meesho API', icon: '📦', status: 'Connected' },
+  { name: 'Payment Gateway', icon: '💳', status: 'Active' },
+  { name: 'WhatsApp Business API', icon: '💬', status: 'Active' },
+  { name: 'Meta Pixel', icon: '📊', status: 'Tracking' },
+  { name: 'Google Merchant Center', icon: '🔍', status: 'Synced' },
+  { name: 'Social Media APIs', icon: '📱', status: 'Connected' },
+];
+
+const securityFeatures = [
+  { name: 'JWT-based Authentication', desc: 'Stateless token-based auth with refresh rotation', icon: Key, color: 'bg-emerald-500/10 text-emerald-600' },
+  { name: 'Role-based Permission Engine', desc: 'Admin, Vendor, Operations — granular module-level access', icon: UserCheck, color: 'bg-blue-500/10 text-blue-600' },
+  { name: 'Audit Logs', desc: 'Complete trail of all user actions with timestamps', icon: FileText, color: 'bg-violet-500/10 text-violet-600' },
+  { name: 'Encrypted API Communication', desc: 'TLS 1.3 encrypted data transfer on all endpoints', icon: Lock, color: 'bg-amber-500/10 text-amber-600' },
+];
+
 export default function SystemArchitecture() {
   return (
     <div className="space-y-6">
@@ -47,6 +66,135 @@ export default function SystemArchitecture() {
         </Badge>
       </div>
 
+      {/* ── Architecture Diagram ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Layers className="w-5 h-5" />Platform Architecture Diagram</CardTitle>
+          <CardDescription>End-to-end system flow from client to database with integrations</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center gap-0">
+            {/* User Layer */}
+            <div className="flex items-center gap-4 p-4 rounded-xl border-2 border-primary/30 bg-primary/5 w-full max-w-md text-center justify-center">
+              <Globe className="w-6 h-6 text-primary" />
+              <Smartphone className="w-6 h-6 text-primary" />
+              <div>
+                <p className="font-semibold">User (Web / Mobile)</p>
+                <p className="text-xs text-muted-foreground">Browser & Mobile Responsive PWA</p>
+              </div>
+            </div>
+            <div className="w-0.5 h-8 bg-border" />
+
+            {/* Frontend */}
+            <div className="p-4 rounded-xl border-2 border-blue-500/30 bg-blue-500/5 w-full max-w-md text-center">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <Layers className="w-5 h-5 text-blue-600" />
+                <p className="font-semibold">Frontend (React UI)</p>
+              </div>
+              <p className="text-xs text-muted-foreground">Vite + React + TypeScript + Tailwind CSS</p>
+              <div className="flex justify-center gap-2 mt-2">
+                <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600 border-blue-500/30">SPA</Badge>
+                <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600 border-blue-500/30">Component Library</Badge>
+                <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600 border-blue-500/30">Design System</Badge>
+              </div>
+            </div>
+            <div className="w-0.5 h-8 bg-border" />
+
+            {/* API Layer */}
+            <div className="p-4 rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5 w-full max-w-lg text-center">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <Server className="w-5 h-5 text-emerald-600" />
+                <p className="font-semibold">API Layer (RESTful Services)</p>
+              </div>
+              <p className="text-xs text-muted-foreground">Authentication, Business Logic, Data Validation</p>
+              <div className="flex justify-center gap-2 mt-2">
+                <Badge variant="outline" className="text-xs gap-1 bg-emerald-500/10 text-emerald-600 border-emerald-500/30"><Lock className="w-3 h-3" />TLS 1.3</Badge>
+                <Badge variant="outline" className="text-xs gap-1 bg-emerald-500/10 text-emerald-600 border-emerald-500/30"><Key className="w-3 h-3" />JWT Auth</Badge>
+              </div>
+            </div>
+
+            {/* Split: DB + Integrations */}
+            <div className="flex w-full max-w-2xl gap-6 mt-6">
+              {/* Database */}
+              <div className="flex-1">
+                <div className="w-0.5 h-8 bg-border mx-auto" />
+                <div className="p-4 rounded-xl border-2 border-violet-500/30 bg-violet-500/5 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <Database className="w-5 h-5 text-violet-600" />
+                    <p className="font-semibold">Database</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">PostgreSQL with RLS Policies</p>
+                  <div className="flex justify-center gap-2 mt-2 flex-wrap">
+                    <Badge variant="outline" className="text-xs bg-violet-500/10 text-violet-600 border-violet-500/30">Orders</Badge>
+                    <Badge variant="outline" className="text-xs bg-violet-500/10 text-violet-600 border-violet-500/30">Products</Badge>
+                    <Badge variant="outline" className="text-xs bg-violet-500/10 text-violet-600 border-violet-500/30">Settlements</Badge>
+                    <Badge variant="outline" className="text-xs bg-violet-500/10 text-violet-600 border-violet-500/30">Users</Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* Side Integrations */}
+              <div className="flex-1">
+                <div className="w-0.5 h-8 bg-border mx-auto" />
+                <div className="p-4 rounded-xl border-2 border-amber-500/30 bg-amber-500/5">
+                  <p className="font-semibold text-center text-sm mb-3">External Integrations</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {integrations.map(int => (
+                      <div key={int.name} className="flex items-center gap-2 p-2 bg-background/60 rounded-lg">
+                        <span className="text-lg">{int.icon}</span>
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium truncate">{int.name}</p>
+                          <p className="text-[10px] text-muted-foreground">{int.status}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Cloud deployment */}
+            <div className="mt-6 p-4 rounded-xl border-2 border-dashed border-muted-foreground/20 bg-muted/30 w-full max-w-2xl text-center">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <Cloud className="w-5 h-5 text-muted-foreground" />
+                <p className="font-semibold text-muted-foreground">Cloud Deployment</p>
+              </div>
+              <p className="text-xs text-muted-foreground">Auto-scaling, CDN, SSL, CI/CD pipeline • 99.9% uptime SLA</p>
+              <div className="flex justify-center gap-2 mt-2">
+                <Badge variant="outline" className="text-xs">Docker</Badge>
+                <Badge variant="outline" className="text-xs">Auto-scale</Badge>
+                <Badge variant="outline" className="text-xs">CDN</Badge>
+                <Badge variant="outline" className="text-xs">CI/CD</Badge>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ── Security & Authentication Section ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5" />Security & Authentication</CardTitle>
+          <CardDescription>Enterprise-grade security measures implemented across the platform</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {securityFeatures.map(feat => (
+              <div key={feat.name} className="flex items-start gap-4 p-4 rounded-lg border bg-card">
+                <div className={`p-2.5 rounded-lg shrink-0 ${feat.color}`}>
+                  <feat.icon className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="font-semibold">{feat.name}</p>
+                  <p className="text-sm text-muted-foreground">{feat.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Modules Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {modules.map((mod) => {
           const Icon = mod.icon;

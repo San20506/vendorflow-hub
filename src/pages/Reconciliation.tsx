@@ -16,6 +16,7 @@ import FeeVariationMonitor from '@/components/reconciliation/FeeVariationMonitor
 import SKUProfitabilityTrend from '@/components/reconciliation/SKUProfitabilityTrend';
 import FinancialRiskAlerts from '@/components/reconciliation/FinancialRiskAlerts';
 import { getReconciliationSettings, subscribeReconciliationSettings } from '@/services/reconciliationSettings';
+import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
 
 type ReconStatus = 'matched' | 'minor_difference' | 'mismatch';
 
@@ -68,6 +69,7 @@ export default function Reconciliation() {
   const [filterPortal, setFilterPortal] = useState<Portal | 'all'>('all');
   const [dateFilter, setDateFilter] = useState('30days');
   const [activeTab, setActiveTab] = useState('overview');
+  const [globalDateRange, setGlobalDateRange] = useState<DateRange>({ from: undefined, to: undefined });
 
   // Get tolerance from shared settings
   const reconSettings = useSyncExternalStore(
@@ -114,6 +116,7 @@ export default function Reconciliation() {
             <SlidersHorizontal className="w-3.5 h-3.5" />
             Tolerance: ₹{tolerance}
           </Badge>
+          <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
           <DateFilter value={dateFilter} onChange={setDateFilter} />
           <Select value={filterPortal} onValueChange={(v) => setFilterPortal(v as Portal | 'all')}>
             <SelectTrigger className="w-[180px]"><SelectValue placeholder="All Marketplaces" /></SelectTrigger>
