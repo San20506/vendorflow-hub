@@ -2,8 +2,9 @@ import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { mockOrders, mockInventory, mockReturns, mockSalesData, mockSettlements, portalConfigs } from '@/services/mockData';
-import { BarChart3, ShoppingCart, Package, RotateCcw, TrendingUp, TrendingDown, AlertTriangle, IndianRupee } from 'lucide-react';
+import { BarChart3, ShoppingCart, Package, RotateCcw, TrendingUp, TrendingDown, AlertTriangle, IndianRupee, Facebook, Target } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend, ComposedChart, Area } from 'recharts';
 
 const COLORS = ['hsl(142, 71%, 45%)', 'hsl(217, 91%, 60%)', 'hsl(340, 82%, 52%)', 'hsl(199, 89%, 48%)', 'hsl(45, 100%, 51%)', 'hsl(262, 83%, 58%)'];
@@ -11,6 +12,25 @@ const COLORS = ['hsl(142, 71%, 45%)', 'hsl(217, 91%, 60%)', 'hsl(340, 82%, 52%)'
 export default function Analytics() {
   const [dateRange, setDateRange] = useState('30');
   const [channelFilter, setChannelFilter] = useState('all');
+  const [adPlatform, setAdPlatform] = useState<'facebook' | 'google'>('facebook');
+
+  // Ad performance mock data
+  const adData = useMemo(() => {
+    const months = ['Sept 2025', 'Oct 2025', 'Nov 2025', 'Dec 2025'];
+    return months.map(month => {
+      const fb = { sales: 180000 + Math.random() * 120000, adSpend: 25000 + Math.random() * 15000, orders: 120 + Math.floor(Math.random() * 80) };
+      const ggl = { sales: 150000 + Math.random() * 100000, adSpend: 20000 + Math.random() * 12000, orders: 90 + Math.floor(Math.random() * 70) };
+      const d = adPlatform === 'facebook' ? fb : ggl;
+      return { month, sales: Math.round(d.sales), adSpend: Math.round(d.adSpend), orders: d.orders, roas: (d.sales / d.adSpend).toFixed(2) };
+    });
+  }, [adPlatform]);
+
+  const adTotals = useMemo(() => ({
+    totalSales: adData.reduce((s, d) => s + d.sales, 0),
+    totalSpend: adData.reduce((s, d) => s + d.adSpend, 0),
+    totalOrders: adData.reduce((s, d) => s + d.orders, 0),
+    avgRoas: (adData.reduce((s, d) => s + d.sales, 0) / adData.reduce((s, d) => s + d.adSpend, 0)).toFixed(2),
+  }), [adData]);
 
   // Revenue tracking (daily)
   const trendData = useMemo(() => {
@@ -268,6 +288,45 @@ export default function Analytics() {
               </div>
             ))}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Sales Analytics: FB vs Google */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <CardTitle className="flex items-center gap-2"><Target className="w-5 h-5" />Sales Analytics — Ad Platform</CardTitle>
+              <CardDescription>Compare Facebook Pixel vs Google Ads performance (Sept–Dec 2025)</CardDescription>
+            </div>
+            <div className="flex gap-2">
+              <Button variant={adPlatform === 'facebook' ? 'default' : 'outline'} size="sm" className="gap-1.5" onClick={() => setAdPlatform('facebook')}>
+                <Facebook className="w-4 h-4" />Facebook Pixel
+              </Button>
+              <Button variant={adPlatform === 'google' ? 'default' : 'outline'} size="sm" className="gap-1.5" onClick={() => setAdPlatform('google')}>
+                <Target className="w-4 h-4" />Google Ads
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="p-3 rounded-lg bg-muted/30"><p className="text-xs text-muted-foreground">Total Sales</p><p className="text-xl font-bold">₹{(adTotals.totalSales / 1000).toFixed(0)}K</p></div>
+            <div className="p-3 rounded-lg bg-muted/30"><p className="text-xs text-muted-foreground">Total Orders</p><p className="text-xl font-bold">{adTotals.totalOrders}</p></div>
+            <div className="p-3 rounded-lg bg-muted/30"><p className="text-xs text-muted-foreground">Ad Spend</p><p className="text-xl font-bold">₹{(adTotals.totalSpend / 1000).toFixed(0)}K</p></div>
+            <div className="p-3 rounded-lg bg-muted/30"><p className="text-xs text-muted-foreground">ROAS</p><p className="text-xl font-bold text-emerald-600">{adTotals.avgRoas}x</p></div>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={adData}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis dataKey="month" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+              <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} tickFormatter={v => `₹${(v/1000).toFixed(0)}K`} />
+              <Tooltip formatter={(v: number) => `₹${v.toLocaleString()}`} />
+              <Legend />
+              <Bar dataKey="sales" fill="hsl(var(--primary))" name="Sales" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="adSpend" fill="hsl(0, 84%, 60%)" name="Ad Spend" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
     </div>
