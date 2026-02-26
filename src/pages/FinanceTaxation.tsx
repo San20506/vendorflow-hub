@@ -13,20 +13,33 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   FileText, Receipt, ArrowDownUp, Download, FileSpreadsheet, FileDown,
   Plus, IndianRupee, TrendingUp, TrendingDown, Calculator, Building2,
-  ArrowUp, ArrowDown, ArrowUpDown, Percent, Eye,
+  ArrowUp, ArrowDown, ArrowUpDown, Percent, Eye, Trash2, Info, BookOpen,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
 
+// ── Mock GSTIN Auto-fill database ──
+const gstinDatabase: Record<string, { name: string; address: string; state: string; stateCode: string; taxStatus: 'Regular' | 'Composition' }> = {
+  '27AAACR5055K1ZY': { name: 'RetailMart India Pvt Ltd', address: '45, MG Road, Andheri East, Mumbai 400069', state: 'Maharashtra', stateCode: '27', taxStatus: 'Regular' },
+  '29AAGCQ1234F1Z5': { name: 'QuickBuy Online Solutions', address: '12, Koramangala, Bengaluru 560034', state: 'Karnataka', stateCode: '29', taxStatus: 'Regular' },
+  '07AABCM9876D1ZP': { name: 'MegaStore Limited', address: '88, Connaught Place, New Delhi 110001', state: 'Delhi', stateCode: '07', taxStatus: 'Regular' },
+  '27AABCR1234M1Z5': { name: 'RawMaterials Co Pvt Ltd', address: '23, Worli, Mumbai 400018', state: 'Maharashtra', stateCode: '27', taxStatus: 'Regular' },
+  '29AADCP5678N1Z3': { name: 'PackTech Industries', address: '56, Whitefield, Bengaluru 560066', state: 'Karnataka', stateCode: '29', taxStatus: 'Composition' },
+  '07AABCL9012P1Z7': { name: 'LogiFreight Services', address: '101, Nehru Place, New Delhi 110019', state: 'Delhi', stateCode: '07', taxStatus: 'Regular' },
+  '33AABCT5678Q1Z9': { name: 'TechZone Solutions', address: '77, T Nagar, Chennai 600017', state: 'Tamil Nadu', stateCode: '33', taxStatus: 'Regular' },
+};
+
+const SELLER_STATE_CODE = '27'; // Maharashtra
+
 // ── Mock Data ──
 
 const mockInvoices = [
-  { id: 'INV-2026-001', type: 'Sales Invoice' as const, customer: 'RetailMart India', gstin: '27AAACR5055K1ZY', date: '2026-02-10', taxableValue: 45000, cgst: 4050, sgst: 4050, igst: 0, total: 53100, status: 'Paid' as const },
-  { id: 'INV-2026-002', type: 'Sales Invoice' as const, customer: 'QuickBuy Online', gstin: '29AAGCQ1234F1Z5', date: '2026-02-08', taxableValue: 28000, cgst: 0, sgst: 0, igst: 5040, total: 33040, status: 'Pending' as const },
-  { id: 'DN-2026-001', type: 'Debit Note' as const, customer: 'RetailMart India', gstin: '27AAACR5055K1ZY', date: '2026-02-05', taxableValue: 5000, cgst: 450, sgst: 450, igst: 0, total: 5900, status: 'Issued' as const },
-  { id: 'CN-2026-001', type: 'Credit Note' as const, customer: 'QuickBuy Online', gstin: '29AAGCQ1234F1Z5', date: '2026-02-03', taxableValue: 3500, cgst: 0, sgst: 0, igst: 630, total: 4130, status: 'Issued' as const },
-  { id: 'INV-2026-003', type: 'Sales Invoice' as const, customer: 'MegaStore Ltd', gstin: '07AABCM9876D1ZP', date: '2026-01-28', taxableValue: 72000, cgst: 6480, sgst: 6480, igst: 0, total: 84960, status: 'Paid' as const },
+  { id: 'INV-2026-001', type: 'Sales Invoice' as const, customer: 'RetailMart India', gstin: '27AAACR5055K1ZY', date: '2026-02-10', taxableValue: 45000, cgst: 4050, sgst: 4050, igst: 0, total: 53100, status: 'Paid' as const, poNumber: 'PO-8801', ewayBill: 'EWB-991234', paymentMethod: 'Bank' as const },
+  { id: 'INV-2026-002', type: 'Sales Invoice' as const, customer: 'QuickBuy Online', gstin: '29AAGCQ1234F1Z5', date: '2026-02-08', taxableValue: 28000, cgst: 0, sgst: 0, igst: 5040, total: 33040, status: 'Pending' as const, poNumber: '', ewayBill: '', paymentMethod: 'Credit' as const },
+  { id: 'DN-2026-001', type: 'Debit Note' as const, customer: 'RetailMart India', gstin: '27AAACR5055K1ZY', date: '2026-02-05', taxableValue: 5000, cgst: 450, sgst: 450, igst: 0, total: 5900, status: 'Issued' as const, poNumber: '', ewayBill: '', paymentMethod: 'Bank' as const },
+  { id: 'CN-2026-001', type: 'Credit Note' as const, customer: 'QuickBuy Online', gstin: '29AAGCQ1234F1Z5', date: '2026-02-03', taxableValue: 3500, cgst: 0, sgst: 0, igst: 630, total: 4130, status: 'Issued' as const, poNumber: '', ewayBill: '', paymentMethod: 'Bank' as const },
+  { id: 'INV-2026-003', type: 'Sales Invoice' as const, customer: 'MegaStore Ltd', gstin: '07AABCM9876D1ZP', date: '2026-01-28', taxableValue: 72000, cgst: 6480, sgst: 6480, igst: 0, total: 84960, status: 'Paid' as const, poNumber: 'PO-9912', ewayBill: 'EWB-112233', paymentMethod: 'Bank' as const },
 ];
 
 const mockPurchaseBills = [
@@ -57,8 +70,49 @@ const plData = {
 const netProfit = plData.revenue - plData.commission - plData.logistics - plData.refundImpact - plData.otherExpenses;
 const marginPct = ((netProfit / plData.revenue) * 100).toFixed(1);
 
-// ── Helpers ──
+// ── Line Item Types ──
+interface LineItem {
+  product: string;
+  hsnCode: string;
+  qty: string;
+  rate: string;
+  gstRate: string;
+  size: string;
+}
 
+const SIZES = ['M', 'L', 'XL', 'XXL', 'XXXL', '4XL', '5XL', 'Freesize'];
+
+function createEmptyLineItem(): LineItem {
+  return { product: '', hsnCode: '', qty: '1', rate: '', gstRate: '18', size: 'Freesize' };
+}
+
+function calcLineGst(item: LineItem, isSameState: boolean) {
+  const qty = parseFloat(item.qty) || 0;
+  const rate = parseFloat(item.rate) || 0;
+  const gstPct = parseFloat(item.gstRate) || 0;
+  const taxable = qty * rate;
+  const gstAmt = taxable * gstPct / 100;
+  if (isSameState) {
+    return { taxable, cgst: gstAmt / 2, sgst: gstAmt / 2, igst: 0, total: taxable + gstAmt };
+  }
+  return { taxable, cgst: 0, sgst: 0, igst: gstAmt, total: taxable + gstAmt };
+}
+
+// Auto invoice number generator
+let invoiceCounter = 4;
+function generateInvoiceNumber(type: string): string {
+  invoiceCounter++;
+  const prefix = type === 'Sales Invoice' ? 'INV' : type === 'Debit Note' ? 'DN' : 'CN';
+  return `${prefix}-2026-${String(invoiceCounter).padStart(3, '0')}`;
+}
+
+let purchaseCounter = 4;
+function generatePurchaseNumber(): string {
+  purchaseCounter++;
+  return `PB-${String(purchaseCounter).padStart(3, '0')}`;
+}
+
+// ── Helpers ──
 const fmt = (n: number) => '₹' + n.toLocaleString('en-IN');
 
 type SortDir = 'asc' | 'desc';
@@ -69,25 +123,41 @@ function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
 }
 
 // ── Component ──
-
 export default function FinanceTaxation() {
   const { toast } = useToast();
   const [globalDateRange, setGlobalDateRange] = useState<DateRange>({ from: undefined, to: undefined });
 
-  // Invoice state
+  // Invoice dialog state
   const [invoiceDialog, setInvoiceDialog] = useState(false);
   const [invoiceType, setInvoiceType] = useState<string>('Sales Invoice');
   const [invoiceSort, setInvoiceSort] = useState<{ field: string; dir: SortDir }>({ field: 'date', dir: 'desc' });
 
   // Purchase bill state
   const [billSort, setBillSort] = useState<{ field: string; dir: SortDir }>({ field: 'date', dir: 'desc' });
+  const [purchaseDialog, setPurchaseDialog] = useState(false);
 
-  // Invoice form
-  const [invForm, setInvForm] = useState({ customer: '', gstin: '', amount: '', gstRate: '18' });
+  // Invoice form with multi-product + additional fields
+  const [invForm, setInvForm] = useState({
+    customer: '', gstin: '', invoiceDate: format(new Date(), 'yyyy-MM-dd'),
+    poNumber: '', ewayBill: '', paymentMethod: 'Bank' as 'Cash' | 'Bank' | 'Credit',
+    autoFilledName: '', autoFilledAddress: '', autoFilledTaxStatus: '',
+  });
+  const [invLineItems, setInvLineItems] = useState<LineItem[]>([createEmptyLineItem()]);
+  const [invAutoNumber, setInvAutoNumber] = useState('');
+
+  // Purchase form
+  const [purchForm, setPurchForm] = useState({
+    supplier: '', gstin: '', billNo: '', date: format(new Date(), 'yyyy-MM-dd'),
+    autoFilledName: '', autoFilledAddress: '', autoFilledTaxStatus: '',
+  });
+  const [purchLineItems, setPurchLineItems] = useState<LineItem[]>([createEmptyLineItem()]);
 
   // Quotation state
   const [quotationDialog, setQuotationDialog] = useState(false);
   const [quotationItems, setQuotationItems] = useState([{ product: '', qty: '1', rate: '', gstRate: '18' }]);
+
+  // GSTR-1 guide
+  const [gstr1GuideOpen, setGstr1GuideOpen] = useState(false);
 
   const mockQuotations = [
     { id: 'QTN-2026-001', customer: 'RetailMart India', date: '2026-02-12', items: 3, total: 67500, status: 'Sent' as const, validTill: '2026-03-12' },
@@ -107,10 +177,83 @@ export default function FinanceTaxation() {
     return sum + qty * rate * (1 + gst / 100);
   }, 0);
 
+  // Determine if same state based on GSTIN
+  const isSameState = (gstin: string) => {
+    if (gstin.length >= 2) {
+      return gstin.substring(0, 2) === SELLER_STATE_CODE;
+    }
+    return true;
+  };
+
+  // GSTIN auto-fill
+  const handleGstinChange = (gstin: string, target: 'invoice' | 'purchase') => {
+    const upper = gstin.toUpperCase();
+    if (target === 'invoice') {
+      setInvForm(f => ({ ...f, gstin: upper }));
+      if (upper.length === 15 && gstinDatabase[upper]) {
+        const data = gstinDatabase[upper];
+        setInvForm(f => ({
+          ...f, gstin: upper, customer: data.name,
+          autoFilledName: data.name, autoFilledAddress: data.address, autoFilledTaxStatus: data.taxStatus,
+        }));
+        toast({ title: 'GSTIN Auto-Filled', description: `${data.name} — ${data.state} (${data.taxStatus})` });
+      }
+    } else {
+      setPurchForm(f => ({ ...f, gstin: upper }));
+      if (upper.length === 15 && gstinDatabase[upper]) {
+        const data = gstinDatabase[upper];
+        setPurchForm(f => ({
+          ...f, gstin: upper, supplier: data.name,
+          autoFilledName: data.name, autoFilledAddress: data.address, autoFilledTaxStatus: data.taxStatus,
+        }));
+        toast({ title: 'GSTIN Auto-Filled', description: `${data.name} — ${data.state} (${data.taxStatus})` });
+      }
+    }
+  };
+
+  // Invoice line items
+  const addInvLineItem = () => setInvLineItems(prev => [...prev, createEmptyLineItem()]);
+  const removeInvLineItem = (idx: number) => setInvLineItems(prev => prev.filter((_, i) => i !== idx));
+  const updateInvLineItem = (idx: number, field: keyof LineItem, value: string) => setInvLineItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item));
+
+  // Purchase line items
+  const addPurchLineItem = () => setPurchLineItems(prev => [...prev, createEmptyLineItem()]);
+  const removePurchLineItem = (idx: number) => setPurchLineItems(prev => prev.filter((_, i) => i !== idx));
+  const updatePurchLineItem = (idx: number, field: keyof LineItem, value: string) => setPurchLineItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item));
+
+  // Invoice totals
+  const invSameState = isSameState(invForm.gstin);
+  const invTotals = useMemo(() => {
+    let taxable = 0, cgst = 0, sgst = 0, igst = 0, total = 0;
+    invLineItems.forEach(item => {
+      const calc = calcLineGst(item, invSameState);
+      taxable += calc.taxable;
+      cgst += calc.cgst;
+      sgst += calc.sgst;
+      igst += calc.igst;
+      total += calc.total;
+    });
+    return { taxable, cgst, sgst, igst, total };
+  }, [invLineItems, invSameState]);
+
+  // Purchase totals
+  const purchSameState = isSameState(purchForm.gstin);
+  const purchTotals = useMemo(() => {
+    let taxable = 0, cgst = 0, sgst = 0, igst = 0, total = 0;
+    purchLineItems.forEach(item => {
+      const calc = calcLineGst(item, purchSameState);
+      taxable += calc.taxable;
+      cgst += calc.cgst;
+      sgst += calc.sgst;
+      igst += calc.igst;
+      total += calc.total;
+    });
+    return { taxable, cgst, sgst, igst, total };
+  }, [purchLineItems, purchSameState]);
+
   const toggleInvSort = (field: string) => {
     setInvoiceSort(prev => prev.field === field ? { field, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { field, dir: 'asc' });
   };
-
   const toggleBillSort = (field: string) => {
     setBillSort(prev => prev.field === field ? { field, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { field, dir: 'asc' });
   };
@@ -136,34 +279,72 @@ export default function FinanceTaxation() {
     });
   }, [billSort]);
 
+  const openInvoiceDialog = (type: string) => {
+    setInvoiceType(type);
+    setInvAutoNumber(generateInvoiceNumber(type));
+    setInvForm({ customer: '', gstin: '', invoiceDate: format(new Date(), 'yyyy-MM-dd'), poNumber: '', ewayBill: '', paymentMethod: 'Bank', autoFilledName: '', autoFilledAddress: '', autoFilledTaxStatus: '' });
+    setInvLineItems([createEmptyLineItem()]);
+    setInvoiceDialog(true);
+  };
+
   const handleCreateInvoice = () => {
-    if (!invForm.customer || !invForm.gstin || !invForm.amount) {
-      toast({ title: 'Validation Error', description: 'Please fill all required fields', variant: 'destructive' });
+    if (!invForm.customer || !invForm.gstin || invLineItems.every(i => !i.rate)) {
+      toast({ title: 'Validation Error', description: 'Please fill all required fields and at least one line item', variant: 'destructive' });
       return;
     }
-    const amt = parseFloat(invForm.amount);
-    if (isNaN(amt) || amt <= 0) {
-      toast({ title: 'Validation Error', description: 'Enter a valid amount', variant: 'destructive' });
-      return;
-    }
-    const rate = parseFloat(invForm.gstRate) / 100;
-    const gst = amt * rate;
     toast({
       title: `${invoiceType} Created`,
-      description: `${invForm.customer} — Taxable: ${fmt(amt)}, GST: ${fmt(gst)}, Total: ${fmt(amt + gst)}`,
+      description: `${invAutoNumber} — ${invForm.customer} — Total: ${fmt(invTotals.total)} ${invSameState ? '(CGST+SGST)' : '(IGST)'}`,
     });
     setInvoiceDialog(false);
-    setInvForm({ customer: '', gstin: '', amount: '', gstRate: '18' });
+  };
+
+  const openPurchaseDialog = () => {
+    setPurchForm({ supplier: '', gstin: '', billNo: generatePurchaseNumber(), date: format(new Date(), 'yyyy-MM-dd'), autoFilledName: '', autoFilledAddress: '', autoFilledTaxStatus: '' });
+    setPurchLineItems([createEmptyLineItem()]);
+    setPurchaseDialog(true);
+  };
+
+  const handleCreatePurchase = () => {
+    if (!purchForm.supplier || !purchForm.gstin || purchLineItems.every(i => !i.rate)) {
+      toast({ title: 'Validation Error', description: 'Fill supplier details and at least one line item', variant: 'destructive' });
+      return;
+    }
+    toast({
+      title: 'Purchase Bill Created',
+      description: `${purchForm.billNo} — ${purchForm.supplier} — Total: ${fmt(purchTotals.total)} — Input GST: ${fmt(purchTotals.cgst + purchTotals.sgst + purchTotals.igst)}`,
+    });
+    setPurchaseDialog(false);
   };
 
   const handleExport = (what: string, format: 'excel' | 'pdf') => {
     toast({ title: `Export ${format.toUpperCase()}`, description: `Preparing ${what} export...` });
   };
 
+  const handleGstr1CsvExport = () => {
+    // Generate CSV matching GSTN offline utility B2B format
+    const headers = ['GSTIN/UIN of Recipient', 'Receiver Name', 'Invoice Number', 'Invoice date', 'Invoice Value', 'Place Of Supply', 'Reverse Charge', 'Applicable % of Tax Rate', 'Invoice Type', 'E-Commerce GSTIN', 'Rate', 'Taxable Value', 'Cess Amount'];
+    const rows = mockGstr1.map(r => {
+      const gstInfo = gstinDatabase[r.gstin];
+      const stateCode = r.gstin.substring(0, 2);
+      const rate = r.igst > 0 ? ((r.igst / r.taxableValue) * 100).toFixed(0) : ((r.cgst + r.sgst) / r.taxableValue * 100).toFixed(0);
+      return [r.gstin, r.customer, r.invoiceNo, format(new Date(r.date), 'dd-MMM-yyyy'), r.total.toString(), `${stateCode}-${gstInfo?.state || 'State'}`, 'N', '', 'Regular', '', rate, r.taxableValue.toString(), '0'];
+    });
+
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `GSTR1_B2B_${format(new Date(), 'yyyyMMdd')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: 'GSTR-1 CSV Exported', description: 'B2B format CSV downloaded — ready for GST offline utility upload.' });
+  };
+
   const totalInputGst = mockPurchaseBills.reduce((s, b) => s + b.inputGst, 0);
   const totalOutputGst = mockInvoices.filter(i => i.type === 'Sales Invoice').reduce((s, i) => s + i.cgst + i.sgst + i.igst, 0);
 
-  // Summary KPIs
   const kpis = [
     { label: 'Total Revenue', value: fmt(plData.revenue), icon: IndianRupee, color: 'text-primary', bg: 'bg-primary/10' },
     { label: 'Net Profit', value: fmt(netProfit), icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
@@ -172,6 +353,84 @@ export default function FinanceTaxation() {
     { label: 'Input GST Credit', value: fmt(totalInputGst), icon: Calculator, color: 'text-violet-600', bg: 'bg-violet-500/10' },
     { label: 'Net GST Payable', value: fmt(totalOutputGst - totalInputGst), icon: Building2, color: 'text-rose-600', bg: 'bg-rose-500/10' },
   ];
+
+  // Line Items Table Component
+  const LineItemsTable = ({ items, onUpdate, onRemove, onAdd, sameState }: {
+    items: LineItem[];
+    onUpdate: (idx: number, field: keyof LineItem, value: string) => void;
+    onRemove: (idx: number) => void;
+    onAdd: () => void;
+    sameState: boolean;
+  }) => (
+    <div className="space-y-3">
+      <div className="overflow-x-auto border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead className="font-semibold text-xs min-w-[140px]">Product</TableHead>
+              <TableHead className="font-semibold text-xs w-[80px]">HSN</TableHead>
+              <TableHead className="font-semibold text-xs w-[70px]">Size</TableHead>
+              <TableHead className="font-semibold text-xs w-[55px]">Qty</TableHead>
+              <TableHead className="font-semibold text-xs w-[80px]">Rate</TableHead>
+              <TableHead className="font-semibold text-xs w-[60px]">GST%</TableHead>
+              {sameState ? (
+                <>
+                  <TableHead className="font-semibold text-xs text-right w-[70px]">CGST</TableHead>
+                  <TableHead className="font-semibold text-xs text-right w-[70px]">SGST</TableHead>
+                </>
+              ) : (
+                <TableHead className="font-semibold text-xs text-right w-[70px]">IGST</TableHead>
+              )}
+              <TableHead className="font-semibold text-xs text-right w-[90px]">Total</TableHead>
+              <TableHead className="w-[40px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((item, idx) => {
+              const calc = calcLineGst(item, sameState);
+              return (
+                <TableRow key={idx}>
+                  <TableCell><Input className="h-8 text-xs" placeholder="Product name" value={item.product} onChange={e => onUpdate(idx, 'product', e.target.value)} /></TableCell>
+                  <TableCell><Input className="h-8 text-xs" placeholder="HSN" value={item.hsnCode} onChange={e => onUpdate(idx, 'hsnCode', e.target.value)} /></TableCell>
+                  <TableCell>
+                    <select className="h-8 w-full border rounded px-1 text-xs bg-background" value={item.size} onChange={e => onUpdate(idx, 'size', e.target.value)}>
+                      {SIZES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </TableCell>
+                  <TableCell><Input className="h-8 text-xs" type="number" min="1" value={item.qty} onChange={e => onUpdate(idx, 'qty', e.target.value)} /></TableCell>
+                  <TableCell><Input className="h-8 text-xs" type="number" placeholder="₹" value={item.rate} onChange={e => onUpdate(idx, 'rate', e.target.value)} /></TableCell>
+                  <TableCell>
+                    <select className="h-8 w-full border rounded px-1 text-xs bg-background" value={item.gstRate} onChange={e => onUpdate(idx, 'gstRate', e.target.value)}>
+                      <option value="5">5%</option><option value="12">12%</option><option value="18">18%</option><option value="28">28%</option>
+                    </select>
+                  </TableCell>
+                  {sameState ? (
+                    <>
+                      <TableCell className="text-right text-xs font-medium">{calc.cgst > 0 ? fmt(calc.cgst) : '—'}</TableCell>
+                      <TableCell className="text-right text-xs font-medium">{calc.sgst > 0 ? fmt(calc.sgst) : '—'}</TableCell>
+                    </>
+                  ) : (
+                    <TableCell className="text-right text-xs font-medium">{calc.igst > 0 ? fmt(calc.igst) : '—'}</TableCell>
+                  )}
+                  <TableCell className="text-right text-xs font-bold">{calc.total > 0 ? fmt(calc.total) : '—'}</TableCell>
+                  <TableCell>
+                    {items.length > 1 && (
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => onRemove(idx)}>
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+      <Button variant="outline" size="sm" className="gap-1" onClick={onAdd}>
+        <Plus className="w-3 h-3" />Add Product
+      </Button>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -218,13 +477,13 @@ export default function FinanceTaxation() {
         {/* ── INVOICES TAB ── */}
         <TabsContent value="invoices" className="space-y-4 mt-4">
           <div className="flex flex-wrap items-center gap-3">
-            <Button className="gap-2" onClick={() => { setInvoiceType('Sales Invoice'); setInvoiceDialog(true); }}>
+            <Button className="gap-2" onClick={() => openInvoiceDialog('Sales Invoice')}>
               <Plus className="w-4 h-4" />Sales Invoice
             </Button>
-            <Button variant="outline" className="gap-2" onClick={() => { setInvoiceType('Debit Note'); setInvoiceDialog(true); }}>
+            <Button variant="outline" className="gap-2" onClick={() => openInvoiceDialog('Debit Note')}>
               <Plus className="w-4 h-4" />Debit Note
             </Button>
-            <Button variant="outline" className="gap-2" onClick={() => { setInvoiceType('Credit Note'); setInvoiceDialog(true); }}>
+            <Button variant="outline" className="gap-2" onClick={() => openInvoiceDialog('Credit Note')}>
               <Plus className="w-4 h-4" />Credit Note
             </Button>
             <div className="ml-auto flex gap-2">
@@ -356,7 +615,7 @@ export default function FinanceTaxation() {
         {/* ── PURCHASE BILLS TAB ── */}
         <TabsContent value="purchase" className="space-y-4 mt-4">
           <div className="flex flex-wrap items-center gap-3">
-            <Button className="gap-2" onClick={() => toast({ title: 'Add Purchase Bill', description: 'Form coming soon — simulated' })}>
+            <Button className="gap-2" onClick={openPurchaseDialog}>
               <Plus className="w-4 h-4" />Add Purchase Bill
             </Button>
             <div className="ml-auto flex gap-2">
@@ -365,26 +624,10 @@ export default function FinanceTaxation() {
             </div>
           </div>
 
-          {/* Input GST Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="pt-5 pb-4">
-                <p className="text-xs text-muted-foreground mb-1">Total Input GST (CGST+SGST)</p>
-                <p className="text-xl font-bold">{fmt(mockPurchaseBills.reduce((s, b) => s + b.cgst + b.sgst, 0))}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-5 pb-4">
-                <p className="text-xs text-muted-foreground mb-1">Total Input IGST</p>
-                <p className="text-xl font-bold">{fmt(mockPurchaseBills.reduce((s, b) => s + b.igst, 0))}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-5 pb-4">
-                <p className="text-xs text-muted-foreground mb-1">Total Input Tax Credit</p>
-                <p className="text-xl font-bold text-emerald-600">{fmt(totalInputGst)}</p>
-              </CardContent>
-            </Card>
+            <Card><CardContent className="pt-5 pb-4"><p className="text-xs text-muted-foreground mb-1">Total Input GST (CGST+SGST)</p><p className="text-xl font-bold">{fmt(mockPurchaseBills.reduce((s, b) => s + b.cgst + b.sgst, 0))}</p></CardContent></Card>
+            <Card><CardContent className="pt-5 pb-4"><p className="text-xs text-muted-foreground mb-1">Total Input IGST</p><p className="text-xl font-bold">{fmt(mockPurchaseBills.reduce((s, b) => s + b.igst, 0))}</p></CardContent></Card>
+            <Card><CardContent className="pt-5 pb-4"><p className="text-xs text-muted-foreground mb-1">Total Input Tax Credit</p><p className="text-xl font-bold text-emerald-600">{fmt(totalInputGst)}</p></CardContent></Card>
           </div>
 
           <Card>
@@ -440,48 +683,27 @@ export default function FinanceTaxation() {
           <div className="flex flex-wrap items-center gap-3">
             <Badge variant="secondary" className="gap-1"><Building2 className="w-3 h-3" />GSTR-1 Ready Data</Badge>
             <div className="ml-auto flex gap-2">
-              <Button className="gap-2" onClick={() => {
-                toast({ title: 'GSTR-1 Export', description: 'Generating GST Portal compatible file...' });
-              }}>
-                <Download className="w-4 h-4" />Export for GST Portal
+              <Button variant="outline" className="gap-2" onClick={() => setGstr1GuideOpen(true)}>
+                <BookOpen className="w-4 h-4" />Upload Guide
+              </Button>
+              <Button className="gap-2" onClick={handleGstr1CsvExport}>
+                <Download className="w-4 h-4" />Export GSTR-1 CSV
               </Button>
               <Button variant="outline" size="sm" className="gap-1" onClick={() => handleExport('GSTR-1', 'excel')}><FileSpreadsheet className="w-3.5 h-3.5" />Excel</Button>
-              <Button variant="outline" size="sm" className="gap-1" onClick={() => handleExport('GSTR-1', 'pdf')}><FileDown className="w-3.5 h-3.5" />PDF</Button>
             </div>
           </div>
 
-          {/* GSTR-1 Summary */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-5 pb-4">
-                <p className="text-xs text-muted-foreground mb-1">Total Taxable Value</p>
-                <p className="text-lg font-bold">{fmt(mockGstr1.reduce((s, r) => s + r.taxableValue, 0))}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-5 pb-4">
-                <p className="text-xs text-muted-foreground mb-1">Total CGST</p>
-                <p className="text-lg font-bold">{fmt(mockGstr1.reduce((s, r) => s + r.cgst, 0))}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-5 pb-4">
-                <p className="text-xs text-muted-foreground mb-1">Total SGST</p>
-                <p className="text-lg font-bold">{fmt(mockGstr1.reduce((s, r) => s + r.sgst, 0))}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-5 pb-4">
-                <p className="text-xs text-muted-foreground mb-1">Total IGST</p>
-                <p className="text-lg font-bold">{fmt(mockGstr1.reduce((s, r) => s + r.igst, 0))}</p>
-              </CardContent>
-            </Card>
+            <Card><CardContent className="pt-5 pb-4"><p className="text-xs text-muted-foreground mb-1">Total Taxable Value</p><p className="text-lg font-bold">{fmt(mockGstr1.reduce((s, r) => s + r.taxableValue, 0))}</p></CardContent></Card>
+            <Card><CardContent className="pt-5 pb-4"><p className="text-xs text-muted-foreground mb-1">Total CGST</p><p className="text-lg font-bold">{fmt(mockGstr1.reduce((s, r) => s + r.cgst, 0))}</p></CardContent></Card>
+            <Card><CardContent className="pt-5 pb-4"><p className="text-xs text-muted-foreground mb-1">Total SGST</p><p className="text-lg font-bold">{fmt(mockGstr1.reduce((s, r) => s + r.sgst, 0))}</p></CardContent></Card>
+            <Card><CardContent className="pt-5 pb-4"><p className="text-xs text-muted-foreground mb-1">Total IGST</p><p className="text-lg font-bold">{fmt(mockGstr1.reduce((s, r) => s + r.igst, 0))}</p></CardContent></Card>
           </div>
 
           <Card>
             <CardHeader>
               <CardTitle>GSTR-1 Data Extract</CardTitle>
-              <CardDescription>Sales invoices formatted for GST portal filing</CardDescription>
+              <CardDescription>Sales invoices formatted for GST portal filing — B2B section</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
@@ -535,19 +757,14 @@ export default function FinanceTaxation() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {/* Revenue */}
                 <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-emerald-500/10"><TrendingUp className="w-4 h-4 text-emerald-600" /></div>
-                    <div>
-                      <p className="font-semibold">Revenue</p>
-                      <p className="text-xs text-muted-foreground">Total sales across all channels</p>
-                    </div>
+                    <div><p className="font-semibold">Revenue</p><p className="text-xs text-muted-foreground">Total sales across all channels</p></div>
                   </div>
                   <p className="text-xl font-bold text-emerald-600">{fmt(plData.revenue)}</p>
                 </div>
 
-                {/* Deductions */}
                 {[
                   { label: 'Commission', desc: 'Marketplace & platform fees', value: plData.commission, color: 'text-amber-600', bg: 'bg-amber-500/10', borderColor: 'border-amber-500/10' },
                   { label: 'Logistics', desc: 'Shipping & delivery costs', value: plData.logistics, color: 'text-blue-600', bg: 'bg-blue-500/10', borderColor: 'border-blue-500/10' },
@@ -557,41 +774,29 @@ export default function FinanceTaxation() {
                   <div key={item.label} className={`flex items-center justify-between p-3 rounded-lg bg-background border ${item.borderColor}`}>
                     <div className="flex items-center gap-3">
                       <div className={`p-2 rounded-lg ${item.bg}`}><TrendingDown className={`w-4 h-4 ${item.color}`} /></div>
-                      <div>
-                        <p className="font-medium">{item.label}</p>
-                        <p className="text-xs text-muted-foreground">{item.desc}</p>
-                      </div>
+                      <div><p className="font-medium">{item.label}</p><p className="text-xs text-muted-foreground">{item.desc}</p></div>
                     </div>
                     <p className={`text-lg font-semibold ${item.color}`}>- {fmt(item.value)}</p>
                   </div>
                 ))}
 
-                {/* Divider */}
                 <div className="border-t-2 border-dashed my-2" />
 
-                {/* Net Profit */}
                 <div className="flex items-center justify-between p-4 rounded-lg bg-primary/5 border-2 border-primary/20">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-primary/10"><IndianRupee className="w-5 h-5 text-primary" /></div>
-                    <div>
-                      <p className="font-bold text-lg">Net Profit</p>
-                      <p className="text-sm text-muted-foreground">Margin: {marginPct}%</p>
-                    </div>
+                    <div><p className="font-bold text-lg">Net Profit</p><p className="text-sm text-muted-foreground">Margin: {marginPct}%</p></div>
                   </div>
                   <p className="text-2xl font-bold text-primary">{fmt(netProfit)}</p>
                 </div>
 
-                {/* Margin Bar */}
                 <div className="mt-4 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Profit Margin</span>
                     <span className="font-semibold">{marginPct}%</span>
                   </div>
                   <div className="h-3 rounded-full bg-muted overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-500 transition-all"
-                      style={{ width: `${marginPct}%` }}
-                    />
+                    <div className="h-full rounded-full bg-gradient-to-r from-primary to-emerald-500 transition-all" style={{ width: `${marginPct}%` }} />
                   </div>
                 </div>
               </div>
@@ -600,74 +805,198 @@ export default function FinanceTaxation() {
         </TabsContent>
       </Tabs>
 
-      {/* ── Invoice Creation Dialog ── */}
+      {/* ── Invoice Creation Dialog (Multi-Product) ── */}
       <Dialog open={invoiceDialog} onOpenChange={setInvoiceDialog}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create {invoiceType}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              Create {invoiceType}
+              <Badge variant="outline" className="font-mono text-xs">{invAutoNumber}</Badge>
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-5">
+            {/* Customer + GSTIN */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Customer Name *</Label>
-                <Input placeholder="e.g. RetailMart India" value={invForm.customer} onChange={e => setInvForm(f => ({ ...f, customer: e.target.value }))} />
-              </div>
               <div className="space-y-2">
                 <Label>GSTIN *</Label>
-                <Input placeholder="e.g. 27AAACR5055K1ZY" maxLength={15} value={invForm.gstin} onChange={e => setInvForm(f => ({ ...f, gstin: e.target.value.toUpperCase() }))} />
+                <Input placeholder="e.g. 27AAACR5055K1ZY" maxLength={15} value={invForm.gstin} onChange={e => handleGstinChange(e.target.value, 'invoice')} />
+                {invForm.autoFilledTaxStatus && (
+                  <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                    <p className="font-medium text-foreground">{invForm.autoFilledName}</p>
+                    <p>{invForm.autoFilledAddress}</p>
+                    <Badge variant="outline" className="text-[10px] mt-1">{invForm.autoFilledTaxStatus}</Badge>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>Customer Name *</Label>
+                <Input placeholder="Auto-filled or enter manually" value={invForm.customer} onChange={e => setInvForm(f => ({ ...f, customer: e.target.value }))} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+
+            {/* Additional Invoice Fields */}
+            <div className="grid grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label>Taxable Amount (₹) *</Label>
-                <Input type="number" placeholder="0.00" min="0" value={invForm.amount} onChange={e => setInvForm(f => ({ ...f, amount: e.target.value }))} />
+                <Label>Invoice Date *</Label>
+                <Input type="date" value={invForm.invoiceDate} onChange={e => setInvForm(f => ({ ...f, invoiceDate: e.target.value }))} />
               </div>
               <div className="space-y-2">
-                <Label>GST Rate</Label>
-                <Select value={invForm.gstRate} onValueChange={v => setInvForm(f => ({ ...f, gstRate: v }))}>
+                <Label>PO Number</Label>
+                <Input placeholder="PO-XXXX" value={invForm.poNumber} onChange={e => setInvForm(f => ({ ...f, poNumber: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>E-way Bill No.</Label>
+                <Input placeholder="EWB-XXXXXX" value={invForm.ewayBill} onChange={e => setInvForm(f => ({ ...f, ewayBill: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Payment Method</Label>
+                <Select value={invForm.paymentMethod} onValueChange={v => setInvForm(f => ({ ...f, paymentMethod: v as any }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="5">5%</SelectItem>
-                    <SelectItem value="12">12%</SelectItem>
-                    <SelectItem value="18">18%</SelectItem>
-                    <SelectItem value="28">28%</SelectItem>
+                    <SelectItem value="Cash">Cash</SelectItem>
+                    <SelectItem value="Bank">Bank Transfer</SelectItem>
+                    <SelectItem value="Credit">Credit</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            {invForm.amount && !isNaN(parseFloat(invForm.amount)) && parseFloat(invForm.amount) > 0 && (
+
+            {/* GST Split Indicator */}
+            <div className="flex items-center gap-2">
+              <Info className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                GST Split: {invSameState ? (
+                  <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600">Same State → CGST + SGST</Badge>
+                ) : (
+                  <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600">Inter State → IGST</Badge>
+                )}
+              </span>
+            </div>
+
+            {/* Multi-Product Line Items */}
+            <div>
+              <Label className="mb-2 block">Line Items</Label>
+              <LineItemsTable
+                items={invLineItems}
+                onUpdate={updateInvLineItem}
+                onRemove={removeInvLineItem}
+                onAdd={addInvLineItem}
+                sameState={invSameState}
+              />
+            </div>
+
+            {/* Totals */}
+            {invTotals.taxable > 0 && (
               <Card className="bg-muted/30">
                 <CardContent className="pt-4 pb-3">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">GST Auto Calculation</p>
-                  <div className="grid grid-cols-3 gap-3 text-sm">
-                    <div>
-                      <p className="text-muted-foreground text-xs">Taxable</p>
-                      <p className="font-semibold">{fmt(parseFloat(invForm.amount))}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground text-xs">GST ({invForm.gstRate}%)</p>
-                      <p className="font-semibold">{fmt(parseFloat(invForm.amount) * parseFloat(invForm.gstRate) / 100)}</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground text-xs">Total</p>
-                      <p className="font-bold text-primary">{fmt(parseFloat(invForm.amount) * (1 + parseFloat(invForm.gstRate) / 100))}</p>
-                    </div>
+                  <div className="grid grid-cols-5 gap-3 text-sm">
+                    <div><p className="text-muted-foreground text-xs">Taxable</p><p className="font-semibold">{fmt(invTotals.taxable)}</p></div>
+                    {invSameState ? (
+                      <>
+                        <div><p className="text-muted-foreground text-xs">CGST</p><p className="font-semibold">{fmt(invTotals.cgst)}</p></div>
+                        <div><p className="text-muted-foreground text-xs">SGST</p><p className="font-semibold">{fmt(invTotals.sgst)}</p></div>
+                      </>
+                    ) : (
+                      <div className="col-span-2"><p className="text-muted-foreground text-xs">IGST</p><p className="font-semibold">{fmt(invTotals.igst)}</p></div>
+                    )}
+                    <div><p className="text-muted-foreground text-xs">Items</p><p className="font-semibold">{invLineItems.length}</p></div>
+                    <div><p className="text-muted-foreground text-xs">Grand Total</p><p className="font-bold text-primary text-lg">{fmt(invTotals.total)}</p></div>
                   </div>
                 </CardContent>
               </Card>
             )}
+
             <Button className="w-full" onClick={handleCreateInvoice}>
               Create {invoiceType} & Download PDF
             </Button>
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ── Purchase Bill Dialog (Multi-Product) ── */}
+      <Dialog open={purchaseDialog} onOpenChange={setPurchaseDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              Add Purchase Bill
+              <Badge variant="outline" className="font-mono text-xs">{purchForm.billNo}</Badge>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-5">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Supplier GSTIN *</Label>
+                <Input placeholder="e.g. 27AABCR1234M1Z5" maxLength={15} value={purchForm.gstin} onChange={e => handleGstinChange(e.target.value, 'purchase')} />
+                {purchForm.autoFilledTaxStatus && (
+                  <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                    <p className="font-medium text-foreground">{purchForm.autoFilledName}</p>
+                    <p>{purchForm.autoFilledAddress}</p>
+                    <Badge variant="outline" className="text-[10px] mt-1">{purchForm.autoFilledTaxStatus}</Badge>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>Supplier Name *</Label>
+                <Input placeholder="Auto-filled or enter manually" value={purchForm.supplier} onChange={e => setPurchForm(f => ({ ...f, supplier: e.target.value }))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Bill Date *</Label>
+                <Input type="date" value={purchForm.date} onChange={e => setPurchForm(f => ({ ...f, date: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Bill Number</Label>
+                <Input value={purchForm.billNo} onChange={e => setPurchForm(f => ({ ...f, billNo: e.target.value }))} />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Info className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                GST Split: {purchSameState ? (
+                  <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600">Same State → CGST + SGST</Badge>
+                ) : (
+                  <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600">Inter State → IGST</Badge>
+                )}
+              </span>
+            </div>
+
+            <div>
+              <Label className="mb-2 block">Line Items</Label>
+              <LineItemsTable
+                items={purchLineItems}
+                onUpdate={updatePurchLineItem}
+                onRemove={removePurchLineItem}
+                onAdd={addPurchLineItem}
+                sameState={purchSameState}
+              />
+            </div>
+
+            {purchTotals.taxable > 0 && (
+              <Card className="bg-muted/30">
+                <CardContent className="pt-4 pb-3">
+                  <div className="grid grid-cols-4 gap-3 text-sm">
+                    <div><p className="text-muted-foreground text-xs">Taxable</p><p className="font-semibold">{fmt(purchTotals.taxable)}</p></div>
+                    <div><p className="text-muted-foreground text-xs">Input GST</p><p className="font-semibold text-emerald-600">{fmt(purchTotals.cgst + purchTotals.sgst + purchTotals.igst)}</p></div>
+                    <div><p className="text-muted-foreground text-xs">Items</p><p className="font-semibold">{purchLineItems.length}</p></div>
+                    <div><p className="text-muted-foreground text-xs">Grand Total</p><p className="font-bold text-primary text-lg">{fmt(purchTotals.total)}</p></div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <Button className="w-full" onClick={handleCreatePurchase}>
+              Add Purchase Bill
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Quotation Dialog */}
       <Dialog open={quotationDialog} onOpenChange={setQuotationDialog}>
         <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Create Quotation</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Create Quotation</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2"><Label>Customer Name</Label><Input placeholder="Customer name" /></div>
@@ -699,6 +1028,66 @@ export default function FinanceTaxation() {
             <Button variant="outline" onClick={() => setQuotationDialog(false)}>Cancel</Button>
             <Button variant="outline" onClick={() => { toast({ title: 'Quotation Saved as Draft' }); setQuotationDialog(false); }}>Save Draft</Button>
             <Button onClick={() => { toast({ title: 'Quotation Created & Sent', description: `Total: ${fmt(quotationTotal)}` }); setQuotationDialog(false); }}>Create & Send</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── GSTR-1 Upload Guide ── */}
+      <Dialog open={gstr1GuideOpen} onOpenChange={setGstr1GuideOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5" />
+              GSTR-1 CSV Upload Guide
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-sm">
+            <Card className="bg-muted/30">
+              <CardContent className="pt-4 pb-3">
+                <p className="font-semibold mb-2">CSV Format: B2B (4A, 4B, 6A, 6C)</p>
+                <p className="text-muted-foreground">The exported CSV follows the GST Returns Offline Tool format for B2B invoices.</p>
+              </CardContent>
+            </Card>
+
+            <div className="space-y-3">
+              <h4 className="font-semibold">Step-by-Step Upload Process:</h4>
+              
+              <div className="space-y-2">
+                {[
+                  { step: 1, title: 'Download GST Offline Tool', desc: 'Visit gst.gov.in → Downloads → Offline Tools → Returns Offline Tool' },
+                  { step: 2, title: 'Export CSV from VMS', desc: 'Click "Export GSTR-1 CSV" button in the GSTR-1 tab above' },
+                  { step: 3, title: 'Open Returns Offline Tool', desc: 'Launch the GST Offline Tool and select GSTR-1 / IFF' },
+                  { step: 4, title: 'Import CSV', desc: 'Go to Import → CSV → Select the downloaded file → Map B2B section' },
+                  { step: 5, title: 'Validate Data', desc: 'Tool will validate GSTIN format, invoice numbers, and tax calculations' },
+                  { step: 6, title: 'Generate JSON', desc: 'After validation, click "Generate JSON" to create portal-ready file' },
+                  { step: 7, title: 'Upload to GST Portal', desc: 'Login to gst.gov.in → Returns → Upload the generated JSON file' },
+                  { step: 8, title: 'File Return', desc: 'Review summary on portal → Submit with DSC/EVC' },
+                ].map(s => (
+                  <div key={s.step} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+                    <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
+                      {s.step}
+                    </div>
+                    <div>
+                      <p className="font-medium">{s.title}</p>
+                      <p className="text-muted-foreground text-xs">{s.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <Card className="bg-amber-500/5 border-amber-500/20">
+              <CardContent className="pt-4 pb-3">
+                <p className="font-semibold text-amber-600 mb-1">Important Notes:</p>
+                <ul className="list-disc pl-4 space-y-1 text-muted-foreground text-xs">
+                  <li>Ensure GSTIN format is valid (15 characters)</li>
+                  <li>Invoice date must be within the filing period</li>
+                  <li>Tax amounts must match the declared rate</li>
+                  <li>Use "Regular" invoice type for standard B2B transactions</li>
+                  <li>Credit/Debit notes go in the CDNR section (exported separately)</li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
         </DialogContent>
       </Dialog>

@@ -19,7 +19,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import {
   Search, Download, FileSpreadsheet, FileText, Edit, Package, ToggleLeft,
-  CheckCircle, XCircle, DollarSign, Filter
+  CheckCircle, XCircle, DollarSign, Filter, Link2, Eye, Copy,
 } from 'lucide-react';
 
 const PORTALS: Portal[] = ['amazon', 'flipkart', 'meesho', 'firstcry', 'blinkit', 'own_website'];
@@ -35,6 +35,8 @@ export default function CatalogManager() {
   const [bulkPriceAction, setBulkPriceAction] = useState<'fixed' | 'percent'>('percent');
   const [bulkPriceValue, setBulkPriceValue] = useState('');
   const [bulkStatus, setBulkStatus] = useState<'active' | 'inactive'>('active');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [shareLink, setShareLink] = useState('');
 
   const categories = useMemo(() => {
     const unique = new Set(mockProducts.map(p => p.category));
@@ -54,11 +56,8 @@ export default function CatalogManager() {
   const allSelected = filteredProducts.length > 0 && selectedIds.length === filteredProducts.length;
 
   const toggleAll = () => {
-    if (allSelected) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(filteredProducts.map(p => p.productId));
-    }
+    if (allSelected) setSelectedIds([]);
+    else setSelectedIds(filteredProducts.map(p => p.productId));
   };
 
   const toggleOne = (id: string) => {
@@ -66,7 +65,7 @@ export default function CatalogManager() {
   };
 
   const handleBulkPriceUpdate = () => {
-    toast({ title: 'Prices Updated', description: `${selectedIds.length} products updated with ${bulkPriceAction === 'percent' ? `${bulkPriceValue}% change` : `₹${bulkPriceValue} fixed price`}.` });
+    toast({ title: 'Prices Updated', description: `${selectedIds.length} products updated.` });
     setIsBulkPriceOpen(false);
     setBulkPriceValue('');
   };
@@ -84,6 +83,17 @@ export default function CatalogManager() {
     toast({ title: `Exporting ${format.toUpperCase()}`, description: `Catalog export initiated for ${filteredProducts.length} products.` });
   };
 
+  const handleGenerateShareLink = () => {
+    const link = `${window.location.origin}/catalog/public/${Date.now().toString(36)}`;
+    setShareLink(link);
+    toast({ title: 'Public Catalog Link Generated', description: 'Read-only catalog link created.' });
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareLink);
+    toast({ title: 'Link Copied', description: 'Catalog share link copied to clipboard.' });
+  };
+
   const formatCurrency = (value: number) => `₹${value.toLocaleString()}`;
 
   return (
@@ -94,6 +104,9 @@ export default function CatalogManager() {
           <p className="text-muted-foreground">Bulk manage products, pricing, status, and portal visibility</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" className="gap-2" onClick={handleGenerateShareLink}>
+            <Link2 className="w-4 h-4" />Share Catalog
+          </Button>
           <Button variant="outline" className="gap-2" onClick={() => handleExport('excel')}>
             <FileSpreadsheet className="w-4 h-4" />Export Excel
           </Button>
@@ -102,6 +115,20 @@ export default function CatalogManager() {
           </Button>
         </div>
       </div>
+
+      {/* Share Link */}
+      {shareLink && (
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="p-3 flex items-center gap-3">
+            <Link2 className="w-4 h-4 text-primary shrink-0" />
+            <code className="text-xs flex-1 truncate text-primary">{shareLink}</code>
+            <Button size="sm" variant="outline" className="gap-1 shrink-0" onClick={handleCopyLink}>
+              <Copy className="w-3 h-3" />Copy
+            </Button>
+            <Badge variant="outline" className="text-xs">Read-Only</Badge>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -161,7 +188,7 @@ export default function CatalogManager() {
                   <TableHead className="font-semibold text-right">Base Price</TableHead>
                   <TableHead className="font-semibold">Status</TableHead>
                   <TableHead className="font-semibold">Portals</TableHead>
-                  <TableHead className="font-semibold text-right">Portal Prices</TableHead>
+                  <TableHead className="font-semibold text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -195,18 +222,10 @@ export default function CatalogManager() {
                         ))}
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="text-xs space-y-0.5">
-                        {Object.entries(product.portalPrices).slice(0, 2).map(([portal, price]) => (
-                          <div key={portal} className="flex justify-end gap-2">
-                            <span className="text-muted-foreground capitalize">{portal}:</span>
-                            <span className="font-medium">{formatCurrency(price)}</span>
-                          </div>
-                        ))}
-                        {Object.keys(product.portalPrices).length > 2 && (
-                          <span className="text-muted-foreground">+{Object.keys(product.portalPrices).length - 2} more</span>
-                        )}
-                      </div>
+                    <TableCell className="text-center">
+                      <Button variant="ghost" size="sm" className="gap-1" onClick={() => setSelectedProduct(product)}>
+                        <Eye className="w-3.5 h-3.5" />Details
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -221,6 +240,77 @@ export default function CatalogManager() {
           )}
         </CardContent>
       </Card>
+
+      {/* Product Detail Modal */}
+      <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Product Details</DialogTitle>
+          </DialogHeader>
+          {selectedProduct && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <img src={selectedProduct.imageUrl} alt={selectedProduct.name} className="w-20 h-20 rounded-lg object-cover" />
+                <div>
+                  <h3 className="font-semibold text-lg">{selectedProduct.name}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedProduct.brand}</p>
+                  <Badge variant="secondary" className={selectedProduct.status === 'active' ? 'bg-emerald-500/10 text-emerald-600 mt-1' : 'bg-muted text-muted-foreground mt-1'}>
+                    {selectedProduct.status}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-muted-foreground text-xs">Master SKU</p>
+                  <p className="font-mono font-medium">{selectedProduct.masterSkuId}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-muted-foreground text-xs">Category</p>
+                  <p className="font-medium">{selectedProduct.category}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-muted-foreground text-xs">MRP</p>
+                  <p className="font-bold text-lg">{formatCurrency(selectedProduct.mrp)}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-muted-foreground text-xs">Base Price</p>
+                  <p className="font-bold text-lg">{formatCurrency(selectedProduct.basePrice)}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-muted-foreground text-xs">HSN Code</p>
+                  <p className="font-medium">{selectedProduct.hsnCode || 'N/A'}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-muted-foreground text-xs">GST %</p>
+                  <p className="font-medium">{selectedProduct.gstPercent || 18}%</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-muted-foreground mb-2 font-medium">Portal-wise Pricing</p>
+                <div className="space-y-1">
+                  {Object.entries(selectedProduct.portalPrices).map(([portal, price]) => (
+                    <div key={portal} className="flex justify-between items-center p-2 bg-muted/30 rounded text-sm">
+                      <span className="capitalize font-medium">{portal}</span>
+                      <span className="font-bold">{formatCurrency(price)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-muted-foreground mb-2 font-medium">Enabled Portals</p>
+                <div className="flex gap-1.5 flex-wrap">
+                  {selectedProduct.portalsEnabled.map(p => (
+                    <Badge key={p} variant="outline" className="capitalize">{p}</Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Bulk Price Dialog */}
       <Dialog open={isBulkPriceOpen} onOpenChange={setIsBulkPriceOpen}>
@@ -239,7 +329,7 @@ export default function CatalogManager() {
             </div>
             <div className="space-y-2">
               <Label>{bulkPriceAction === 'percent' ? 'Change %' : 'New Price (₹)'}</Label>
-              <Input type="number" value={bulkPriceValue} onChange={e => setBulkPriceValue(e.target.value)} placeholder={bulkPriceAction === 'percent' ? 'e.g. -10 for 10% decrease' : '0.00'} />
+              <Input type="number" value={bulkPriceValue} onChange={e => setBulkPriceValue(e.target.value)} placeholder={bulkPriceAction === 'percent' ? 'e.g. -10' : '0.00'} />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsBulkPriceOpen(false)}>Cancel</Button>

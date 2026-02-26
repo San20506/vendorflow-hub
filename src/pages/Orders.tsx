@@ -19,14 +19,17 @@ import {
 import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { Switch } from '@/components/ui/switch';
 import { 
   Search, Download, ShoppingCart, Package, Truck, CheckCircle, Clock,
   X, Eye, Users, UserPlus, UserCheck, Star, Layers, RotateCcw, AlertTriangle,
-  MapPin, Timer, ArrowDownToLine, Ban,
+  MapPin, Timer, ArrowDownToLine, Ban, Video, Trash2, Shield,
 } from 'lucide-react';
 import { DateFilter, ExportButton, useRowSelection, SelectAllCheckbox, RowCheckbox } from '@/components/TableEnhancements';
 import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
+import { useToast } from '@/hooks/use-toast';
 
+// Status config for orders
 const statusConfig: Record<OrderStatus, { label: string; color: string; icon: React.ElementType }> = {
   pending: { label: 'Pending', color: 'bg-warning/10 text-warning', icon: Clock },
   confirmed: { label: 'Confirmed', color: 'bg-info/10 text-info', icon: CheckCircle },
@@ -40,7 +43,7 @@ const statusConfig: Record<OrderStatus, { label: string; color: string; icon: Re
   courier_return: { label: 'Courier Return', color: 'bg-amber-500/10 text-amber-600', icon: Ban },
 };
 
-// Portal cutoff configuration
+// Portal cutoff times
 const portalCutoffs: Record<string, { label: string; hour: number | null; description: string }> = {
   amazon: { label: 'Amazon', hour: 14, description: 'Cutoff 2:00 PM' },
   flipkart: { label: 'Flipkart', hour: 15, description: 'Cutoff 3:00 PM' },
@@ -58,7 +61,6 @@ function getOrderCutoffStatus(order: Order): 'within' | 'missed' | 'immediate' {
   return orderHour < cutoff.hour ? 'within' : 'missed';
 }
 
-// Compute customer intelligence from orders
 function computeCustomerProfiles(orders: Order[]) {
   const map: Record<string, {
     name: string; phone: string; email: string; orderCount: number; totalSpend: number;
@@ -82,7 +84,6 @@ function computeCustomerProfiles(orders: Order[]) {
     if (o.customerCity && !p.cities.includes(o.customerCity)) p.cities.push(o.customerCity);
     if (o.customerState && !p.states.includes(o.customerState)) p.states.push(o.customerState);
   });
-  // Flag suspicious: many addresses or high return rate
   Object.values(map).forEach(p => {
     const returnOrders = orders.filter(o => o.customerId === Object.keys(map).find(k => map[k] === p) && ['returned', 'rto', 'customer_return', 'courier_return', 'cancelled'].includes(o.status));
     if (p.addresses.length >= 3 || (p.orderCount >= 3 && returnOrders.length / p.orderCount > 0.5)) {
@@ -94,7 +95,53 @@ function computeCustomerProfiles(orders: Order[]) {
 
 type CustomerTypeFilter = 'all' | 'new' | 'repeat' | 'high_value';
 
+// Video reconciliation types
+type VideoQuality = '360' | '420' | '720' | '1000';
+type VideoStatus = 'not_captured' | 'captured' | 'eligible_for_delete' | 'retained_for_return';
+
+interface VideoRecord {
+  captured: boolean;
+  quality: VideoQuality;
+  capturedAt?: string;
+  status: VideoStatus;
+}
+
+// Generate initial video records for all orders
+function generateVideoRecords(orders: Order[]): Record<string, VideoRecord> {
+  const records: Record<string, VideoRecord> = {};
+  orders.forEach(o => {
+    const isReturn = ['returned', 'rto', 'customer_return', 'courier_return'].includes(o.status);
+    const daysSinceOrder = Math.floor((Date.now() - new Date(o.orderDate).getTime()) / (1000 * 60 * 60 * 24));
+    const captured = Math.random() > 0.2; // 80% captured
+    let status: VideoStatus = 'not_captured';
+    if (captured) {
+      if (isReturn) {
+        status = 'retained_for_return';
+      } else if (daysSinceOrder > 30) {
+        status = 'eligible_for_delete';
+      } else {
+        status = 'captured';
+      }
+    }
+    records[o.orderId] = {
+      captured,
+      quality: captured ? (['360', '720', '1000'] as VideoQuality[])[Math.floor(Math.random() * 3)] : '720',
+      capturedAt: captured ? new Date(new Date(o.orderDate).getTime() + 3600000).toISOString() : undefined,
+      status,
+    };
+  });
+  return records;
+}
+
+const videoStatusLabels: Record<VideoStatus, { label: string; color: string }> = {
+  not_captured: { label: 'Not Captured', color: 'bg-destructive/10 text-destructive' },
+  captured: { label: 'Captured', color: 'bg-success/10 text-success' },
+  eligible_for_delete: { label: 'Auto Delete Eligible', color: 'bg-amber-500/10 text-amber-600' },
+  retained_for_return: { label: 'Retained (Return)', color: 'bg-blue-500/10 text-blue-600' },
+};
+
 export default function Orders() {
+  const { toast } = useToast();
   const [selectedPortal, setSelectedPortal] = useState<Portal | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -104,6 +151,11 @@ export default function Orders() {
   const [dateFilter, setDateFilter] = useState('30days');
   const [activeTab, setActiveTab] = useState('orders');
   const [globalDateRange, setGlobalDateRange] = useState<DateRange>({ from: undefined, to: undefined });
+
+  // Video reconciliation state
+  const [videoRecords, setVideoRecords] = useState<Record<string, VideoRecord>>(() => generateVideoRecords(mockOrders));
+  const [returnPolicyDays] = useState(15);
+  const [videoRetentionDays] = useState(100);
 
   const customerProfiles = useMemo(() => computeCustomerProfiles(mockOrders), []);
 
@@ -132,7 +184,6 @@ export default function Orders() {
 
   const rowSelection = useRowSelection(filteredOrders.map(o => o.orderId));
 
-  // Processing dashboard stats
   const processingStats = useMemo(() => {
     const orders = selectedPortal === 'all' ? mockOrders : mockOrders.filter(o => o.portal === selectedPortal);
     const withinCutoff = orders.filter(o => ['pending', 'confirmed'].includes(o.status) && getOrderCutoffStatus(o) === 'within').length;
@@ -146,6 +197,60 @@ export default function Orders() {
     const shipped = orders.filter(o => o.status === 'shipped').length;
     return { total, withinCutoff, missedCutoff, pendingDispatch, rtoPending, customerReturns, courierReturns, delivered, shipped };
   }, [selectedPortal]);
+
+  // Video stats
+  const videoStats = useMemo(() => {
+    const all = Object.values(videoRecords);
+    return {
+      captured: all.filter(v => v.captured).length,
+      notCaptured: all.filter(v => !v.captured).length,
+      eligibleDelete: all.filter(v => v.status === 'eligible_for_delete').length,
+      retained: all.filter(v => v.status === 'retained_for_return').length,
+    };
+  }, [videoRecords]);
+
+  const toggleVideoCapture = (orderId: string) => {
+    setVideoRecords(prev => {
+      const rec = prev[orderId];
+      const newCaptured = !rec.captured;
+      return {
+        ...prev,
+        [orderId]: {
+          ...rec,
+          captured: newCaptured,
+          capturedAt: newCaptured ? new Date().toISOString() : undefined,
+          status: newCaptured ? 'captured' : 'not_captured',
+        },
+      };
+    });
+    toast({ title: 'Video status updated' });
+  };
+
+  const updateVideoQuality = (orderId: string, quality: VideoQuality) => {
+    setVideoRecords(prev => ({
+      ...prev,
+      [orderId]: { ...prev[orderId], quality },
+    }));
+  };
+
+  const runVideoCleanup = () => {
+    setVideoRecords(prev => {
+      const updated = { ...prev };
+      mockOrders.forEach(o => {
+        const daysSince = Math.floor((Date.now() - new Date(o.orderDate).getTime()) / (1000 * 60 * 60 * 24));
+        const isReturn = ['returned', 'rto', 'customer_return', 'courier_return'].includes(o.status);
+        const rec = updated[o.orderId];
+        if (!rec?.captured) return;
+        if (isReturn) {
+          updated[o.orderId] = { ...rec, status: daysSince > videoRetentionDays ? 'eligible_for_delete' : 'retained_for_return' };
+        } else if (daysSince > returnPolicyDays) {
+          updated[o.orderId] = { ...rec, status: 'eligible_for_delete' };
+        }
+      });
+      return updated;
+    });
+    toast({ title: 'Video Cleanup Simulation', description: `Checked ${mockOrders.length} orders. Return policy: ${returnPolicyDays}d, Retention: ${videoRetentionDays}d` });
+  };
 
   const formatCurrency = (value: number) => `₹${value.toLocaleString()}`;
   const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString('en-IN', {
@@ -257,6 +362,54 @@ export default function Orders() {
           </Card>
         </div>
 
+        {/* Video Reconciliation Summary */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Video className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold">Video Reconciliation</span>
+                <Badge variant="outline" className="text-xs">Return Policy: {returnPolicyDays} days</Badge>
+                <Badge variant="outline" className="text-xs">Retention: {videoRetentionDays} days</Badge>
+              </div>
+              <Button size="sm" variant="outline" className="gap-1.5" onClick={runVideoCleanup}>
+                <Trash2 className="w-3.5 h-3.5" />
+                Run Cleanup Simulation
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-success/5 border border-success/20">
+                <Shield className="w-4 h-4 text-success" />
+                <div>
+                  <p className="text-lg font-bold text-success">{videoStats.captured}</p>
+                  <p className="text-[11px] text-muted-foreground">Videos Captured</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-destructive/5 border border-destructive/20">
+                <X className="w-4 h-4 text-destructive" />
+                <div>
+                  <p className="text-lg font-bold text-destructive">{videoStats.notCaptured}</p>
+                  <p className="text-[11px] text-muted-foreground">Not Captured</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                <Trash2 className="w-4 h-4 text-amber-600" />
+                <div>
+                  <p className="text-lg font-bold text-amber-600">{videoStats.eligibleDelete}</p>
+                  <p className="text-[11px] text-muted-foreground">Auto Delete Eligible</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-500/5 border border-blue-500/20">
+                <RotateCcw className="w-4 h-4 text-blue-600" />
+                <div>
+                  <p className="text-lg font-bold text-blue-600">{videoStats.retained}</p>
+                  <p className="text-[11px] text-muted-foreground">Retained (Return)</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Portal Cutoff Reference */}
         <Card>
           <CardContent className="p-3">
@@ -334,11 +487,12 @@ export default function Orders() {
                     <TableHead className="font-semibold">Portal</TableHead>
                     <TableHead className="font-semibold">Customer</TableHead>
                     <TableHead className="font-semibold">Customer Type</TableHead>
-                    <TableHead className="font-semibold">Order Type</TableHead>
                     <TableHead className="font-semibold">Cutoff</TableHead>
                     <TableHead className="font-semibold">Date</TableHead>
                     <TableHead className="font-semibold text-right">Amount</TableHead>
                     <TableHead className="font-semibold">Status</TableHead>
+                    <TableHead className="font-semibold">Video</TableHead>
+                    <TableHead className="font-semibold">Quality</TableHead>
                     <TableHead className="font-semibold text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -347,10 +501,11 @@ export default function Orders() {
                     const status = statusConfig[order.status];
                     const portal = portalConfigs.find(p => p.id === order.portal);
                     const StatusIcon = status.icon;
-                    const isMulti = order.items.length > 1;
                     const custType = getCustomerType(order.customerId);
                     const cutoffStatus = getOrderCutoffStatus(order);
                     const profile = customerProfiles[order.customerId];
+                    const videoRec = videoRecords[order.orderId];
+                    const vStatus = videoRec ? videoStatusLabels[videoRec.status] : null;
                     
                       return (
                         <TableRow key={order.orderId} className={`hover:bg-muted/30 ${rowSelection.isSelected(order.orderId) ? 'bg-primary/5' : ''}`}>
@@ -389,52 +544,29 @@ export default function Orders() {
                         </TableCell>
                         <TableCell>
                           {custType === 'repeat' ? (
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Badge variant="secondary" className="gap-1 bg-blue-500/10 text-blue-600">
-                                  <UserCheck className="w-3 h-3" />
-                                  Repeat
-                                </Badge>
-                              </TooltipTrigger>
-                              <TooltipContent>Customer has placed orders before</TooltipContent>
-                            </Tooltip>
+                            <Badge variant="secondary" className="gap-1 bg-blue-500/10 text-blue-600">
+                              <UserCheck className="w-3 h-3" />Repeat
+                            </Badge>
                           ) : (
                             <Badge variant="secondary" className="gap-1 bg-emerald-500/10 text-emerald-600">
-                              <UserPlus className="w-3 h-3" />
-                              New
+                              <UserPlus className="w-3 h-3" />New
                             </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {isMulti ? (
-                            <div className="flex items-center gap-1.5">
-                              <Badge variant="secondary" className="gap-1 bg-purple-500/10 text-purple-600">
-                                <Layers className="w-3 h-3" />
-                                Multi-SKU
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">({order.items.length} SKUs)</span>
-                            </div>
-                          ) : (
-                            <span className="text-sm text-muted-foreground">Single Item</span>
                           )}
                         </TableCell>
                         <TableCell>
                           {cutoffStatus === 'within' && (
                             <Badge variant="secondary" className="gap-1 bg-success/10 text-success text-xs">
-                              <Timer className="w-3 h-3" />
-                              Within
+                              <Timer className="w-3 h-3" />Within
                             </Badge>
                           )}
                           {cutoffStatus === 'missed' && (
                             <Badge variant="secondary" className="gap-1 bg-destructive/10 text-destructive text-xs">
-                              <AlertTriangle className="w-3 h-3" />
-                              Missed
+                              <AlertTriangle className="w-3 h-3" />Missed
                             </Badge>
                           )}
                           {cutoffStatus === 'immediate' && (
                             <Badge variant="secondary" className="gap-1 bg-info/10 text-info text-xs">
-                              <CheckCircle className="w-3 h-3" />
-                              Immediate
+                              <CheckCircle className="w-3 h-3" />Immediate
                             </Badge>
                           )}
                         </TableCell>
@@ -449,6 +581,39 @@ export default function Orders() {
                             <StatusIcon className="w-3 h-3" />
                             {status.label}
                           </Badge>
+                        </TableCell>
+                        {/* Video Captured Toggle */}
+                        <TableCell>
+                          <div className="flex flex-col items-center gap-1">
+                            <Switch
+                              checked={videoRec?.captured ?? false}
+                              onCheckedChange={() => toggleVideoCapture(order.orderId)}
+                              className="scale-75"
+                            />
+                            {vStatus && (
+                              <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${vStatus.color}`}>
+                                {vStatus.label}
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        {/* Video Quality */}
+                        <TableCell>
+                          <Select
+                            value={videoRec?.quality ?? '720'}
+                            onValueChange={(v) => updateVideoQuality(order.orderId, v as VideoQuality)}
+                            disabled={!videoRec?.captured}
+                          >
+                            <SelectTrigger className="h-7 w-[70px] text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="360">360p</SelectItem>
+                              <SelectItem value="420">420p</SelectItem>
+                              <SelectItem value="720">720p</SelectItem>
+                              <SelectItem value="1000">1000p</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                         <TableCell className="text-center">
                           <Button 
@@ -515,28 +680,32 @@ export default function Orders() {
                     <p className="text-sm text-muted-foreground">Total Amount</p>
                     <p className="font-bold text-lg">{formatCurrency(selectedOrder.totalAmount)}</p>
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Cutoff Status</p>
-                    {(() => {
-                      const cs = getOrderCutoffStatus(selectedOrder);
-                      const cutoff = portalCutoffs[selectedOrder.portal];
-                      return (
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary" className={`gap-1 text-xs ${
-                            cs === 'within' ? 'bg-success/10 text-success' : cs === 'missed' ? 'bg-destructive/10 text-destructive' : 'bg-info/10 text-info'
-                          }`}>
-                            {cs === 'within' ? 'Within Cutoff' : cs === 'missed' ? 'Missed Cutoff' : 'Immediate'}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">{cutoff?.description}</span>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Order Type</p>
-                    <p className="font-medium">{selectedOrder.items.length > 1 ? 'Multi-SKU Order' : 'Single Order'}</p>
-                  </div>
                 </div>
+
+                {/* Video Status in Detail */}
+                {videoRecords[selectedOrder.orderId] && (
+                  <div className="p-4 rounded-lg bg-muted/50 border">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <Video className="w-4 h-4" /> Video Reconciliation
+                    </h4>
+                    <div className="grid grid-cols-3 gap-3 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Captured</p>
+                        <p className="font-medium">{videoRecords[selectedOrder.orderId].captured ? 'Yes' : 'No'}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Quality</p>
+                        <p className="font-medium">{videoRecords[selectedOrder.orderId].quality}p</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Status</p>
+                        <Badge variant="outline" className={`text-xs ${videoStatusLabels[videoRecords[selectedOrder.orderId].status].color}`}>
+                          {videoStatusLabels[videoRecords[selectedOrder.orderId].status].label}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Customer Info */}
                 <div className="p-4 rounded-lg bg-muted/50">
@@ -562,24 +731,12 @@ export default function Orders() {
                       <p className="text-muted-foreground">Shipping Address</p>
                       <p className="font-medium">{selectedOrder.shippingAddress}</p>
                     </div>
-                    {selectedOrder.customerCity && (
-                      <div>
-                        <p className="text-muted-foreground">City</p>
-                        <p className="font-medium">{selectedOrder.customerCity}, {selectedOrder.customerState}</p>
-                      </div>
-                    )}
-                    {selectedOrder.customerPinCode && (
-                      <div>
-                        <p className="text-muted-foreground">Pin Code</p>
-                        <p className="font-medium">{selectedOrder.customerPinCode}</p>
-                      </div>
-                    )}
                   </div>
                 </div>
 
-                {/* Order Items with Master SKU */}
+                {/* Order Items */}
                 <div>
-                  <h4 className="font-semibold mb-3">Order Items ({selectedOrder.items.length} SKU{selectedOrder.items.length > 1 ? 's' : ''})</h4>
+                  <h4 className="font-semibold mb-3">Order Items ({selectedOrder.items.length})</h4>
                   <div className="overflow-x-auto border rounded-lg">
                     <Table>
                       <TableHeader>
@@ -682,12 +839,6 @@ export default function Orders() {
                       High Value Customer
                     </Badge>
                   )}
-                  {selectedProfile.orderCount >= 3 && (
-                    <Badge variant="secondary" className="gap-1 bg-purple-500/10 text-purple-600">
-                      <ShoppingCart className="w-3 h-3" />
-                      Frequent Buyer
-                    </Badge>
-                  )}
                   {selectedProfile.suspicious && (
                     <Badge variant="destructive" className="gap-1">
                       <AlertTriangle className="w-3 h-3" />
@@ -715,7 +866,6 @@ export default function Orders() {
                   </div>
                 </div>
 
-                {/* Address & Location */}
                 <div className="p-4 rounded-lg bg-muted/50">
                   <h4 className="font-semibold mb-3 flex items-center gap-1.5">
                     <MapPin className="w-4 h-4" />
@@ -742,14 +892,6 @@ export default function Orders() {
                             <Badge key={pin} variant="outline" className="text-xs">{pin}</Badge>
                           ))}
                         </div>
-                      </div>
-                    )}
-                    {selectedProfile.addresses.length > 1 && (
-                      <div>
-                        <p className="text-muted-foreground">Shipping Addresses ({selectedProfile.addresses.length})</p>
-                        {selectedProfile.addresses.map((addr, i) => (
-                          <p key={i} className="font-medium text-xs mt-1">{addr}</p>
-                        ))}
                       </div>
                     )}
                   </div>
