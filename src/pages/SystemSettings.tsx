@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shield, Settings, Cog, Upload, Download, FileSpreadsheet, Eye, Pencil, ToggleLeft, Blocks, Clock, Zap, Users, Lock, IndianRupee, CheckCircle2, AlertTriangle, SlidersHorizontal } from 'lucide-react';
+import { Shield, Settings, Cog, Upload, Download, FileSpreadsheet, Eye, Pencil, ToggleLeft, Blocks, Clock, Zap, Users, Lock, IndianRupee, CheckCircle2, AlertTriangle, SlidersHorizontal, History, LogIn, Edit3 } from 'lucide-react';
 import { getReconciliationSettings, setReconciliationSettings, subscribeReconciliationSettings } from '@/services/reconciliationSettings';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 // TAB 1 — Field Configuration
 interface FieldConfig {
@@ -181,13 +182,14 @@ export default function SystemSettings() {
       </div>
 
       <Tabs defaultValue="fields" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="fields" className="text-xs sm:text-sm">Field Config</TabsTrigger>
           <TabsTrigger value="features" className="text-xs sm:text-sm">Features</TabsTrigger>
           <TabsTrigger value="financial" className="text-xs sm:text-sm">Financial Controls</TabsTrigger>
           <TabsTrigger value="services" className="text-xs sm:text-sm">Services</TabsTrigger>
           <TabsTrigger value="import-export" className="text-xs sm:text-sm">Import / Export</TabsTrigger>
           <TabsTrigger value="permissions" className="text-xs sm:text-sm">Permissions</TabsTrigger>
+          <TabsTrigger value="audit" className="text-xs sm:text-sm">Activity Log</TabsTrigger>
         </TabsList>
 
         {/* TAB 1 — FIELD CONFIGURATION */}
@@ -529,6 +531,52 @@ export default function SystemSettings() {
                       );
                     })
                   )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* TAB — ACTIVITY LOG */}
+        <TabsContent value="audit">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><History className="w-5 h-5" />System Activity Log</CardTitle>
+              <CardDescription>Audit trail of all system actions — logins, edits, approvals, and configuration changes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="font-semibold">Timestamp</TableHead>
+                    <TableHead className="font-semibold">Action</TableHead>
+                    <TableHead className="font-semibold">User</TableHead>
+                    <TableHead className="font-semibold">Module</TableHead>
+                    <TableHead className="font-semibold">Description</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[
+                    { id: 'SYS-001', action: 'login', user: 'Sarah Johnson', module: 'Auth', description: 'Admin logged in', timestamp: new Date(Date.now() - 0.5 * 3600000).toISOString(), icon: LogIn, color: 'bg-blue-500/10 text-blue-600' },
+                    { id: 'SYS-002', action: 'financial_edit', user: 'Sarah Johnson', module: 'Finance', description: 'Invoice INV-2026-001 created — ₹53,100', timestamp: new Date(Date.now() - 2 * 3600000).toISOString(), icon: Edit3, color: 'bg-rose-500/10 text-rose-600' },
+                    { id: 'SYS-003', action: 'approval', user: 'Admin', module: 'Onboarding', description: 'BrightWave Electronics application approved', timestamp: new Date(Date.now() - 5 * 3600000).toISOString(), icon: CheckCircle2, color: 'bg-emerald-500/10 text-emerald-600' },
+                    { id: 'SYS-004', action: 'status_change', user: 'Admin', module: 'Returns', description: 'Return RET-2024-001 advanced to Claim Raised', timestamp: new Date(Date.now() - 8 * 3600000).toISOString(), icon: AlertTriangle, color: 'bg-amber-500/10 text-amber-600' },
+                    { id: 'SYS-005', action: 'permission_change', user: 'Sarah Johnson', module: 'Permissions', description: 'Analytics access enabled for Vendor User role', timestamp: new Date(Date.now() - 24 * 3600000).toISOString(), icon: Shield, color: 'bg-purple-500/10 text-purple-600' },
+                    { id: 'SYS-006', action: 'financial_edit', user: 'Admin', module: 'Settings', description: 'Reconciliation tolerance updated to ₹5', timestamp: new Date(Date.now() - 48 * 3600000).toISOString(), icon: Edit3, color: 'bg-rose-500/10 text-rose-600' },
+                    { id: 'SYS-007', action: 'status_change', user: 'Admin', module: 'Subscription', description: 'EverGreen Foods subscription changed from Trial to Fully Paid', timestamp: new Date(Date.now() - 72 * 3600000).toISOString(), icon: AlertTriangle, color: 'bg-amber-500/10 text-amber-600' },
+                    { id: 'SYS-008', action: 'login', user: 'Michael Chen', module: 'Auth', description: 'Vendor logged in from mobile', timestamp: new Date(Date.now() - 96 * 3600000).toISOString(), icon: LogIn, color: 'bg-blue-500/10 text-blue-600' },
+                  ].map(log => {
+                    const Icon = log.icon;
+                    return (
+                      <TableRow key={log.id}>
+                        <TableCell className="text-sm whitespace-nowrap">{format(new Date(log.timestamp), 'dd MMM yyyy HH:mm')}</TableCell>
+                        <TableCell><Badge variant="secondary" className={`gap-1 ${log.color}`}><Icon className="w-3 h-3" />{log.action.replace('_', ' ')}</Badge></TableCell>
+                        <TableCell className="font-medium text-sm">{log.user}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{log.module}</TableCell>
+                        <TableCell className="text-sm max-w-[300px] truncate">{log.description}</TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </CardContent>

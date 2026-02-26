@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -98,6 +99,7 @@ export default function BusinessOnboarding() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [subFilter, setSubFilter] = useState('all');
   const [showChangeLog, setShowChangeLog] = useState<OnboardingRequest | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ id: string; action: 'approved' | 'rejected' } | null>(null);
 
   const filtered = useMemo(() => requests.filter(r => {
     const matchSearch = r.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -268,8 +270,8 @@ export default function BusinessOnboarding() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="text-rose-600" onClick={() => handleAdminAction(req.id, 'rejected')}>Reject</Button>
-                      <Button size="sm" onClick={() => handleAdminAction(req.id, 'approved')}>Approve</Button>
+                      <Button variant="outline" size="sm" className="text-rose-600" onClick={() => setConfirmAction({ id: req.id, action: 'rejected' })}>Reject</Button>
+                      <Button size="sm" onClick={() => setConfirmAction({ id: req.id, action: 'approved' })}>Approve</Button>
                     </div>
                   </div>
                 ))}
@@ -405,6 +407,20 @@ export default function BusinessOnboarding() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Confirmation Dialog for Admin Actions */}
+      <ConfirmDialog
+        open={!!confirmAction}
+        onOpenChange={(open) => !open && setConfirmAction(null)}
+        title={confirmAction?.action === 'approved' ? 'Approve Application' : 'Reject Application'}
+        description={`Are you sure you want to ${confirmAction?.action === 'approved' ? 'approve' : 'reject'} this onboarding request? This action will be logged in the audit trail.`}
+        confirmLabel={confirmAction?.action === 'approved' ? 'Approve' : 'Reject'}
+        variant={confirmAction?.action === 'rejected' ? 'destructive' : 'default'}
+        onConfirm={() => {
+          if (confirmAction) handleAdminAction(confirmAction.id, confirmAction.action);
+          setConfirmAction(null);
+        }}
+      />
     </div>
   );
 }

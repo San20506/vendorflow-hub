@@ -289,8 +289,14 @@ export default function FinanceTaxation() {
   };
 
   const handleCreateInvoice = () => {
-    if (!invForm.customer || !invForm.gstin || invLineItems.every(i => !i.rate)) {
-      toast({ title: 'Validation Error', description: 'Please fill all required fields and at least one line item', variant: 'destructive' });
+    const errors: string[] = [];
+    if (!invForm.customer.trim()) errors.push('Customer name');
+    if (!invForm.gstin.trim() || invForm.gstin.length < 15) errors.push('Valid GSTIN (15 characters)');
+    if (!invForm.invoiceDate) errors.push('Invoice date');
+    const hasLineItems = invLineItems.some(i => i.product.trim() && parseFloat(i.rate) > 0);
+    if (!hasLineItems) errors.push('At least one line item with product name and rate');
+    if (errors.length > 0) {
+      toast({ title: 'Validation Error', description: `Missing: ${errors.join(', ')}`, variant: 'destructive' });
       return;
     }
     toast({
@@ -307,8 +313,14 @@ export default function FinanceTaxation() {
   };
 
   const handleCreatePurchase = () => {
-    if (!purchForm.supplier || !purchForm.gstin || purchLineItems.every(i => !i.rate)) {
-      toast({ title: 'Validation Error', description: 'Fill supplier details and at least one line item', variant: 'destructive' });
+    const errors: string[] = [];
+    if (!purchForm.supplier.trim()) errors.push('Supplier name');
+    if (!purchForm.gstin.trim() || purchForm.gstin.length < 15) errors.push('Valid GSTIN (15 characters)');
+    if (!purchForm.date) errors.push('Bill date');
+    const hasLineItems = purchLineItems.some(i => i.product.trim() && parseFloat(i.rate) > 0);
+    if (!hasLineItems) errors.push('At least one line item with product name and rate');
+    if (errors.length > 0) {
+      toast({ title: 'Validation Error', description: `Missing: ${errors.join(', ')}`, variant: 'destructive' });
       return;
     }
     toast({

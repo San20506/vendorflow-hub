@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { mockReturns, portalConfigs } from '@/services/mockData';
 import { Portal, ReturnReason } from '@/types';
 import { PortalFilter } from '@/components/dashboard/PortalFilter';
@@ -185,6 +186,7 @@ export default function Returns() {
   const [lifecycleData, setLifecycleData] = useState(mockLifecycleData);
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [confirmAdvance, setConfirmAdvance] = useState<string | null>(null);
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
@@ -413,7 +415,7 @@ export default function Returns() {
                         <div className="flex items-center gap-1 justify-center">
                           <Button variant="ghost" size="sm" className="text-xs" onClick={() => setSelectedReturn(r)}>Details</Button>
                           {r.currentStage !== 'settlement_adjusted' && r.currentStage !== 'claim_rejected' && (
-                            <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={() => advanceStage(r.returnId)}>
+                            <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={() => setConfirmAdvance(r.returnId)}>
                               <ChevronRight className="w-3 h-3" />Advance
                             </Button>
                           )}
@@ -564,6 +566,19 @@ export default function Returns() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Confirmation Dialog for Advancing Stage */}
+      <ConfirmDialog
+        open={!!confirmAdvance}
+        onOpenChange={(open) => !open && setConfirmAdvance(null)}
+        title="Advance Return Stage"
+        description={`Are you sure you want to advance return ${confirmAdvance} to the next lifecycle stage? This action cannot be undone.`}
+        confirmLabel="Advance Stage"
+        onConfirm={() => {
+          if (confirmAdvance) advanceStage(confirmAdvance);
+          setConfirmAdvance(null);
+        }}
+      />
     </div>
   );
 }

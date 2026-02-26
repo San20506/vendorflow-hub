@@ -1,9 +1,10 @@
 import { ReactNode } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/types';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
-import { Bell, Search, LogOut, Settings, User, Smartphone } from 'lucide-react';
+import { Bell, Search, LogOut, Settings, User, Smartphone, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -16,14 +17,57 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AIAccessBanner, AIAccessControl } from '@/components/AIAccessControl';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface AppLayoutProps {
   children: ReactNode;
 }
 
+// Route permission map — which roles can access which routes
+const routePermissions: Record<string, UserRole[]> = {
+  '/dashboard': ['admin', 'vendor', 'operations'],
+  '/insights': ['admin', 'vendor', 'operations'],
+  '/products': ['admin', 'vendor'],
+  '/catalog-manager': ['admin'],
+  '/product-health': ['admin', 'vendor', 'operations'],
+  '/sku-mapping': ['admin', 'vendor'],
+  '/inventory': ['admin', 'vendor', 'operations'],
+  '/orders': ['admin', 'vendor', 'operations'],
+  '/consolidated-orders': ['admin', 'operations'],
+  '/returns': ['admin', 'operations'],
+  '/settlements': ['admin', 'vendor'],
+  '/reconciliation': ['admin', 'operations'],
+  '/price-payout': ['admin', 'vendor'],
+  '/finance': ['admin', 'vendor'],
+  '/vendors': ['admin'],
+  '/warehouses': ['admin', 'operations'],
+  '/data-import': ['admin', 'operations'],
+  '/video-management': ['admin', 'operations'],
+  '/alerts': ['admin', 'vendor', 'operations'],
+  '/tasks': ['admin', 'operations'],
+  '/analytics': ['admin', 'vendor'],
+  '/leads': ['admin', 'vendor'],
+  '/customers': ['admin', 'vendor', 'operations'],
+  '/whatsapp': ['admin'],
+  '/social-insights': ['admin', 'vendor'],
+  '/ecommerce': ['admin', 'vendor'],
+  '/reports': ['admin', 'vendor', 'operations'],
+  '/onboarding': ['admin'],
+  '/system-settings': ['admin'],
+  '/permissions': ['admin'],
+  '/api-settings': ['admin'],
+  '/legal-compliance': ['admin'],
+  '/subscription': ['admin'],
+  '/chatbot': ['admin'],
+  '/support': ['admin', 'vendor', 'operations'],
+  '/data-configuration': ['admin'],
+  '/system-architecture': ['admin'],
+};
+
 export function AppLayout({ children }: AppLayoutProps) {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -33,6 +77,11 @@ export function AppLayout({ children }: AppLayoutProps) {
     logout();
     navigate('/login');
   };
+
+  // Role-based route protection
+  const currentPath = location.pathname;
+  const allowedRoles = routePermissions[currentPath];
+  const hasAccess = !allowedRoles || (user && allowedRoles.includes(user.role));
 
   const lastSynced = new Date();
   lastSynced.setMinutes(lastSynced.getMinutes() - 3);
@@ -163,7 +212,22 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           {/* Main Content */}
           <main className="flex-1 p-6 overflow-auto bg-background">
-            {children}
+            {!hasAccess ? (
+              <div className="flex items-center justify-center min-h-[60vh]">
+                <Alert variant="destructive" className="max-w-md">
+                  <ShieldAlert className="h-5 w-5" />
+                  <AlertTitle>Access Restricted</AlertTitle>
+                  <AlertDescription>
+                    Your role <Badge variant="outline" className="mx-1 capitalize">{user?.role}</Badge> does not have permission to access this module. Contact your administrator to request access.
+                  </AlertDescription>
+                  <Button variant="outline" size="sm" className="mt-3" onClick={() => navigate('/dashboard')}>
+                    Return to Dashboard
+                  </Button>
+                </Alert>
+              </div>
+            ) : (
+              children
+            )}
           </main>
         </SidebarInset>
       </div>

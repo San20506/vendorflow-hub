@@ -41,6 +41,10 @@ export default function Products() {
   const [productImage, setProductImage] = useState<string | null>(null);
   const [productVideo, setProductVideo] = useState<string | null>(null);
 
+  // Form validation state
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [formData, setFormData] = useState({ name: '', masterSku: '', brand: '', category: '', hsn: '', mrp: '', basePrice: '', gst: '' });
+
   const categories = useMemo(() => {
     const unique = new Set(mockProducts.map(p => p.category));
     return Array.from(unique);
@@ -119,6 +123,37 @@ export default function Products() {
     toast({ title: 'Video uploaded', description: 'Product video preview ready.' });
   };
 
+  const validateProductForm = (): boolean => {
+    const errors: Record<string, string> = {};
+    if (!formData.name.trim()) errors.name = 'Product name is required';
+    if (!formData.masterSku.trim()) errors.masterSku = 'Master SKU is required';
+    if (!formData.brand) errors.brand = 'Brand is required';
+    if (!formData.category) errors.category = 'Category is required';
+    if (!formData.hsn.trim()) errors.hsn = 'HSN Code is required';
+    if (!formData.mrp || parseFloat(formData.mrp) <= 0) errors.mrp = 'MRP must be greater than 0';
+    if (!formData.basePrice || parseFloat(formData.basePrice) <= 0) errors.basePrice = 'Base price must be greater than 0';
+    if (formData.mrp && formData.basePrice && parseFloat(formData.mrp) < parseFloat(formData.basePrice)) {
+      errors.basePrice = 'Base price cannot exceed MRP';
+    }
+    if (!formData.gst) errors.gst = 'GST % is required';
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleProductSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateProductForm()) {
+      toast({ title: 'Validation Error', description: 'Please fix the highlighted errors before submitting.', variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'Product Created', description: 'New product added to catalog.' });
+    setIsAddDialogOpen(false);
+    setFormData({ name: '', masterSku: '', brand: '', category: '', hsn: '', mrp: '', basePrice: '', gst: '' });
+    setFormErrors({});
+  };
+
+  const isFormValid = formData.name && formData.masterSku && formData.brand && formData.category && formData.hsn && formData.mrp && formData.basePrice && formData.gst;
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -160,46 +195,51 @@ export default function Products() {
                   <TabsTrigger value="excel">Excel Upload</TabsTrigger>
                 </TabsList>
                 <TabsContent value="manual">
-                  <form className="space-y-5" onSubmit={e => { e.preventDefault(); toast({ title: 'Product Created', description: 'New product added to catalog.' }); setIsAddDialogOpen(false); }}>
+                  <form className="space-y-5" onSubmit={handleProductSubmit}>
                     {/* Basic Info */}
                     <div className="space-y-3">
                       <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Basic Information</h3>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="name">Product Name *</Label>
-                          <Input id="name" placeholder="Enter product name" required />
+                          <Input id="name" placeholder="Enter product name" value={formData.name} onChange={e => setFormData(f => ({ ...f, name: e.target.value }))} className={formErrors.name ? 'border-destructive' : ''} />
+                          {formErrors.name && <p className="text-xs text-destructive">{formErrors.name}</p>}
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="masterSku">Master SKU ID *</Label>
-                          <Input id="masterSku" placeholder="e.g. MSKU-009" required />
+                          <Input id="masterSku" placeholder="e.g. MSKU-009" value={formData.masterSku} onChange={e => setFormData(f => ({ ...f, masterSku: e.target.value }))} className={formErrors.masterSku ? 'border-destructive' : ''} />
+                          {formErrors.masterSku && <p className="text-xs text-destructive">{formErrors.masterSku}</p>}
                         </div>
                       </div>
                       <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="brand">Brand *</Label>
-                          <Select>
-                            <SelectTrigger><SelectValue placeholder="Select brand" /></SelectTrigger>
+                          <Select value={formData.brand} onValueChange={v => setFormData(f => ({ ...f, brand: v }))}>
+                            <SelectTrigger className={formErrors.brand ? 'border-destructive' : ''}><SelectValue placeholder="Select brand" /></SelectTrigger>
                             <SelectContent>
                               {['Boat', 'Samsung', 'Nike', 'Puma', 'Mamaearth', 'Sony', 'Apple'].map(b => (
                                 <SelectItem key={b} value={b}>{b}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
+                          {formErrors.brand && <p className="text-xs text-destructive">{formErrors.brand}</p>}
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="category">Category *</Label>
-                          <Select>
-                            <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                          <Select value={formData.category} onValueChange={v => setFormData(f => ({ ...f, category: v }))}>
+                            <SelectTrigger className={formErrors.category ? 'border-destructive' : ''}><SelectValue placeholder="Select category" /></SelectTrigger>
                             <SelectContent>
                               {categories.map(cat => (
                                 <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
+                          {formErrors.category && <p className="text-xs text-destructive">{formErrors.category}</p>}
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="hsn">HSN Code *</Label>
-                          <Input id="hsn" placeholder="e.g. 8518" required />
+                          <Input id="hsn" placeholder="e.g. 8518" value={formData.hsn} onChange={e => setFormData(f => ({ ...f, hsn: e.target.value }))} className={formErrors.hsn ? 'border-destructive' : ''} />
+                          {formErrors.hsn && <p className="text-xs text-destructive">{formErrors.hsn}</p>}
                         </div>
                       </div>
                     </div>
@@ -210,22 +250,25 @@ export default function Products() {
                       <div className="grid grid-cols-3 gap-4">
                         <div className="space-y-2">
                           <Label>MRP (₹) *</Label>
-                          <Input type="number" placeholder="0.00" required />
+                          <Input type="number" placeholder="0.00" value={formData.mrp} onChange={e => setFormData(f => ({ ...f, mrp: e.target.value }))} className={formErrors.mrp ? 'border-destructive' : ''} />
+                          {formErrors.mrp && <p className="text-xs text-destructive">{formErrors.mrp}</p>}
                         </div>
                         <div className="space-y-2">
                           <Label>Base Price (₹) *</Label>
-                          <Input type="number" placeholder="0.00" required />
+                          <Input type="number" placeholder="0.00" value={formData.basePrice} onChange={e => setFormData(f => ({ ...f, basePrice: e.target.value }))} className={formErrors.basePrice ? 'border-destructive' : ''} />
+                          {formErrors.basePrice && <p className="text-xs text-destructive">{formErrors.basePrice}</p>}
                         </div>
                         <div className="space-y-2">
                           <Label>GST % *</Label>
-                          <Select>
-                            <SelectTrigger><SelectValue placeholder="Select GST" /></SelectTrigger>
+                          <Select value={formData.gst} onValueChange={v => setFormData(f => ({ ...f, gst: v }))}>
+                            <SelectTrigger className={formErrors.gst ? 'border-destructive' : ''}><SelectValue placeholder="Select GST" /></SelectTrigger>
                             <SelectContent>
                               {[0, 5, 12, 18, 28].map(g => (
                                 <SelectItem key={g} value={String(g)}>{g}%</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
+                          {formErrors.gst && <p className="text-xs text-destructive">{formErrors.gst}</p>}
                         </div>
                       </div>
                     </div>
@@ -300,8 +343,8 @@ export default function Products() {
                     </div>
 
                     <div className="flex justify-end gap-2 pt-4">
-                      <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                      <Button type="submit">Create Product</Button>
+                      <Button type="button" variant="outline" onClick={() => { setIsAddDialogOpen(false); setFormErrors({}); }}>Cancel</Button>
+                      <Button type="submit" disabled={!isFormValid}>Create Product</Button>
                     </div>
                   </form>
                 </TabsContent>
