@@ -1,17 +1,27 @@
 import { useState, useMemo } from 'react';
-import { mockSettlements, portalConfigs } from '@/services/mockData';
+import { mockSettlements, mockOrders, portalConfigs } from '@/services/mockData';
 import { Portal, SettlementStatus } from '@/types';
 import { PortalFilter } from '@/components/dashboard/PortalFilter';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CreditCard, CheckCircle, Clock, AlertTriangle, TrendingUp, Percent } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import {
+  CreditCard, CheckCircle, Clock, AlertTriangle, TrendingUp, Percent,
+  PieChart as PieChartIcon, BarChart3, Landmark, ArrowLeftRight, Split,
+  CheckCircle2, Wallet, Receipt, Building2, ShoppingCart
+} from 'lucide-react';
 import { DateFilter, ExportButton, useRowSelection, SelectAllCheckbox, RowCheckbox } from '@/components/TableEnhancements';
 import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
 import OrderPaymentSettlement from '@/components/settlements/OrderPaymentSettlement';
 import LandingCostAnalysis from '@/components/settlements/LandingCostAnalysis';
+import {
+  ResponsiveContainer, PieChart, Pie, Cell, Tooltip,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  LineChart, Line, Legend, LabelList
+} from 'recharts';
 
 const settlementStatusConfig: Record<SettlementStatus, { label: string; color: string; icon: React.ElementType }> = {
   pending: { label: 'Pending', color: 'bg-warning/10 text-warning', icon: Clock },
@@ -19,7 +29,6 @@ const settlementStatusConfig: Record<SettlementStatus, { label: string; color: s
   delayed: { label: 'Delayed', color: 'bg-destructive/10 text-destructive', icon: AlertTriangle },
 };
 
-// Mock individual order settlements
 const mockOrderSettlements = [
   { orderId: 'ORD-2024-001', portal: 'amazon' as Portal, amount: 2999, fees: 150, commission: 450, net: 2399, status: 'completed' as SettlementStatus },
   { orderId: 'ORD-2024-002', portal: 'flipkart' as Portal, amount: 4197, fees: 210, commission: 630, net: 3357, status: 'completed' as SettlementStatus },
@@ -31,12 +40,63 @@ const mockOrderSettlements = [
   { orderId: 'ORD-2024-008', portal: 'flipkart' as Portal, amount: 5998, fees: 300, commission: 900, net: 4798, status: 'pending' as SettlementStatus },
 ];
 
+const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
+
+// Mock expense data
+const expenseCategories = [
+  { name: 'Shipping', value: 45000, color: COLORS[0] },
+  { name: 'Commission', value: 38000, color: COLORS[1] },
+  { name: 'Returns', value: 12000, color: COLORS[2] },
+  { name: 'Packaging', value: 8500, color: COLORS[3] },
+  { name: 'Marketing', value: 15000, color: COLORS[4] },
+];
+
+const taxSplit = { cgst: 28500, sgst: 28500, igst: 14200 };
+const totalTax = taxSplit.cgst + taxSplit.sgst + taxSplit.igst;
+
+// Mock revenue vs cost trend
+const revenueCostTrend = [
+  { period: 'Week 1', revenue: 185000, cost: 128000, margin: 30.8 },
+  { period: 'Week 2', revenue: 210000, cost: 142000, margin: 32.4 },
+  { period: 'Week 3', revenue: 195000, cost: 135000, margin: 30.8 },
+  { period: 'Week 4', revenue: 240000, cost: 155000, margin: 35.4 },
+];
+
+// Reconciliation discrepancy trend
+const reconTrend = [
+  { period: 'Jan', mismatchCount: 12, discrepancyAmt: 4500 },
+  { period: 'Feb', mismatchCount: 8, discrepancyAmt: 2800 },
+  { period: 'Mar', mismatchCount: 15, discrepancyAmt: 6200 },
+  { period: 'Apr', mismatchCount: 6, discrepancyAmt: 1900 },
+  { period: 'May', mismatchCount: 10, discrepancyAmt: 3700 },
+  { period: 'Jun', mismatchCount: 4, discrepancyAmt: 1200 },
+];
+
+// B2B vs B2C
+const b2bValue = 320000;
+const b2cValue = 480000;
+const salesSplit = [
+  { name: 'B2B', value: b2bValue },
+  { name: 'B2C', value: b2cValue },
+];
+
+// Bank vs Ecom
+const bankTotal = 756000;
+const ecomTotal = 742500;
+const bankEcomDiff = bankTotal - ecomTotal;
+
+function SectionBadge() {
+  return <Badge variant="outline" className="gap-1 text-[10px] border-success/30 text-success"><CheckCircle2 className="w-3 h-3" />Updated</Badge>;
+}
+
 export default function Settlements() {
   const [selectedPortal, setSelectedPortal] = useState<Portal | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState('30days');
-  const [viewTab, setViewTab] = useState('batch');
+  const [viewTab, setViewTab] = useState('overview');
   const [globalDateRange, setGlobalDateRange] = useState<DateRange>({ from: undefined, to: undefined });
+  const [trendView, setTrendView] = useState<'weekly' | 'monthly'>('weekly');
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState('all');
 
   const filteredSettlements = useMemo(() => {
     return mockSettlements.filter(settlement => {
@@ -69,6 +129,19 @@ export default function Settlements() {
     };
   }, [selectedPortal]);
 
+  const paymentBatches = useMemo(() => {
+    const upcoming = mockSettlements.filter(s => s.status === 'pending');
+    const settled = mockSettlements.filter(s => s.status === 'completed');
+    const pendingS = mockSettlements.filter(s => s.status === 'delayed');
+    return {
+      upcoming: { count: upcoming.length, value: upcoming.reduce((s, i) => s + i.netAmount, 0) },
+      settled: { count: settled.length, value: settled.reduce((s, i) => s + i.netAmount, 0) },
+      pending: { count: pendingS.length, value: pendingS.reduce((s, i) => s + i.netAmount, 0) },
+    };
+  }, []);
+
+  const totalExpense = expenseCategories.reduce((s, e) => s + e.value, 0);
+
   const formatCurrency = (value: number) => {
     if (value >= 100000) return `₹${(value / 100000).toFixed(2)}L`;
     if (value >= 1000) return `₹${(value / 1000).toFixed(1)}K`;
@@ -81,23 +154,19 @@ export default function Settlements() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Payments & Settlements</h1>
-          <p className="text-muted-foreground">Track portal-wise settlements and payment cycles</p>
+          <h1 className="text-2xl font-bold text-foreground">Financial Dashboard</h1>
+          <p className="text-muted-foreground">Revenue, expenses, settlements & reconciliation overview</p>
         </div>
-        <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
-        <ExportButton label={activeSelection.count > 0 ? undefined : `Export – ${dateLabel}`} selectedCount={activeSelection.count} />
+        <div className="flex items-center gap-2 flex-wrap">
+          <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
+          <ExportButton label={activeSelection.count > 0 ? undefined : `Export – ${dateLabel}`} selectedCount={activeSelection.count} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="bg-card"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-primary/10"><CreditCard className="w-5 h-5 text-primary" /></div><div><p className="text-xl font-bold">{formatCurrency(stats.totalAmount)}</p><p className="text-xs text-muted-foreground">Gross Amount</p></div></div></CardContent></Card>
-        <Card className="bg-card"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-success/10"><TrendingUp className="w-5 h-5 text-success" /></div><div><p className="text-xl font-bold">{formatCurrency(stats.totalNet)}</p><p className="text-xs text-muted-foreground">Net Amount</p></div></div></CardContent></Card>
-        <Card className="bg-card"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-accent/10"><Percent className="w-5 h-5 text-accent" /></div><div><p className="text-xl font-bold">{formatCurrency(stats.totalCommission)}</p><p className="text-xs text-muted-foreground">Commission</p></div></div></CardContent></Card>
-        <Card className="bg-card"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-warning/10"><Clock className="w-5 h-5 text-warning" /></div><div><p className="text-xl font-bold">{formatCurrency(stats.pending)}</p><p className="text-xs text-muted-foreground">Pending</p></div></div></CardContent></Card>
-        <Card className="bg-card"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-destructive/10"><AlertTriangle className="w-5 h-5 text-destructive" /></div><div><p className="text-xl font-bold">{stats.delayed}</p><p className="text-xs text-muted-foreground">Delayed</p></div></div></CardContent></Card>
-      </div>
-
+      {/* Filter Controls */}
       <Card>
         <CardContent className="p-4">
           <div className="flex flex-col lg:flex-row gap-4">
@@ -110,17 +179,335 @@ export default function Settlements() {
                 {Object.entries(settlementStatusConfig).map(([key, config]) => (<SelectItem key={key} value={key}>{config.label}</SelectItem>))}
               </SelectContent>
             </Select>
+            <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
+              <SelectTrigger className="w-[180px]"><SelectValue placeholder="Payment Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Payments</SelectItem>
+                <SelectItem value="settled">Settled</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="failed">Failed</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
 
+      {/* KPI Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        {[
+          { icon: CreditCard, value: formatCurrency(stats.totalAmount), label: 'Gross Amount', bg: 'bg-primary/10', fg: 'text-primary' },
+          { icon: TrendingUp, value: formatCurrency(stats.totalNet), label: 'Net Amount', bg: 'bg-success/10', fg: 'text-success' },
+          { icon: Percent, value: formatCurrency(stats.totalCommission), label: 'Commission', bg: 'bg-accent/10', fg: 'text-accent-foreground' },
+          { icon: Clock, value: formatCurrency(stats.pending), label: 'Pending', bg: 'bg-warning/10', fg: 'text-warning' },
+          { icon: AlertTriangle, value: String(stats.delayed), label: 'Delayed', bg: 'bg-destructive/10', fg: 'text-destructive' },
+        ].map((kpi, i) => (
+          <Card key={i} className="bg-card">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${kpi.bg}`}><kpi.icon className={`w-5 h-5 ${kpi.fg}`} /></div>
+                <div><p className="text-xl font-bold">{kpi.value}</p><p className="text-xs text-muted-foreground">{kpi.label}</p></div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* ===== BLOCK 1: Revenue & Cost Trend ===== */}
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg">Revenue vs Cost Trend</CardTitle>
+              <SectionBadge />
+            </div>
+            <div className="flex gap-1">
+              {(['weekly', 'monthly'] as const).map(v => (
+                <button key={v} onClick={() => setTrendView(v)} className={`px-3 py-1 text-xs rounded-md transition-colors ${trendView === v ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>
+                  {v === 'weekly' ? 'Weekly' : 'Monthly'}
+                </button>
+              ))}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={revenueCostTrend}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                <XAxis dataKey="period" tick={{ fontSize: 12 }} className="fill-muted-foreground" />
+                <YAxis tickFormatter={v => `₹${(v / 1000).toFixed(0)}K`} tick={{ fontSize: 12 }} className="fill-muted-foreground" />
+                <Tooltip formatter={(v: number) => `₹${v.toLocaleString()}`} contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }} />
+                <Legend />
+                <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} name="Revenue" />
+                <Line type="monotone" dataKey="cost" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 4 }} name="Cost" />
+                <Line type="monotone" dataKey="margin" stroke="hsl(var(--chart-3))" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 3 }} name="Margin %" yAxisId={0} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ===== BLOCK 2: Expense & Tax Overview ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Expense Analysis */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg">Expense Analysis</CardTitle>
+              <SectionBadge />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              {/* Pie */}
+              <div>
+                <p className="text-xs text-muted-foreground mb-2 font-medium">Category %</p>
+                <div className="h-[180px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={expenseCategories} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={35} outerRadius={70} paddingAngle={2}>
+                        {expenseCategories.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip formatter={(v: number) => `₹${v.toLocaleString()}`} contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 11 }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {expenseCategories.map((e, i) => (
+                    <div key={i} className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                      <span className="w-2 h-2 rounded-full shrink-0" style={{ background: COLORS[i] }} />
+                      {e.name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Bar */}
+              <div>
+                <p className="text-xs text-muted-foreground mb-2 font-medium">Amount Comparison</p>
+                <div className="h-[180px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={expenseCategories} layout="vertical">
+                      <XAxis type="number" tickFormatter={v => `₹${(v / 1000).toFixed(0)}K`} tick={{ fontSize: 10 }} className="fill-muted-foreground" />
+                      <YAxis type="category" dataKey="name" width={70} tick={{ fontSize: 10 }} className="fill-muted-foreground" />
+                      <Tooltip formatter={(v: number) => `₹${v.toLocaleString()}`} contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 11 }} />
+                      <Bar dataKey="value" radius={[0, 4, 4, 0]} fill="hsl(var(--primary))">
+                        {expenseCategories.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                        <LabelList dataKey="value" position="right" formatter={(v: number) => `₹${(v / 1000).toFixed(1)}K`} className="fill-foreground" style={{ fontSize: 10 }} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+            <Card className="mt-4 bg-muted/30 border-0">
+              <CardContent className="p-3 flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-destructive/10"><Receipt className="w-5 h-5 text-destructive" /></div>
+                <div><p className="text-lg font-bold">{formatCurrency(totalExpense)}</p><p className="text-xs text-muted-foreground">Total Expenses</p></div>
+              </CardContent>
+            </Card>
+          </CardContent>
+        </Card>
+
+        {/* Tax Split */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg">Tax Split Contribution</CardTitle>
+              <SectionBadge />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {[
+              { label: 'CGST', value: taxSplit.cgst, pct: ((taxSplit.cgst / totalTax) * 100).toFixed(1), color: 'bg-primary' },
+              { label: 'SGST', value: taxSplit.sgst, pct: ((taxSplit.sgst / totalTax) * 100).toFixed(1), color: 'bg-chart-2' },
+              { label: 'IGST', value: taxSplit.igst, pct: ((taxSplit.igst / totalTax) * 100).toFixed(1), color: 'bg-chart-3' },
+            ].map((t, i) => (
+              <Card key={i} className="bg-muted/30 border-0">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold text-sm">{t.label}</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="text-xs">{t.pct}%</Badge>
+                      <span className="font-bold text-sm">{formatCurrency(t.value)}</span>
+                    </div>
+                  </div>
+                  <Progress value={parseFloat(t.pct)} className="h-2" />
+                </CardContent>
+              </Card>
+            ))}
+            <div className="text-center pt-2">
+              <p className="text-2xl font-bold">{formatCurrency(totalTax)}</p>
+              <p className="text-xs text-muted-foreground">Total Tax Collected</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ===== BLOCK 3: Settlement & Reconciliation ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Payment Batch Status */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg">Payment Batch Status</CardTitle>
+              <SectionBadge />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {[
+              { label: 'Upcoming Batches', count: paymentBatches.upcoming.count, value: paymentBatches.upcoming.value, icon: Clock, bg: 'bg-warning/10', fg: 'text-warning' },
+              { label: 'Settled Batches', count: paymentBatches.settled.count, value: paymentBatches.settled.value, icon: CheckCircle, bg: 'bg-success/10', fg: 'text-success' },
+              { label: 'Pending Settlements', count: paymentBatches.pending.count, value: paymentBatches.pending.value, icon: AlertTriangle, bg: 'bg-destructive/10', fg: 'text-destructive' },
+            ].map((b, i) => (
+              <Card key={i} className="bg-muted/30 border-0">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${b.bg}`}><b.icon className={`w-5 h-5 ${b.fg}`} /></div>
+                    <div>
+                      <p className="font-semibold text-sm">{b.label}</p>
+                      <p className="text-xs text-muted-foreground">{b.count} batches</p>
+                    </div>
+                  </div>
+                  <p className="text-lg font-bold">{formatCurrency(b.value)}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Reconciliation Discrepancy Trend */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg">Reconciliation Discrepancy Trend</CardTitle>
+              <SectionBadge />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={reconTrend}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                  <XAxis dataKey="period" tick={{ fontSize: 12 }} className="fill-muted-foreground" />
+                  <YAxis yAxisId="left" tick={{ fontSize: 12 }} className="fill-muted-foreground" />
+                  <YAxis yAxisId="right" orientation="right" tickFormatter={v => `₹${(v / 1000).toFixed(1)}K`} tick={{ fontSize: 12 }} className="fill-muted-foreground" />
+                  <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }} />
+                  <Legend />
+                  <Line yAxisId="left" type="monotone" dataKey="mismatchCount" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 4 }} name="Mismatches" />
+                  <Line yAxisId="right" type="monotone" dataKey="discrepancyAmt" stroke="hsl(var(--warning))" strokeWidth={2} dot={{ r: 4 }} name="Discrepancy ₹" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ===== BLOCK 4: Sales Split ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* B2B vs B2C */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg">B2B vs B2C Sales Split</CardTitle>
+              <SectionBadge />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-6">
+              <div className="h-[180px] w-[180px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={salesSplit} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3}>
+                      <Cell fill="hsl(var(--primary))" />
+                      <Cell fill="hsl(var(--chart-4))" />
+                    </Pie>
+                    <Tooltip formatter={(v: number) => `₹${v.toLocaleString()}`} contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 11 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-4 flex-1">
+                {[
+                  { label: 'B2B Sales', value: b2bValue, pct: ((b2bValue / (b2bValue + b2cValue)) * 100).toFixed(1), color: 'bg-primary', icon: Building2 },
+                  { label: 'B2C Sales', value: b2cValue, pct: ((b2cValue / (b2bValue + b2cValue)) * 100).toFixed(1), color: 'bg-chart-4', icon: ShoppingCart },
+                ].map((s, i) => (
+                  <div key={i} className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <s.icon className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">{s.label}</span>
+                      </div>
+                      <span className="font-bold">{formatCurrency(s.value)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Progress value={parseFloat(s.pct)} className="h-2 flex-1" />
+                      <Badge variant="secondary" className="text-xs">{s.pct}%</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bank vs E-Commerce Reconciliation */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-lg">Bank vs E-Commerce Reconciliation</CardTitle>
+              <SectionBadge />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Card className="bg-muted/30 border-0">
+                <CardContent className="p-4 text-center">
+                  <Landmark className="w-6 h-6 mx-auto mb-2 text-primary" />
+                  <p className="text-lg font-bold">{formatCurrency(bankTotal)}</p>
+                  <p className="text-xs text-muted-foreground">Bank Payments</p>
+                </CardContent>
+              </Card>
+              <Card className="bg-muted/30 border-0">
+                <CardContent className="p-4 text-center">
+                  <ShoppingCart className="w-6 h-6 mx-auto mb-2 text-chart-4" />
+                  <p className="text-lg font-bold">{formatCurrency(ecomTotal)}</p>
+                  <p className="text-xs text-muted-foreground">E-Commerce Settlements</p>
+                </CardContent>
+              </Card>
+            </div>
+            <Card className={`border-0 ${bankEcomDiff !== 0 ? 'bg-destructive/5' : 'bg-success/5'}`}>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <ArrowLeftRight className={`w-5 h-5 ${bankEcomDiff !== 0 ? 'text-destructive' : 'text-success'}`} />
+                  <div>
+                    <p className="font-semibold text-sm">Difference</p>
+                    <p className="text-xs text-muted-foreground">{bankEcomDiff !== 0 ? 'Mismatch detected' : 'Fully reconciled'}</p>
+                  </div>
+                </div>
+                <p className={`text-xl font-bold ${bankEcomDiff !== 0 ? 'text-destructive' : 'text-success'}`}>
+                  {bankEcomDiff >= 0 ? '+' : ''}{formatCurrency(Math.abs(bankEcomDiff))}
+                </p>
+              </CardContent>
+            </Card>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ===== Settlement Tables ===== */}
       <Tabs value={viewTab} onValueChange={setViewTab}>
         <TabsList>
-          <TabsTrigger value="batch">Batch Settlement View</TabsTrigger>
-          <TabsTrigger value="individual">Individual Order Settlement</TabsTrigger>
-          <TabsTrigger value="detailed">Order Payment Settlement</TabsTrigger>
-          <TabsTrigger value="landing-cost">Landing Cost Analysis</TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="batch">Batch Settlement</TabsTrigger>
+          <TabsTrigger value="individual">Individual Orders</TabsTrigger>
+          <TabsTrigger value="detailed">Order Payment</TabsTrigger>
+          <TabsTrigger value="landing-cost">Landing Cost</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="overview">
+          <div className="text-center py-8 text-muted-foreground">
+            <PieChartIcon className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <p className="text-sm">Select a specific tab above to view detailed settlement data.</p>
+          </div>
+        </TabsContent>
 
         <TabsContent value="batch">
           <Card>
