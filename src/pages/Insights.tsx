@@ -3,17 +3,35 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   TrendingUp, TrendingDown, IndianRupee, Users, ShoppingCart, Package,
   BarChart3, HeadphonesIcon, Clock, AlertTriangle, Activity, Zap,
-  ArrowUpRight, ArrowDownRight, ShieldAlert, CheckCircle2,
+  ArrowUpRight, ArrowDownRight, ShieldAlert, CheckCircle2, Filter,
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LabelList,
 } from 'recharts';
 
 const fmt = (n: number) => '₹' + n.toLocaleString('en-IN');
+
+// Channel options
+const channels = [
+  { id: 'all', name: 'All Channels' },
+  { id: 'amazon', name: 'Amazon' },
+  { id: 'flipkart', name: 'Flipkart' },
+  { id: 'meesho', name: 'Meesho' },
+  { id: 'website', name: 'Website' },
+  { id: 'blinkit', name: 'Blinkit' },
+];
+
+// Sort options
+const sortOptions = [
+  { id: 'date', name: 'Date' },
+  { id: 'revenue', name: 'Revenue' },
+  { id: 'units', name: 'Units' },
+];
 
 // ---- Mock data ----
 const dailySales = Array.from({ length: 14 }, (_, i) => ({
@@ -66,6 +84,41 @@ const opsData = {
   ],
 };
 
+// ---- Filter bar component ----
+function InsightsFilterBar({ channel, onChannelChange, sortBy, onSortChange }: {
+  channel: string; onChannelChange: (v: string) => void;
+  sortBy: string; onSortChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Filter className="w-3.5 h-3.5" />
+        <span>Filters:</span>
+      </div>
+      <Select value={channel} onValueChange={onChannelChange}>
+        <SelectTrigger className="w-[160px] h-8 text-xs">
+          <SelectValue placeholder="Channel" />
+        </SelectTrigger>
+        <SelectContent>
+          {channels.map(c => (
+            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select value={sortBy} onValueChange={onSortChange}>
+        <SelectTrigger className="w-[130px] h-8 text-xs">
+          <SelectValue placeholder="Sort by" />
+        </SelectTrigger>
+        <SelectContent>
+          {sortOptions.map(s => (
+            <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 // ---- Stat card component ----
 function StatCard({ icon: Icon, label, value, change, variant = 'default' }: {
   icon: React.ElementType; label: string; value: string; change?: number; variant?: 'default' | 'success' | 'warning' | 'danger';
@@ -97,10 +150,21 @@ function StatCard({ icon: Icon, label, value, change, variant = 'default' }: {
 
 // ---- Executive Dashboard ----
 function ExecutiveDashboard() {
-  const totalRevenue = channelRevenue.reduce((s, c) => s + c.value, 0);
+  const [channel, setChannel] = useState('all');
+  const [sortBy, setSortBy] = useState('date');
+
+  const filteredChannelRevenue = useMemo(() => {
+    let data = channel === 'all' ? channelRevenue : channelRevenue.filter(c => c.name.toLowerCase() === channel);
+    if (sortBy === 'revenue') data = [...data].sort((a, b) => b.value - a.value);
+    return data;
+  }, [channel, sortBy]);
+
+  const totalRevenue = filteredChannelRevenue.reduce((s, c) => s + c.value, 0);
   const topChannel = channelRevenue.reduce((a, b) => a.value > b.value ? a : b);
+
   return (
     <div className="space-y-6">
+      <InsightsFilterBar channel={channel} onChannelChange={setChannel} sortBy={sortBy} onSortChange={setSortBy} />
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <StatCard icon={IndianRupee} label="Total Revenue" value={fmt(totalRevenue)} change={14.2} variant="success" />
         <StatCard icon={TrendingUp} label="Growth %" value="14.2%" change={3.1} variant="success" />
@@ -111,7 +175,12 @@ function ExecutiveDashboard() {
       </div>
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
-          <CardHeader><CardTitle className="text-base">Revenue Trend</CardTitle></CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-base">Revenue Trend</CardTitle>
+            <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/20 gap-0.5">
+              <CheckCircle2 className="w-2.5 h-2.5" /> Updated
+            </Badge>
+          </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={dailySales}>
@@ -129,8 +198,8 @@ function ExecutiveDashboard() {
           <CardContent>
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
-                <Pie data={channelRevenue} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                  {channelRevenue.map((e, i) => <Cell key={i} fill={e.color} />)}
+                <Pie data={filteredChannelRevenue} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                  {filteredChannelRevenue.map((e, i) => <Cell key={i} fill={e.color} />)}
                 </Pie>
                 <Tooltip formatter={(v: number) => fmt(v)} />
               </PieChart>
@@ -144,10 +213,22 @@ function ExecutiveDashboard() {
 
 // ---- Sales Dashboard ----
 function SalesDashboard() {
+  const [channel, setChannel] = useState('all');
+  const [sortBy, setSortBy] = useState('date');
+
+  const sortedProducts = useMemo(() => {
+    let data = [...topProducts];
+    if (sortBy === 'revenue') data.sort((a, b) => b.revenue - a.revenue);
+    else if (sortBy === 'units') data.sort((a, b) => b.orders - a.orders);
+    return data;
+  }, [sortBy]);
+
   const totalOrders = dailySales.reduce((s, d) => s + d.orders, 0);
   const totalRev = dailySales.reduce((s, d) => s + d.revenue, 0);
+
   return (
     <div className="space-y-6">
+      <InsightsFilterBar channel={channel} onChannelChange={setChannel} sortBy={sortBy} onSortChange={setSortBy} />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard icon={IndianRupee} label="Period Revenue" value={fmt(totalRev)} change={11.4} variant="success" />
         <StatCard icon={ShoppingCart} label="Total Orders" value={totalOrders.toString()} change={7.2} />
@@ -155,7 +236,12 @@ function SalesDashboard() {
         <StatCard icon={Package} label="Avg Order Value" value={fmt(Math.round(totalRev / totalOrders))} change={2.1} />
       </div>
       <Card>
-        <CardHeader><CardTitle className="text-base">Daily Sales</CardTitle></CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-base">Daily Sales</CardTitle>
+          <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/20 gap-0.5">
+            <CheckCircle2 className="w-2.5 h-2.5" /> Updated
+          </Badge>
+        </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={dailySales}>
@@ -164,7 +250,9 @@ function SalesDashboard() {
               <YAxis tick={{ fontSize: 11 }} className="fill-muted-foreground" />
               <Tooltip formatter={(v: number) => fmt(v)} />
               <Legend />
-              <Bar dataKey="revenue" name="Revenue" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="revenue" name="Revenue" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]}>
+                <LabelList dataKey="revenue" position="top" className="fill-muted-foreground" fontSize={9} formatter={(v: number) => `₹${(v / 1000).toFixed(0)}K`} />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -173,7 +261,7 @@ function SalesDashboard() {
         <CardHeader><CardTitle className="text-base">Top Products</CardTitle></CardHeader>
         <CardContent className="p-0">
           <div className="divide-y">
-            {topProducts.map(p => (
+            {sortedProducts.map(p => (
               <div key={p.name} className="flex items-center justify-between px-6 py-3">
                 <div>
                   <p className="font-medium text-sm">{p.name}</p>
@@ -196,9 +284,13 @@ function SalesDashboard() {
 
 // ---- Support Dashboard ----
 function SupportDashboard() {
+  const [channel, setChannel] = useState('all');
+  const [sortBy, setSortBy] = useState('date');
   const totalTickets = ticketData.reduce((s, t) => s + t.count, 0);
+
   return (
     <div className="space-y-6">
+      <InsightsFilterBar channel={channel} onChannelChange={setChannel} sortBy={sortBy} onSortChange={setSortBy} />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard icon={HeadphonesIcon} label="Open Tickets" value={totalTickets.toString()} change={-6} variant="warning" />
         <StatCard icon={Clock} label="Avg Response Time" value="2.4 hrs" change={-12} variant="success" />
@@ -232,10 +324,14 @@ function SupportDashboard() {
 
 // ---- Financial Dashboard ----
 function FinancialDashboard() {
+  const [channel, setChannel] = useState('all');
+  const [sortBy, setSortBy] = useState('date');
   const latest = profitTrend[profitTrend.length - 1];
   const marginWarning = latest.margin < 25;
+
   return (
     <div className="space-y-6">
+      <InsightsFilterBar channel={channel} onChannelChange={setChannel} sortBy={sortBy} onSortChange={setSortBy} />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard icon={IndianRupee} label="Revenue (Latest)" value={fmt(latest.revenue)} change={8.3} variant="success" />
         <StatCard icon={TrendingDown} label="Total Cost" value={fmt(latest.cost)} change={4.1} variant="warning" />
@@ -254,7 +350,12 @@ function FinancialDashboard() {
         </Card>
       )}
       <Card>
-        <CardHeader><CardTitle className="text-base">Revenue vs Cost Trend</CardTitle></CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-base">Revenue vs Cost Trend</CardTitle>
+          <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/20 gap-0.5">
+            <CheckCircle2 className="w-2.5 h-2.5" /> Updated
+          </Badge>
+        </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={profitTrend}>
@@ -290,8 +391,12 @@ function FinancialDashboard() {
 
 // ---- Operations Dashboard ----
 function OperationsDashboard() {
+  const [channel, setChannel] = useState('all');
+  const [sortBy, setSortBy] = useState('date');
+
   return (
     <div className="space-y-6">
+      <InsightsFilterBar channel={channel} onChannelChange={setChannel} sortBy={sortBy} onSortChange={setSortBy} />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard icon={Zap} label="Automation Rate" value={`${opsData.automationRate}%`} change={5} variant="success" />
         <StatCard icon={Activity} label="Workflow Load" value={`${opsData.workflowLoad}%`} variant={opsData.workflowLoad > 80 ? 'danger' : 'default'} />
@@ -327,7 +432,12 @@ function OperationsDashboard() {
         </CardContent>
       </Card>
       <Card>
-        <CardHeader><CardTitle className="text-base">Order Processing Volume</CardTitle></CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-base">Order Processing Volume</CardTitle>
+          <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/20 gap-0.5">
+            <CheckCircle2 className="w-2.5 h-2.5" /> Updated
+          </Badge>
+        </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={dailySales}>
@@ -335,7 +445,9 @@ function OperationsDashboard() {
               <XAxis dataKey="day" tick={{ fontSize: 11 }} className="fill-muted-foreground" />
               <YAxis tick={{ fontSize: 11 }} className="fill-muted-foreground" />
               <Tooltip />
-              <Bar dataKey="orders" name="Orders" fill="hsl(var(--chart-4))" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="orders" name="Orders" fill="hsl(var(--chart-4))" radius={[4, 4, 0, 0]}>
+                <LabelList dataKey="orders" position="top" className="fill-muted-foreground" fontSize={9} />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -348,17 +460,20 @@ function OperationsDashboard() {
 export default function Insights() {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Insights</h1>
-        <p className="text-muted-foreground">Business intelligence dashboards</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Insights</h1>
+          <p className="text-muted-foreground">Business intelligence dashboards</p>
+        </div>
+        <Badge variant="outline" className="text-xs font-mono">v1.2</Badge>
       </div>
       <Tabs defaultValue="executive" className="space-y-6">
-        <TabsList className="flex-wrap h-auto gap-1">
-          <TabsTrigger value="executive" className="gap-1.5"><BarChart3 className="w-3.5 h-3.5" />Executive</TabsTrigger>
-          <TabsTrigger value="sales" className="gap-1.5"><ShoppingCart className="w-3.5 h-3.5" />Sales</TabsTrigger>
-          <TabsTrigger value="support" className="gap-1.5"><HeadphonesIcon className="w-3.5 h-3.5" />Support</TabsTrigger>
-          <TabsTrigger value="financial" className="gap-1.5"><IndianRupee className="w-3.5 h-3.5" />Financial</TabsTrigger>
-          <TabsTrigger value="operations" className="gap-1.5"><Activity className="w-3.5 h-3.5" />Operations</TabsTrigger>
+        <TabsList className="flex-wrap h-auto gap-1 bg-muted/60 p-1">
+          <TabsTrigger value="executive" className="gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"><BarChart3 className="w-3.5 h-3.5" />Executive</TabsTrigger>
+          <TabsTrigger value="sales" className="gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"><ShoppingCart className="w-3.5 h-3.5" />Sales</TabsTrigger>
+          <TabsTrigger value="support" className="gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"><HeadphonesIcon className="w-3.5 h-3.5" />Support</TabsTrigger>
+          <TabsTrigger value="financial" className="gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"><IndianRupee className="w-3.5 h-3.5" />Financial</TabsTrigger>
+          <TabsTrigger value="operations" className="gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"><Activity className="w-3.5 h-3.5" />Operations</TabsTrigger>
         </TabsList>
         <TabsContent value="executive"><ExecutiveDashboard /></TabsContent>
         <TabsContent value="sales"><SalesDashboard /></TabsContent>
