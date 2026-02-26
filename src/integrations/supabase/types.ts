@@ -24,6 +24,7 @@ export type Database = {
           module: string
           user_id: string | null
           user_name: string | null
+          vendor_id: string | null
         }
         Insert: {
           action: string
@@ -34,6 +35,7 @@ export type Database = {
           module: string
           user_id?: string | null
           user_name?: string | null
+          vendor_id?: string | null
         }
         Update: {
           action?: string
@@ -44,6 +46,7 @@ export type Database = {
           module?: string
           user_id?: string | null
           user_name?: string | null
+          vendor_id?: string | null
         }
         Relationships: []
       }
@@ -62,6 +65,7 @@ export type Database = {
           sgst: number | null
           status: string | null
           total_amount: number
+          vendor_id: string | null
         }
         Insert: {
           cgst?: number | null
@@ -77,6 +81,7 @@ export type Database = {
           sgst?: number | null
           status?: string | null
           total_amount?: number
+          vendor_id?: string | null
         }
         Update: {
           cgst?: number | null
@@ -92,6 +97,7 @@ export type Database = {
           sgst?: number | null
           status?: string | null
           total_amount?: number
+          vendor_id?: string | null
         }
         Relationships: [
           {
@@ -118,6 +124,7 @@ export type Database = {
           sgst: number | null
           status: string | null
           total_amount: number
+          vendor_id: string | null
         }
         Insert: {
           cgst?: number | null
@@ -133,6 +140,7 @@ export type Database = {
           sgst?: number | null
           status?: string | null
           total_amount?: number
+          vendor_id?: string | null
         }
         Update: {
           cgst?: number | null
@@ -148,6 +156,7 @@ export type Database = {
           sgst?: number | null
           status?: string | null
           total_amount?: number
+          vendor_id?: string | null
         }
         Relationships: [
           {
@@ -206,6 +215,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           due_date: string | null
+          finalized: boolean
           gstin: string | null
           id: string
           igst: number | null
@@ -219,12 +229,14 @@ export type Database = {
           total_amount: number
           type: string
           updated_at: string
+          vendor_id: string | null
         }
         Insert: {
           cgst?: number | null
           created_at?: string
           created_by?: string | null
           due_date?: string | null
+          finalized?: boolean
           gstin?: string | null
           id?: string
           igst?: number | null
@@ -238,12 +250,14 @@ export type Database = {
           total_amount?: number
           type?: string
           updated_at?: string
+          vendor_id?: string | null
         }
         Update: {
           cgst?: number | null
           created_at?: string
           created_by?: string | null
           due_date?: string | null
+          finalized?: boolean
           gstin?: string | null
           id?: string
           igst?: number | null
@@ -257,6 +271,7 @@ export type Database = {
           total_amount?: number
           type?: string
           updated_at?: string
+          vendor_id?: string | null
         }
         Relationships: [
           {
@@ -284,6 +299,7 @@ export type Database = {
           status: Database["public"]["Enums"]["lead_status"]
           updated_at: string
           value: number | null
+          vendor_id: string | null
         }
         Insert: {
           assigned_to?: string | null
@@ -300,6 +316,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string
           value?: number | null
+          vendor_id?: string | null
         }
         Update: {
           assigned_to?: string | null
@@ -316,6 +333,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string
           value?: number | null
+          vendor_id?: string | null
         }
         Relationships: []
       }
@@ -458,6 +476,7 @@ export type Database = {
           status: Database["public"]["Enums"]["order_status"]
           total_amount: number
           updated_at: string
+          vendor_id: string | null
           video_captured: boolean | null
           video_quality: string | null
         }
@@ -482,6 +501,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["order_status"]
           total_amount?: number
           updated_at?: string
+          vendor_id?: string | null
           video_captured?: boolean | null
           video_quality?: string | null
         }
@@ -506,6 +526,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["order_status"]
           total_amount?: number
           updated_at?: string
+          vendor_id?: string | null
           video_captured?: boolean | null
           video_quality?: string | null
         }
@@ -528,6 +549,7 @@ export type Database = {
           sku: string
           status: string | null
           updated_at: string
+          vendor_id: string | null
         }
         Insert: {
           base_price?: number
@@ -545,6 +567,7 @@ export type Database = {
           sku: string
           status?: string | null
           updated_at?: string
+          vendor_id?: string | null
         }
         Update: {
           base_price?: number
@@ -562,6 +585,7 @@ export type Database = {
           sku?: string
           status?: string | null
           updated_at?: string
+          vendor_id?: string | null
         }
         Relationships: []
       }
@@ -603,6 +627,7 @@ export type Database = {
           portal: string
           processed_orders: number | null
           status: string | null
+          vendor_id: string | null
         }
         Insert: {
           created_at?: string
@@ -614,6 +639,7 @@ export type Database = {
           portal: string
           processed_orders?: number | null
           status?: string | null
+          vendor_id?: string | null
         }
         Update: {
           created_at?: string
@@ -625,6 +651,7 @@ export type Database = {
           portal?: string
           processed_orders?: number | null
           status?: string | null
+          vendor_id?: string | null
         }
         Relationships: []
       }
@@ -644,6 +671,7 @@ export type Database = {
           resolved_at: string | null
           status: Database["public"]["Enums"]["return_status"]
           updated_at: string
+          vendor_id: string | null
         }
         Insert: {
           claim_status?: string | null
@@ -660,6 +688,7 @@ export type Database = {
           resolved_at?: string | null
           status?: Database["public"]["Enums"]["return_status"]
           updated_at?: string
+          vendor_id?: string | null
         }
         Update: {
           claim_status?: string | null
@@ -676,6 +705,7 @@ export type Database = {
           resolved_at?: string | null
           status?: Database["public"]["Enums"]["return_status"]
           updated_at?: string
+          vendor_id?: string | null
         }
         Relationships: [
           {
@@ -693,6 +723,7 @@ export type Database = {
           commission: number | null
           created_at: string
           id: string
+          locked: boolean
           net_amount: number
           portal: string
           reference_orders: string[] | null
@@ -701,12 +732,14 @@ export type Database = {
           status: Database["public"]["Enums"]["settlement_status"]
           tax: number | null
           updated_at: string
+          vendor_id: string | null
         }
         Insert: {
           amount?: number
           commission?: number | null
           created_at?: string
           id?: string
+          locked?: boolean
           net_amount?: number
           portal: string
           reference_orders?: string[] | null
@@ -715,12 +748,14 @@ export type Database = {
           status?: Database["public"]["Enums"]["settlement_status"]
           tax?: number | null
           updated_at?: string
+          vendor_id?: string | null
         }
         Update: {
           amount?: number
           commission?: number | null
           created_at?: string
           id?: string
+          locked?: boolean
           net_amount?: number
           portal?: string
           reference_orders?: string[] | null
@@ -729,6 +764,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["settlement_status"]
           tax?: number | null
           updated_at?: string
+          vendor_id?: string | null
         }
         Relationships: []
       }
@@ -755,6 +791,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_vendor_data: { Args: { _vendor_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

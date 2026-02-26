@@ -1,6 +1,12 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
+// Helper to get current user id for vendor_id
+async function getCurrentUserId(): Promise<string | null> {
+  const { data } = await supabase.auth.getUser();
+  return data.user?.id ?? null;
+}
+
 // ==================== PRODUCTS ====================
 export const productsDb = {
   async getAll(search?: string) {
@@ -16,7 +22,8 @@ export const productsDb = {
     return data;
   },
   async create(product: TablesInsert<'products'>) {
-    const { data, error } = await supabase.from('products').insert(product).select().single();
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('products').insert({ ...product, vendor_id: userId, created_by: userId }).select().single();
     if (error) throw error;
     return data;
   },
@@ -50,8 +57,12 @@ export const ordersDb = {
     return data;
   },
   async create(order: TablesInsert<'orders'>) {
-    const { data, error } = await supabase.from('orders').insert(order).select().single();
-    if (error) throw error;
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('orders').insert({ ...order, vendor_id: userId, created_by: userId }).select().single();
+    if (error) {
+      if (error.code === '23505') throw new Error('Duplicate order number. This order already exists.');
+      throw error;
+    }
     return data;
   },
   async updateStatus(id: string, status: string) {
@@ -95,6 +106,12 @@ export const returnsDb = {
     if (error) throw error;
     return data;
   },
+  async create(returnData: TablesInsert<'returns'>) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('returns').insert({ ...returnData, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
   async updateStatus(id: string, status: string) {
     const updates: TablesUpdate<'returns'> = { status: status as any };
     if (['closed', 'refund_initiated'].includes(status)) updates.resolved_at = new Date().toISOString();
@@ -114,7 +131,13 @@ export const invoicesDb = {
     return data;
   },
   async create(invoice: TablesInsert<'invoices'>) {
-    const { data, error } = await supabase.from('invoices').insert(invoice).select().single();
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('invoices').insert({ ...invoice, vendor_id: userId, created_by: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async finalize(id: string) {
+    const { data, error } = await supabase.from('invoices').update({ finalized: true } as any).eq('id', id).select().single();
     if (error) throw error;
     return data;
   },
@@ -138,7 +161,8 @@ export const debitNotesDb = {
     return data;
   },
   async create(note: TablesInsert<'debit_notes'>) {
-    const { data, error } = await supabase.from('debit_notes').insert(note).select().single();
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('debit_notes').insert({ ...note, vendor_id: userId, created_by: userId }).select().single();
     if (error) throw error;
     return data;
   },
@@ -152,7 +176,8 @@ export const creditNotesDb = {
     return data;
   },
   async create(note: TablesInsert<'credit_notes'>) {
-    const { data, error } = await supabase.from('credit_notes').insert(note).select().single();
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('credit_notes').insert({ ...note, vendor_id: userId, created_by: userId }).select().single();
     if (error) throw error;
     return data;
   },
@@ -197,7 +222,8 @@ export const leadsDb = {
     return data;
   },
   async create(lead: TablesInsert<'leads'>) {
-    const { data, error } = await supabase.from('leads').insert(lead).select().single();
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('leads').insert({ ...lead, vendor_id: userId, created_by: userId }).select().single();
     if (error) throw error;
     return data;
   },
@@ -240,7 +266,8 @@ export const activityLogsDb = {
     return data;
   },
   async log(entry: TablesInsert<'activity_logs'>) {
-    const { error } = await supabase.from('activity_logs').insert(entry);
+    const userId = await getCurrentUserId();
+    const { error } = await supabase.from('activity_logs').insert({ ...entry, user_id: userId, vendor_id: userId });
     if (error) console.error('Failed to log activity:', error);
   },
 };
@@ -248,7 +275,9 @@ export const activityLogsDb = {
 // ==================== FILE STORAGE ====================
 export const storageService = {
   async upload(bucket: string, path: string, file: File) {
-    const { data, error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
+    const userId = await getCurrentUserId();
+    const vendorPath = userId ? `${userId}/${path}` : path;
+    const { data, error } = await supabase.storage.from(bucket).upload(vendorPath, file, { upsert: true });
     if (error) throw error;
     const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(data.path);
     return urlData.publicUrl;
