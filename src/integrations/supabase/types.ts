@@ -14,16 +14,796 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          module: string
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          module: string
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          module?: string
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: []
+      }
+      credit_notes: {
+        Row: {
+          cgst: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          igst: number | null
+          note_date: string
+          note_number: string
+          order_id: string | null
+          party_name: string
+          reason: string | null
+          sgst: number | null
+          status: string | null
+          total_amount: number
+        }
+        Insert: {
+          cgst?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          igst?: number | null
+          note_date?: string
+          note_number: string
+          order_id?: string | null
+          party_name: string
+          reason?: string | null
+          sgst?: number | null
+          status?: string | null
+          total_amount?: number
+        }
+        Update: {
+          cgst?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          igst?: number | null
+          note_date?: string
+          note_number?: string
+          order_id?: string | null
+          party_name?: string
+          reason?: string | null
+          sgst?: number | null
+          status?: string | null
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_notes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      debit_notes: {
+        Row: {
+          cgst: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          igst: number | null
+          note_date: string
+          note_number: string
+          order_id: string | null
+          party_name: string
+          reason: string | null
+          sgst: number | null
+          status: string | null
+          total_amount: number
+        }
+        Insert: {
+          cgst?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          igst?: number | null
+          note_date?: string
+          note_number: string
+          order_id?: string | null
+          party_name: string
+          reason?: string | null
+          sgst?: number | null
+          status?: string | null
+          total_amount?: number
+        }
+        Update: {
+          cgst?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          igst?: number | null
+          note_date?: string
+          note_number?: string
+          order_id?: string | null
+          party_name?: string
+          reason?: string | null
+          sgst?: number | null
+          status?: string | null
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "debit_notes_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_items: {
+        Row: {
+          gst_percent: number | null
+          hsn_code: string | null
+          id: string
+          invoice_id: string
+          product_name: string
+          quantity: number
+          rate: number
+          total: number
+        }
+        Insert: {
+          gst_percent?: number | null
+          hsn_code?: string | null
+          id?: string
+          invoice_id: string
+          product_name: string
+          quantity?: number
+          rate?: number
+          total?: number
+        }
+        Update: {
+          gst_percent?: number | null
+          hsn_code?: string | null
+          id?: string
+          invoice_id?: string
+          product_name?: string
+          quantity?: number
+          rate?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          cgst: number | null
+          created_at: string
+          created_by: string | null
+          due_date: string | null
+          gstin: string | null
+          id: string
+          igst: number | null
+          invoice_date: string
+          invoice_number: string
+          order_id: string | null
+          party_name: string
+          pdf_url: string | null
+          sgst: number | null
+          status: string | null
+          total_amount: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          cgst?: number | null
+          created_at?: string
+          created_by?: string | null
+          due_date?: string | null
+          gstin?: string | null
+          id?: string
+          igst?: number | null
+          invoice_date?: string
+          invoice_number: string
+          order_id?: string | null
+          party_name: string
+          pdf_url?: string | null
+          sgst?: number | null
+          status?: string | null
+          total_amount?: number
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          cgst?: number | null
+          created_at?: string
+          created_by?: string | null
+          due_date?: string | null
+          gstin?: string | null
+          id?: string
+          igst?: number | null
+          invoice_date?: string
+          invoice_number?: string
+          order_id?: string | null
+          party_name?: string
+          pdf_url?: string | null
+          sgst?: number | null
+          status?: string | null
+          total_amount?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          assigned_to: string | null
+          company_name: string
+          contact_person: string
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          notes: string | null
+          phone: string | null
+          priority: Database["public"]["Enums"]["lead_priority"] | null
+          source: string | null
+          status: Database["public"]["Enums"]["lead_status"]
+          updated_at: string
+          value: number | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          company_name: string
+          contact_person: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          priority?: Database["public"]["Enums"]["lead_priority"] | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+          value?: number | null
+        }
+        Update: {
+          assigned_to?: string | null
+          company_name?: string
+          contact_person?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          priority?: Database["public"]["Enums"]["lead_priority"] | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+          value?: number | null
+        }
+        Relationships: []
+      }
+      onboarding_requests: {
+        Row: {
+          access_enabled: boolean | null
+          business_name: string
+          business_type: string | null
+          created_at: string
+          documents: string[] | null
+          email: string
+          gstin: string | null
+          id: string
+          owner_name: string
+          phone: string | null
+          platforms: string[] | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["onboarding_status"]
+          subscription_expiry: string | null
+          subscription_status:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
+          updated_at: string
+        }
+        Insert: {
+          access_enabled?: boolean | null
+          business_name: string
+          business_type?: string | null
+          created_at?: string
+          documents?: string[] | null
+          email: string
+          gstin?: string | null
+          id?: string
+          owner_name: string
+          phone?: string | null
+          platforms?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["onboarding_status"]
+          subscription_expiry?: string | null
+          subscription_status?:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
+          updated_at?: string
+        }
+        Update: {
+          access_enabled?: boolean | null
+          business_name?: string
+          business_type?: string | null
+          created_at?: string
+          documents?: string[] | null
+          email?: string
+          gstin?: string | null
+          id?: string
+          owner_name?: string
+          phone?: string | null
+          platforms?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["onboarding_status"]
+          subscription_expiry?: string | null
+          subscription_status?:
+            | Database["public"]["Enums"]["subscription_status"]
+            | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          gst_percent: number | null
+          id: string
+          order_id: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          sku: string | null
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          gst_percent?: number | null
+          id?: string
+          order_id: string
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          sku?: string | null
+          total?: number
+          unit_price?: number
+        }
+        Update: {
+          gst_percent?: number | null
+          id?: string
+          order_id?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          sku?: string | null
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          commission: number | null
+          created_at: string
+          created_by: string | null
+          customer_address: string | null
+          customer_city: string | null
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          customer_pincode: string | null
+          customer_state: string | null
+          delivered_date: string | null
+          id: string
+          order_date: string
+          order_number: string
+          portal: string
+          shipped_date: string | null
+          shipping_fee: number | null
+          status: Database["public"]["Enums"]["order_status"]
+          total_amount: number
+          updated_at: string
+          video_captured: boolean | null
+          video_quality: string | null
+        }
+        Insert: {
+          commission?: number | null
+          created_at?: string
+          created_by?: string | null
+          customer_address?: string | null
+          customer_city?: string | null
+          customer_email?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          customer_pincode?: string | null
+          customer_state?: string | null
+          delivered_date?: string | null
+          id?: string
+          order_date?: string
+          order_number: string
+          portal: string
+          shipped_date?: string | null
+          shipping_fee?: number | null
+          status?: Database["public"]["Enums"]["order_status"]
+          total_amount?: number
+          updated_at?: string
+          video_captured?: boolean | null
+          video_quality?: string | null
+        }
+        Update: {
+          commission?: number | null
+          created_at?: string
+          created_by?: string | null
+          customer_address?: string | null
+          customer_city?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          customer_pincode?: string | null
+          customer_state?: string | null
+          delivered_date?: string | null
+          id?: string
+          order_date?: string
+          order_number?: string
+          portal?: string
+          shipped_date?: string | null
+          shipping_fee?: number | null
+          status?: Database["public"]["Enums"]["order_status"]
+          total_amount?: number
+          updated_at?: string
+          video_captured?: boolean | null
+          video_quality?: string | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          base_price: number
+          brand: string | null
+          category: string | null
+          created_at: string
+          created_by: string | null
+          gst_percent: number | null
+          hsn_code: string | null
+          id: string
+          image_url: string | null
+          mrp: number
+          name: string
+          portals_enabled: string[] | null
+          sku: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          base_price?: number
+          brand?: string | null
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          gst_percent?: number | null
+          hsn_code?: string | null
+          id?: string
+          image_url?: string | null
+          mrp?: number
+          name: string
+          portals_enabled?: string[] | null
+          sku: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number
+          brand?: string | null
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          gst_percent?: number | null
+          hsn_code?: string | null
+          id?: string
+          image_url?: string | null
+          mrp?: number
+          name?: string
+          portals_enabled?: string[] | null
+          sku?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          id: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reconciliation_logs: {
+        Row: {
+          created_at: string
+          date: string
+          difference: number | null
+          expected_orders: number | null
+          id: string
+          notes: string | null
+          portal: string
+          processed_orders: number | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          difference?: number | null
+          expected_orders?: number | null
+          id?: string
+          notes?: string | null
+          portal: string
+          processed_orders?: number | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          difference?: number | null
+          expected_orders?: number | null
+          id?: string
+          notes?: string | null
+          portal?: string
+          processed_orders?: number | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      returns: {
+        Row: {
+          claim_status: string | null
+          created_at: string
+          customer_name: string
+          evidence_urls: string[] | null
+          id: string
+          order_id: string | null
+          order_number: string
+          portal: string
+          reason: string | null
+          refund_amount: number | null
+          requested_at: string
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["return_status"]
+          updated_at: string
+        }
+        Insert: {
+          claim_status?: string | null
+          created_at?: string
+          customer_name: string
+          evidence_urls?: string[] | null
+          id?: string
+          order_id?: string | null
+          order_number: string
+          portal: string
+          reason?: string | null
+          refund_amount?: number | null
+          requested_at?: string
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["return_status"]
+          updated_at?: string
+        }
+        Update: {
+          claim_status?: string | null
+          created_at?: string
+          customer_name?: string
+          evidence_urls?: string[] | null
+          id?: string
+          order_id?: string | null
+          order_number?: string
+          portal?: string
+          reason?: string | null
+          refund_amount?: number | null
+          requested_at?: string
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["return_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "returns_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      settlements: {
+        Row: {
+          amount: number
+          commission: number | null
+          created_at: string
+          id: string
+          net_amount: number
+          portal: string
+          reference_orders: string[] | null
+          settlement_date: string | null
+          settlement_id: string
+          status: Database["public"]["Enums"]["settlement_status"]
+          tax: number | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          commission?: number | null
+          created_at?: string
+          id?: string
+          net_amount?: number
+          portal: string
+          reference_orders?: string[] | null
+          settlement_date?: string | null
+          settlement_id: string
+          status?: Database["public"]["Enums"]["settlement_status"]
+          tax?: number | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          commission?: number | null
+          created_at?: string
+          id?: string
+          net_amount?: number
+          portal?: string
+          reference_orders?: string[] | null
+          settlement_date?: string | null
+          settlement_id?: string
+          status?: Database["public"]["Enums"]["settlement_status"]
+          tax?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "vendor" | "operations"
+      lead_priority: "low" | "medium" | "high"
+      lead_status:
+        | "new"
+        | "contacted"
+        | "qualified"
+        | "negotiation"
+        | "won"
+        | "lost"
+      onboarding_status: "submitted" | "under_review" | "approved" | "rejected"
+      order_status:
+        | "pending"
+        | "confirmed"
+        | "processing"
+        | "shipped"
+        | "delivered"
+        | "cancelled"
+        | "rto"
+        | "returned"
+      return_status:
+        | "requested"
+        | "approved"
+        | "rejected"
+        | "pickup_scheduled"
+        | "picked_up"
+        | "received"
+        | "refund_initiated"
+        | "closed"
+      settlement_status:
+        | "pending"
+        | "processing"
+        | "completed"
+        | "disputed"
+        | "failed"
+      subscription_status:
+        | "trial"
+        | "fully_paid"
+        | "partially_paid"
+        | "expired"
+        | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +930,52 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "vendor", "operations"],
+      lead_priority: ["low", "medium", "high"],
+      lead_status: [
+        "new",
+        "contacted",
+        "qualified",
+        "negotiation",
+        "won",
+        "lost",
+      ],
+      onboarding_status: ["submitted", "under_review", "approved", "rejected"],
+      order_status: [
+        "pending",
+        "confirmed",
+        "processing",
+        "shipped",
+        "delivered",
+        "cancelled",
+        "rto",
+        "returned",
+      ],
+      return_status: [
+        "requested",
+        "approved",
+        "rejected",
+        "pickup_scheduled",
+        "picked_up",
+        "received",
+        "refund_initiated",
+        "closed",
+      ],
+      settlement_status: [
+        "pending",
+        "processing",
+        "completed",
+        "disputed",
+        "failed",
+      ],
+      subscription_status: [
+        "trial",
+        "fully_paid",
+        "partially_paid",
+        "expired",
+        "suspended",
+      ],
+    },
   },
 } as const

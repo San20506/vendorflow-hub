@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { UserRole } from '@/types';
+import { useAuth, UserRole } from '@/contexts/AuthContext';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { Bell, Search, LogOut, Settings, User, Smartphone, ShieldAlert } from 'lucide-react';
@@ -65,16 +64,20 @@ const routePermissions: Record<string, UserRole[]> = {
 };
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center bg-background"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
@@ -116,7 +119,7 @@ export function AppLayout({ children }: AppLayoutProps) {
               </span>
 
               {/* Mobile Ready Badge */}
-              <Badge variant="outline" className="gap-1 text-xs bg-emerald-500/10 text-emerald-600 border-emerald-500/30 hidden lg:flex">
+              <Badge variant="outline" className="gap-1 text-xs bg-primary/10 text-primary border-primary/30 hidden lg:flex">
                 <Smartphone className="w-3 h-3" />
                 Mobile Ready – Responsive & PWA
               </Badge>

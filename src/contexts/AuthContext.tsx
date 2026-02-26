@@ -1,68 +1,137 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { User, UserRole } from '@/types';
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { User as SupabaseUser, Session } from '@supabase/supabase-js';
+
+export type UserRole = 'admin' | 'vendor' | 'operations';
+
+export interface AppUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  avatar?: string;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string, role: UserRole) => Promise<void>;
-  logout: () => void;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, name: string) => Promise<void>;
+  logout: () => Promise<void>;
   switchRole: (role: UserRole) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users for demo
-const mockUsers: Record<UserRole, User> = {
-  admin: {
-    id: 'admin-001',
-    name: 'Sarah Johnson',
-    email: 'admin@vendorpro.com',
-    role: 'admin',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
-  },
-  vendor: {
-    id: 'vendor-001',
-    name: 'Michael Chen',
-    email: 'vendor@vendorpro.com',
-    role: 'vendor',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Michael',
-  },
-  operations: {
-    id: 'ops-001',
-    name: 'Emily Davis',
-    email: 'ops@vendorpro.com',
-    role: 'operations',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emily',
-  },
-};
+async function fetchUserRole(userId: string): Promise<UserRole> {
+  const { data } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId)
+    .limit(1)
+    .single();
+  return (data?.role as UserRole) || 'vendor';
+}
+
+async function fetchProfile(userId: string): Promise<{ name: string; avatar_url: string | null } | null> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('name, avatar_url')
+    .eq('id', userId)
+    .single();
+  return data;
+}
+
+async function buildAppUser(session: Session): Promise<AppUser> {
+  const supaUser = session.user;
+  const [role, profile] = await Promise.all([
+    fetchUserRole(supaUser.id),
+    fetchProfile(supaUser.id),
+  ]);
+  return {
+    id: supaUser.id,
+    name: profile?.name || supaUser.user_metadata?.name || supaUser.email?.split('@')[0] || 'User',
+    email: supaUser.email || '',
+    role,
+    avatar: profile?.avatar_url || undefined,
+  };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = useCallback(async (email: string, password: string, role: UserRole) => {
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    
-    // Mock authentication - in production, this would call a real API
-    const mockUser = mockUsers[role];
-    setUser({ ...mockUser, email });
+  useEffect(() => {
+    // Set up auth listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        // Use setTimeout to avoid potential deadlocks with Supabase client
+        setTimeout(async () => {
+          try {
+            const appUser = await buildAppUser(session);
+            setUser(appUser);
+          } catch {
+            setUser(null);
+          }
+          setIsLoading(false);
+        }, 0);
+      } else {
+        setUser(null);
+        setIsLoading(false);
+      }
+    });
+
+    // THEN check existing session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session) {
+        try {
+          const appUser = await buildAppUser(session);
+          setUser(appUser);
+        } catch {
+          setUser(null);
+        }
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const logout = useCallback(() => {
+  const login = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw new Error(error.message);
+  }, []);
+
+  const signup = useCallback(async (email: string, password: string, name: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name },
+        emailRedirectTo: window.location.origin,
+      },
+    });
+    if (error) throw new Error(error.message);
+  }, []);
+
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
     setUser(null);
   }, []);
 
   const switchRole = useCallback((role: UserRole) => {
     if (user) {
-      const newUser = mockUsers[role];
-      setUser({ ...newUser, email: user.email });
+      setUser({ ...user, role });
     }
   }, [user]);
 
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
+    isLoading,
     login,
+    signup,
     logout,
     switchRole,
   };
