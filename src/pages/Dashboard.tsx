@@ -221,14 +221,16 @@ export default function Dashboard() {
   const maxBrandRevenue = topBrandsByRevenue.length > 0 ? topBrandsByRevenue[0].revenue : 1;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in relative">
       {/* ═══ PAGE HEADER ═══ */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
             <h1 className="text-2xl font-bold text-foreground">Sales Dashboard</h1>
           </div>
-          <p className="text-muted-foreground">Welcome back, {user?.name}!</p>
+        </div>
+        <div className="absolute left-1/2 -translate-x-1/2 top-4 hidden md:block">
+          <p className="text-lg font-semibold text-muted-foreground">Welcome back, {user?.name}!</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-2">
