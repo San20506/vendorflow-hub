@@ -132,13 +132,13 @@ export default function Reconciliation() {
       <ReconciliationHealthScore matchedPct={matchedPct} mismatchPct={mismatchPct} delayedPct={37.5} chargebackLossPct={4.2} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="flex-wrap h-auto gap-1">
-          <TabsTrigger value="overview">Reconciliation Report</TabsTrigger>
-          <TabsTrigger value="settlement-cycles">Settlement Cycles</TabsTrigger>
-          <TabsTrigger value="chargebacks">Chargebacks & Disputes</TabsTrigger>
-          <TabsTrigger value="fee-variation">Fee Variation</TabsTrigger>
-          <TabsTrigger value="sku-trends">SKU Profitability</TabsTrigger>
-          <TabsTrigger value="risk-alerts">Risk Alerts <Badge variant="destructive" className="ml-1.5 text-[10px] px-1.5 py-0">5</Badge></TabsTrigger>
+        <TabsList className="flex-wrap h-auto gap-1.5 bg-muted/50 p-1.5">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Reconciliation Report</TabsTrigger>
+          <TabsTrigger value="settlement-cycles" className="data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-sm">Settlement Cycles</TabsTrigger>
+          <TabsTrigger value="chargebacks" className="data-[state=active]:bg-warning data-[state=active]:text-warning-foreground data-[state=active]:shadow-sm">Chargebacks & Disputes</TabsTrigger>
+          <TabsTrigger value="fee-variation" className="data-[state=active]:bg-info data-[state=active]:text-info-foreground data-[state=active]:shadow-sm">Fee Variation</TabsTrigger>
+          <TabsTrigger value="sku-trends" className="data-[state=active]:bg-success data-[state=active]:text-success-foreground data-[state=active]:shadow-sm">SKU Profitability</TabsTrigger>
+          <TabsTrigger value="risk-alerts" className="data-[state=active]:bg-destructive data-[state=active]:text-destructive-foreground data-[state=active]:shadow-sm">Risk Alerts <Badge variant="destructive" className="ml-1.5 text-[10px] px-1.5 py-0 bg-destructive-foreground text-destructive">5</Badge></TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">

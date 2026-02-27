@@ -159,6 +159,9 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
+  const [isEditingBrand, setIsEditingBrand] = useState(false);
+  const [brandName, setBrandName] = useState('VendorFlow');
+  const [brandSubtitle, setBrandSubtitle] = useState('v1.0 • VMS Platform');
 
   const filteredGroups = navigationGroups.map(group => ({
     ...group,
@@ -169,14 +172,37 @@ export function AppSidebar() {
     <Sidebar className="border-r-0" collapsible="icon">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-sidebar-primary">
+          <button
+            onClick={() => !isCollapsed && setIsEditingBrand(!isEditingBrand)}
+            className="flex items-center justify-center w-9 h-9 rounded-lg bg-sidebar-primary hover:opacity-80 transition-opacity cursor-pointer"
+            title="Click to edit branding"
+          >
             <Package className="w-5 h-5 text-sidebar-primary-foreground" />
-          </div>
+          </button>
           {!isCollapsed && (
-            <div className="flex flex-col">
-              <span className="font-semibold text-sidebar-foreground">VendorFlow</span>
-              <span className="text-xs text-sidebar-foreground/60">v1.0 • VMS Platform</span>
-            </div>
+            isEditingBrand ? (
+              <div className="flex flex-col gap-1">
+                <input
+                  className="bg-sidebar-accent text-sidebar-foreground text-sm font-semibold rounded px-1.5 py-0.5 border border-sidebar-border w-[120px]"
+                  value={brandName}
+                  onChange={(e) => setBrandName(e.target.value)}
+                  onBlur={() => setIsEditingBrand(false)}
+                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingBrand(false)}
+                  autoFocus
+                />
+                <input
+                  className="bg-sidebar-accent text-sidebar-foreground/60 text-[10px] rounded px-1.5 py-0.5 border border-sidebar-border w-[120px]"
+                  value={brandSubtitle}
+                  onChange={(e) => setBrandSubtitle(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingBrand(false)}
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col cursor-pointer" onClick={() => setIsEditingBrand(true)} title="Click to edit">
+                <span className="font-semibold text-sidebar-foreground">{brandName}</span>
+                <span className="text-xs text-sidebar-foreground/60">{brandSubtitle}</span>
+              </div>
+            )
           )}
         </div>
       </SidebarHeader>
