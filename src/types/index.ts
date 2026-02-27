@@ -10,7 +10,7 @@ export interface User {
 }
 
 // Portal Types
-export type Portal = 'amazon' | 'flipkart' | 'meesho' | 'firstcry' | 'blinkit' | 'own_website';
+export type Portal = 'amazon' | 'flipkart' | 'meesho' | 'firstcry' | 'blinkit' | 'own_website' | 'myntra' | 'nykaa' | 'ajio';
 
 // Product Health Status
 export type ProductHealthStatus = 'live' | 'not_active' | 'out_of_stock';
@@ -18,7 +18,7 @@ export type ProductHealthStatus = 'live' | 'not_active' | 'out_of_stock';
 export interface ProductHealth {
   productId: string;
   productName: string;
-  portalStatus: Record<Portal, ProductHealthStatus>;
+  portalStatus: Partial<Record<Portal, ProductHealthStatus>>;
 }
 
 // SKU Mapping Types
@@ -118,7 +118,7 @@ export interface InventoryItem {
   masterQuantity: number;
   reservedQuantity: number;
   availableQuantity: number;
-  channelAllocations: Record<Portal, number>;
+  channelAllocations: Partial<Record<Portal, number>>;
   warehouse: string;
   agingDays: number;
   lowStockThreshold: number;

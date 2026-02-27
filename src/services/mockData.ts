@@ -1085,6 +1085,9 @@ export const portalConfigs = [
   { id: 'meesho' as Portal, name: 'Meesho', color: 'hsl(340, 82%, 52%)', icon: '📦' },
   { id: 'firstcry' as Portal, name: 'FirstCry', color: 'hsl(199, 89%, 48%)', icon: '👶' },
   { id: 'blinkit' as Portal, name: 'Blinkit', color: 'hsl(45, 100%, 51%)', icon: '⚡' },
+  { id: 'myntra' as Portal, name: 'Myntra', color: 'hsl(350, 80%, 55%)', icon: '👗' },
+  { id: 'nykaa' as Portal, name: 'Nykaa', color: 'hsl(330, 70%, 50%)', icon: '💄' },
+  { id: 'ajio' as Portal, name: 'Ajio', color: 'hsl(210, 70%, 45%)', icon: '👔' },
   { id: 'own_website' as Portal, name: 'Own Website', color: 'hsl(262, 83%, 58%)', icon: '🌐' },
 ];
 

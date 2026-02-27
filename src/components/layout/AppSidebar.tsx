@@ -54,6 +54,7 @@ import {
   Building2,
   Contact,
   PieChart,
+  Megaphone,
 } from 'lucide-react';
 
 interface NavItem {
@@ -127,6 +128,7 @@ const navigationGroups: NavGroup[] = [
     label: 'Marketing',
     items: [
       { title: 'Unified Inbox', url: '/social-insights', icon: Share2, roles: ['admin', 'vendor'] },
+      { title: 'Marketing Config', url: '/marketing-config', icon: Megaphone, roles: ['admin'] },
       { title: 'Own Website', url: '/ecommerce', icon: Globe, roles: ['admin', 'vendor'] },
     ],
   },

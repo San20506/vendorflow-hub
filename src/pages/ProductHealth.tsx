@@ -15,7 +15,7 @@ const statusConfig: Record<ProductHealthStatus, { label: string; icon: React.Ele
   out_of_stock: { label: 'Out of Stock', icon: Package, className: 'bg-rose-500/15 text-rose-600 border-rose-500/30' },
 };
 
-function getOverallStatus(portalStatus: Record<Portal, ProductHealthStatus>): ProductHealthStatus {
+function getOverallStatus(portalStatus: Partial<Record<Portal, ProductHealthStatus>>): ProductHealthStatus {
   const values = Object.values(portalStatus);
   if (values.every(s => s === 'live')) return 'live';
   if (values.some(s => s === 'out_of_stock')) return 'out_of_stock';
