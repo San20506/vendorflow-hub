@@ -55,6 +55,8 @@ import {
   Contact,
   PieChart,
   Megaphone,
+  Wallet,
+  Scissors,
 } from 'lucide-react';
 
 interface NavItem {
@@ -110,6 +112,7 @@ const navigationSections: NavSection[] = [
           { title: 'Reconciliation', url: '/reconciliation', icon: Scale, roles: ['admin', 'operations'] },
           { title: 'Price & Payout', url: '/price-payout', icon: IndianRupee, roles: ['admin', 'vendor'] },
           { title: 'Finance & Tax', url: '/finance', icon: Receipt, roles: ['admin', 'vendor'] },
+          { title: 'Expense Tracking', url: '/expenses', icon: Wallet, roles: ['admin', 'operations'] },
         ],
       },
       {
@@ -154,6 +157,7 @@ const navigationSections: NavSection[] = [
           { title: 'Lead Management', url: '/leads', icon: UserPlus, roles: ['admin', 'vendor'] },
           { title: 'Customer Database', url: '/customers', icon: Contact, roles: ['admin', 'vendor', 'operations'] },
           { title: 'WhatsApp API', url: '/whatsapp', icon: MessageCircle, roles: ['admin'] },
+          { title: 'Staff & Salary', url: '/staff', icon: Scissors, roles: ['admin', 'operations'] },
         ],
       },
       {
