@@ -36,11 +36,11 @@ const SELLER_STATE_CODE = '27'; // Maharashtra
 // ── Mock Data ──
 
 const mockInvoices = [
-  { id: 'INV-2026-001', type: 'Sales Invoice' as const, customer: 'RetailMart India', gstin: '27AAACR5055K1ZY', date: '2026-02-10', taxableValue: 45000, cgst: 4050, sgst: 4050, igst: 0, total: 53100, status: 'Paid' as const, poNumber: 'PO-8801', ewayBill: 'EWB-991234', paymentMethod: 'Bank' as const },
-  { id: 'INV-2026-002', type: 'Sales Invoice' as const, customer: 'QuickBuy Online', gstin: '29AAGCQ1234F1Z5', date: '2026-02-08', taxableValue: 28000, cgst: 0, sgst: 0, igst: 5040, total: 33040, status: 'Pending' as const, poNumber: '', ewayBill: '', paymentMethod: 'Credit' as const },
-  { id: 'DN-2026-001', type: 'Debit Note' as const, customer: 'RetailMart India', gstin: '27AAACR5055K1ZY', date: '2026-02-05', taxableValue: 5000, cgst: 450, sgst: 450, igst: 0, total: 5900, status: 'Issued' as const, poNumber: '', ewayBill: '', paymentMethod: 'Bank' as const },
-  { id: 'CN-2026-001', type: 'Credit Note' as const, customer: 'QuickBuy Online', gstin: '29AAGCQ1234F1Z5', date: '2026-02-03', taxableValue: 3500, cgst: 0, sgst: 0, igst: 630, total: 4130, status: 'Issued' as const, poNumber: '', ewayBill: '', paymentMethod: 'Bank' as const },
-  { id: 'INV-2026-003', type: 'Sales Invoice' as const, customer: 'MegaStore Ltd', gstin: '07AABCM9876D1ZP', date: '2026-01-28', taxableValue: 72000, cgst: 6480, sgst: 6480, igst: 0, total: 84960, status: 'Paid' as const, poNumber: 'PO-9912', ewayBill: 'EWB-112233', paymentMethod: 'Bank' as const },
+  { id: 'INV-2026-001', type: 'Sales Invoice' as const, customer: 'RetailMart India', gstin: '27AAACR5055K1ZY', date: '2026-02-10', taxableValue: 45000, cgst: 4050, sgst: 4050, igst: 0, total: 53100, status: 'Paid' as const, poNumber: 'PO-8801', ewayBill: 'EWB-991234', paymentMethod: 'Bank' as 'Cash' | 'Bank' | 'Credit' },
+  { id: 'INV-2026-002', type: 'Sales Invoice' as const, customer: 'QuickBuy Online', gstin: '29AAGCQ1234F1Z5', date: '2026-02-08', taxableValue: 28000, cgst: 0, sgst: 0, igst: 5040, total: 33040, status: 'Pending' as const, poNumber: '', ewayBill: '', paymentMethod: 'Credit' as 'Cash' | 'Bank' | 'Credit' },
+  { id: 'DN-2026-001', type: 'Debit Note' as const, customer: 'RetailMart India', gstin: '27AAACR5055K1ZY', date: '2026-02-05', taxableValue: 5000, cgst: 450, sgst: 450, igst: 0, total: 5900, status: 'Issued' as const, poNumber: '', ewayBill: '', paymentMethod: 'Bank' as 'Cash' | 'Bank' | 'Credit' },
+  { id: 'CN-2026-001', type: 'Credit Note' as const, customer: 'QuickBuy Online', gstin: '29AAGCQ1234F1Z5', date: '2026-02-03', taxableValue: 3500, cgst: 0, sgst: 0, igst: 630, total: 4130, status: 'Issued' as const, poNumber: '', ewayBill: '', paymentMethod: 'Cash' as 'Cash' | 'Bank' | 'Credit' },
+  { id: 'INV-2026-003', type: 'Sales Invoice' as const, customer: 'MegaStore Ltd', gstin: '07AABCM9876D1ZP', date: '2026-01-28', taxableValue: 72000, cgst: 6480, sgst: 6480, igst: 0, total: 84960, status: 'Paid' as const, poNumber: 'PO-9912', ewayBill: 'EWB-112233', paymentMethod: 'Bank' as 'Cash' | 'Bank' | 'Credit' },
 ];
 
 const mockPurchaseBills = [
@@ -530,6 +530,9 @@ export default function FinanceTaxation() {
                     <TableHead className="font-semibold text-right cursor-pointer select-none" onClick={() => toggleInvSort('total')}>
                       <span className="flex items-center justify-end">Total<SortIcon active={invoiceSort.field === 'total'} dir={invoiceSort.dir} /></span>
                     </TableHead>
+                    <TableHead className="font-semibold">PO #</TableHead>
+                    <TableHead className="font-semibold">E-way Bill</TableHead>
+                    <TableHead className="font-semibold">Payment</TableHead>
                     <TableHead className="font-semibold">Status</TableHead>
                     <TableHead className="font-semibold">Actions</TableHead>
                   </TableRow>
@@ -551,6 +554,15 @@ export default function FinanceTaxation() {
                       <TableCell className="text-right text-sm">{inv.sgst > 0 ? fmt(inv.sgst) : '—'}</TableCell>
                       <TableCell className="text-right text-sm">{inv.igst > 0 ? fmt(inv.igst) : '—'}</TableCell>
                       <TableCell className="text-right font-semibold">{fmt(inv.total)}</TableCell>
+                      <TableCell className="text-xs font-mono text-muted-foreground">{inv.poNumber || '—'}</TableCell>
+                      <TableCell className="text-xs font-mono text-muted-foreground">{inv.ewayBill || '—'}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={
+                          inv.paymentMethod === 'Cash' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' :
+                          inv.paymentMethod === 'Credit' ? 'bg-amber-500/10 text-amber-600 border-amber-500/30' :
+                          'bg-blue-500/10 text-blue-600 border-blue-500/30'
+                        }>{inv.paymentMethod}</Badge>
+                      </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={
                           inv.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' :
