@@ -103,8 +103,8 @@ export default function Dashboard() {
   const dailySummary = useMemo(() => {
     const today = new Date().toDateString();
     const yesterday = new Date(Date.now() - 86400000).toDateString();
-    const todayOrders = mockOrders.filter(o => new Date(o.orderDate).toDateString() === today && (selectedPortal === 'all' || o.portal === selectedPortal));
-    const yesterdayOrders = mockOrders.filter(o => new Date(o.orderDate).toDateString() === yesterday && (selectedPortal === 'all' || o.portal === selectedPortal));
+    const todayOrders = orders.filter(o => new Date(o.orderDate).toDateString() === today && (selectedPortal === 'all' || o.portal === selectedPortal));
+    const yesterdayOrders = orders.filter(o => new Date(o.orderDate).toDateString() === yesterday && (selectedPortal === 'all' || o.portal === selectedPortal));
     const todayRevenue = todayOrders.reduce((s, o) => s + o.totalAmount, 0);
     const yesterdayRevenue = yesterdayOrders.reduce((s, o) => s + o.totalAmount, 0);
     const revenueGrowth = yesterdayRevenue > 0 ? +((todayRevenue - yesterdayRevenue) / yesterdayRevenue * 100).toFixed(1) : 0;
