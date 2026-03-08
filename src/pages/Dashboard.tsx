@@ -213,7 +213,7 @@ export default function Dashboard() {
   }, [selectedPortal]);
 
   const totalUnitsSold = useMemo(() =>
-    mockSalesData.filter(d => selectedPortal === 'all' || d.portal === selectedPortal).reduce((s, d) => s + d.orders, 0),
+    salesData.filter(d => selectedPortal === 'all' || d.portal === selectedPortal).reduce((s, d) => s + (d.orders || 0), 0),
   [selectedPortal]);
 
   const duplicateCustomerCount = useMemo(() => {
