@@ -210,7 +210,7 @@ export default function Orders() {
   const rowSelection = useRowSelection(filteredOrders.map(o => o.orderId));
 
   const processingStats = useMemo(() => {
-    const orders = selectedPortal === 'all' ? mockOrders : mockOrders.filter(o => o.portal === selectedPortal);
+    const orders = selectedPortal === 'all' ? allOrders : allOrders.filter(o => o.portal === selectedPortal);
     const withinCutoff = orders.filter(o => ['pending', 'confirmed'].includes(o.status) && getOrderCutoffStatus(o) === 'within').length;
     const missedCutoff = orders.filter(o => ['pending', 'confirmed'].includes(o.status) && getOrderCutoffStatus(o) === 'missed').length;
     const pendingDispatch = orders.filter(o => ['confirmed', 'packed'].includes(o.status)).length;
