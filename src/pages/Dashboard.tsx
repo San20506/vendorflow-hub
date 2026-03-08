@@ -82,7 +82,7 @@ export default function Dashboard() {
 
   // Filtered orders by portal & date
   const filteredOrders = useMemo(() => {
-    return mockOrders.filter(o => {
+    return orders.filter(o => {
       if (selectedPortal !== 'all' && o.portal !== selectedPortal) return false;
       if (dateRange.from && new Date(o.orderDate) < dateRange.from) return false;
       if (dateRange.to && new Date(o.orderDate) > dateRange.to) return false;
