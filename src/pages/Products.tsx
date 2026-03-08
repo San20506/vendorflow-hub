@@ -45,24 +45,41 @@ export default function Products() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({ name: '', masterSku: '', brand: '', category: '', hsn: '', mrp: '', basePrice: '', gst: '' });
 
-  const categories = useMemo(() => {
-    const unique = new Set(mockProducts.map(p => p.category));
-    return Array.from(unique);
+  const [allProducts, setAllProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await productsDb.getAll();
+        setAllProducts(data.map((p: any) => ({
+          ...p, productId: p.id, masterSkuId: p.sku, name: p.name,
+          brand: p.brand || '', category: p.category || '', hsnCode: p.hsn_code || '',
+          mrp: p.mrp ?? 0, basePrice: p.base_price ?? 0, gstPercent: p.gst_percent ?? 0,
+          status: p.status || 'active', createdAt: p.created_at,
+        })));
+      } catch (e) { console.error(e); }
+    };
+    fetchProducts();
   }, []);
+
+  const categories = useMemo(() => {
+    const unique = new Set(allProducts.map((p: any) => p.category as string).filter(Boolean));
+    return Array.from(unique);
+  }, [allProducts]);
 
   // Duplicate detection
   const duplicateSkus = useMemo(() => {
     const skuCount: Record<string, number> = {};
-    mockProducts.forEach(p => {
+    allProducts.forEach((p: any) => {
       skuCount[p.masterSkuId] = (skuCount[p.masterSkuId] || 0) + 1;
     });
     return Object.entries(skuCount).filter(([, c]) => c > 1).map(([sku]) => sku);
-  }, []);
+  }, [allProducts]);
 
-  const getMargin = (p: Product) => ((p.mrp - p.basePrice) / p.mrp) * 100;
+  const getMargin = (p: any) => p.mrp > 0 ? ((p.mrp - p.basePrice) / p.mrp) * 100 : 0;
 
   const filteredProducts = useMemo(() => {
-    let results = mockProducts.filter(product => {
+    let results = allProducts.filter((product: any) => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            product.productId.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            product.masterSkuId.toLowerCase().includes(searchQuery.toLowerCase()) ||
