@@ -1,6 +1,5 @@
-import { useState, useMemo } from 'react';
-import { mockProducts } from '@/services/mockData';
-import { Product, Portal } from '@/types';
+import { useState, useEffect, useMemo } from 'react';
+import { productsDb } from '@/services/database';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -19,13 +18,16 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import {
   Search, Download, FileSpreadsheet, FileText, Edit, Package, ToggleLeft,
-  CheckCircle, XCircle, DollarSign, Filter, Link2, Eye, Copy,
+  CheckCircle, XCircle, DollarSign, Filter, Link2, Eye, Copy, Loader2,
 } from 'lucide-react';
 
+type Portal = 'amazon' | 'flipkart' | 'meesho' | 'firstcry' | 'blinkit' | 'own_website';
 const PORTALS: Portal[] = ['amazon', 'flipkart', 'meesho', 'firstcry', 'blinkit', 'own_website'];
 
 export default function CatalogManager() {
   const { toast } = useToast();
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -35,43 +37,80 @@ export default function CatalogManager() {
   const [bulkPriceAction, setBulkPriceAction] = useState<'fixed' | 'percent'>('percent');
   const [bulkPriceValue, setBulkPriceValue] = useState('');
   const [bulkStatus, setBulkStatus] = useState<'active' | 'inactive'>('active');
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [shareLink, setShareLink] = useState('');
 
-  const categories = useMemo(() => {
-    const unique = new Set(mockProducts.map(p => p.category));
-    return Array.from(unique);
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const data = await productsDb.getAll();
+        setProducts(data);
+      } catch (err) {
+        console.error('Failed to load products:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
   }, []);
 
+  const categories = useMemo(() => {
+    const unique = new Set(products.map(p => p.category).filter(Boolean));
+    return Array.from(unique) as string[];
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
-    return mockProducts.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           product.masterSkuId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           product.brand.toLowerCase().includes(searchQuery.toLowerCase());
+    return products.filter(product => {
+      const matchesSearch = (product.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           (product.sku || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           (product.brand || '').toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, categoryFilter]);
+  }, [products, searchQuery, categoryFilter]);
 
   const allSelected = filteredProducts.length > 0 && selectedIds.length === filteredProducts.length;
 
   const toggleAll = () => {
     if (allSelected) setSelectedIds([]);
-    else setSelectedIds(filteredProducts.map(p => p.productId));
+    else setSelectedIds(filteredProducts.map(p => p.id));
   };
 
   const toggleOne = (id: string) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
 
-  const handleBulkPriceUpdate = () => {
-    toast({ title: 'Prices Updated', description: `${selectedIds.length} products updated.` });
+  const handleBulkPriceUpdate = async () => {
+    try {
+      const value = parseFloat(bulkPriceValue);
+      if (isNaN(value)) return;
+      for (const id of selectedIds) {
+        const product = products.find(p => p.id === id);
+        if (!product) continue;
+        const newPrice = bulkPriceAction === 'fixed' ? value : product.base_price * (1 + value / 100);
+        await productsDb.update(id, { base_price: Math.round(newPrice * 100) / 100 });
+      }
+      const updated = await productsDb.getAll();
+      setProducts(updated);
+      toast({ title: 'Prices Updated', description: `${selectedIds.length} products updated.` });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
     setIsBulkPriceOpen(false);
     setBulkPriceValue('');
   };
 
-  const handleBulkStatusUpdate = () => {
-    toast({ title: 'Status Updated', description: `${selectedIds.length} products set to ${bulkStatus}.` });
+  const handleBulkStatusUpdate = async () => {
+    try {
+      for (const id of selectedIds) {
+        await productsDb.update(id, { status: bulkStatus });
+      }
+      const updated = await productsDb.getAll();
+      setProducts(updated);
+      toast({ title: 'Status Updated', description: `${selectedIds.length} products set to ${bulkStatus}.` });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
     setIsBulkStatusOpen(false);
   };
 
@@ -96,6 +135,14 @@ export default function CatalogManager() {
 
   const formatCurrency = (value: number) => `₹${value.toLocaleString()}`;
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -116,7 +163,6 @@ export default function CatalogManager() {
         </div>
       </div>
 
-      {/* Share Link */}
       {shareLink && (
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="p-3 flex items-center gap-3">
@@ -132,9 +178,9 @@ export default function CatalogManager() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="bg-card"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-primary/10"><Package className="w-5 h-5 text-primary" /></div><div><p className="text-2xl font-bold">{mockProducts.length}</p><p className="text-sm text-muted-foreground">Total Products</p></div></div></CardContent></Card>
-        <Card className="bg-card"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-emerald-500/10"><CheckCircle className="w-5 h-5 text-emerald-600" /></div><div><p className="text-2xl font-bold">{mockProducts.filter(p => p.status === 'active').length}</p><p className="text-sm text-muted-foreground">Active</p></div></div></CardContent></Card>
-        <Card className="bg-card"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-muted"><XCircle className="w-5 h-5 text-muted-foreground" /></div><div><p className="text-2xl font-bold">{mockProducts.filter(p => p.status === 'inactive').length}</p><p className="text-sm text-muted-foreground">Inactive</p></div></div></CardContent></Card>
+        <Card className="bg-card"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-primary/10"><Package className="w-5 h-5 text-primary" /></div><div><p className="text-2xl font-bold">{products.length}</p><p className="text-sm text-muted-foreground">Total Products</p></div></div></CardContent></Card>
+        <Card className="bg-card"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-emerald-500/10"><CheckCircle className="w-5 h-5 text-emerald-600" /></div><div><p className="text-2xl font-bold">{products.filter(p => p.status === 'active').length}</p><p className="text-sm text-muted-foreground">Active</p></div></div></CardContent></Card>
+        <Card className="bg-card"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-muted"><XCircle className="w-5 h-5 text-muted-foreground" /></div><div><p className="text-2xl font-bold">{products.filter(p => p.status === 'inactive').length}</p><p className="text-sm text-muted-foreground">Inactive</p></div></div></CardContent></Card>
         <Card className="bg-card"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-blue-500/10"><DollarSign className="w-5 h-5 text-blue-600" /></div><div><p className="text-2xl font-bold">{selectedIds.length}</p><p className="text-sm text-muted-foreground">Selected</p></div></div></CardContent></Card>
       </div>
 
@@ -182,7 +228,7 @@ export default function CatalogManager() {
                     <Checkbox checked={allSelected} onCheckedChange={toggleAll} />
                   </TableHead>
                   <TableHead className="font-semibold">Product</TableHead>
-                  <TableHead className="font-semibold">Master SKU</TableHead>
+                  <TableHead className="font-semibold">SKU</TableHead>
                   <TableHead className="font-semibold">Category</TableHead>
                   <TableHead className="font-semibold text-right">MRP</TableHead>
                   <TableHead className="font-semibold text-right">Base Price</TableHead>
@@ -193,23 +239,29 @@ export default function CatalogManager() {
               </TableHeader>
               <TableBody>
                 {filteredProducts.map(product => (
-                  <TableRow key={product.productId} className={`hover:bg-muted/30 ${selectedIds.includes(product.productId) ? 'bg-primary/5' : ''}`}>
+                  <TableRow key={product.id} className={`hover:bg-muted/30 ${selectedIds.includes(product.id) ? 'bg-primary/5' : ''}`}>
                     <TableCell>
-                      <Checkbox checked={selectedIds.includes(product.productId)} onCheckedChange={() => toggleOne(product.productId)} />
+                      <Checkbox checked={selectedIds.includes(product.id)} onCheckedChange={() => toggleOne(product.id)} />
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <img src={product.imageUrl} alt={product.name} className="w-9 h-9 rounded-lg object-cover" />
+                        {product.image_url ? (
+                          <img src={product.image_url} alt={product.name} className="w-9 h-9 rounded-lg object-cover" />
+                        ) : (
+                          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+                            <Package className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                        )}
                         <div>
                           <p className="font-medium text-sm">{product.name}</p>
-                          <p className="text-xs text-muted-foreground">{product.brand}</p>
+                          <p className="text-xs text-muted-foreground">{product.brand || 'No brand'}</p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="font-mono text-xs">{product.masterSkuId}</TableCell>
-                    <TableCell><Badge variant="secondary" className="text-xs">{product.category}</Badge></TableCell>
+                    <TableCell className="font-mono text-xs">{product.sku}</TableCell>
+                    <TableCell><Badge variant="secondary" className="text-xs">{product.category || 'Uncategorized'}</Badge></TableCell>
                     <TableCell className="text-right text-sm">{formatCurrency(product.mrp)}</TableCell>
-                    <TableCell className="text-right font-medium text-sm">{formatCurrency(product.basePrice)}</TableCell>
+                    <TableCell className="text-right font-medium text-sm">{formatCurrency(product.base_price)}</TableCell>
                     <TableCell>
                       <Badge variant="secondary" className={product.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground'}>
                         {product.status}
@@ -217,7 +269,7 @@ export default function CatalogManager() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1 flex-wrap">
-                        {product.portalsEnabled.map(p => (
+                        {(product.portals_enabled || []).map((p: string) => (
                           <Badge key={p} variant="outline" className="text-[10px] px-1.5 py-0 capitalize">{p}</Badge>
                         ))}
                       </div>
@@ -250,10 +302,16 @@ export default function CatalogManager() {
           {selectedProduct && (
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <img src={selectedProduct.imageUrl} alt={selectedProduct.name} className="w-20 h-20 rounded-lg object-cover" />
+                {selectedProduct.image_url ? (
+                  <img src={selectedProduct.image_url} alt={selectedProduct.name} className="w-20 h-20 rounded-lg object-cover" />
+                ) : (
+                  <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center">
+                    <Package className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                )}
                 <div>
                   <h3 className="font-semibold text-lg">{selectedProduct.name}</h3>
-                  <p className="text-sm text-muted-foreground">{selectedProduct.brand}</p>
+                  <p className="text-sm text-muted-foreground">{selectedProduct.brand || 'No brand'}</p>
                   <Badge variant="secondary" className={selectedProduct.status === 'active' ? 'bg-emerald-500/10 text-emerald-600 mt-1' : 'bg-muted text-muted-foreground mt-1'}>
                     {selectedProduct.status}
                   </Badge>
@@ -262,12 +320,12 @@ export default function CatalogManager() {
 
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="p-3 rounded-lg bg-muted/50">
-                  <p className="text-muted-foreground text-xs">Master SKU</p>
-                  <p className="font-mono font-medium">{selectedProduct.masterSkuId}</p>
+                  <p className="text-muted-foreground text-xs">SKU</p>
+                  <p className="font-mono font-medium">{selectedProduct.sku}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50">
                   <p className="text-muted-foreground text-xs">Category</p>
-                  <p className="font-medium">{selectedProduct.category}</p>
+                  <p className="font-medium">{selectedProduct.category || 'N/A'}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50">
                   <p className="text-muted-foreground text-xs">MRP</p>
@@ -275,36 +333,27 @@ export default function CatalogManager() {
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50">
                   <p className="text-muted-foreground text-xs">Base Price</p>
-                  <p className="font-bold text-lg">{formatCurrency(selectedProduct.basePrice)}</p>
+                  <p className="font-bold text-lg">{formatCurrency(selectedProduct.base_price)}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50">
                   <p className="text-muted-foreground text-xs">HSN Code</p>
-                  <p className="font-medium">{selectedProduct.hsnCode || 'N/A'}</p>
+                  <p className="font-medium">{selectedProduct.hsn_code || 'N/A'}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-muted/50">
                   <p className="text-muted-foreground text-xs">GST %</p>
-                  <p className="font-medium">{selectedProduct.gstPercent || 18}%</p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs text-muted-foreground mb-2 font-medium">Portal-wise Pricing</p>
-                <div className="space-y-1">
-                  {Object.entries(selectedProduct.portalPrices).map(([portal, price]) => (
-                    <div key={portal} className="flex justify-between items-center p-2 bg-muted/30 rounded text-sm">
-                      <span className="capitalize font-medium">{portal}</span>
-                      <span className="font-bold">{formatCurrency(price)}</span>
-                    </div>
-                  ))}
+                  <p className="font-medium">{selectedProduct.gst_percent || 18}%</p>
                 </div>
               </div>
 
               <div>
                 <p className="text-xs text-muted-foreground mb-2 font-medium">Enabled Portals</p>
                 <div className="flex gap-1.5 flex-wrap">
-                  {selectedProduct.portalsEnabled.map(p => (
+                  {(selectedProduct.portals_enabled || []).map((p: string) => (
                     <Badge key={p} variant="outline" className="capitalize">{p}</Badge>
                   ))}
+                  {(!selectedProduct.portals_enabled || selectedProduct.portals_enabled.length === 0) && (
+                    <span className="text-sm text-muted-foreground">No portals enabled</span>
+                  )}
                 </div>
               </div>
             </div>
@@ -344,16 +393,13 @@ export default function CatalogManager() {
         <DialogContent>
           <DialogHeader><DialogTitle>Bulk Status Update ({selectedIds.length} products)</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>New Status</Label>
-              <Select value={bulkStatus} onValueChange={(v: 'active' | 'inactive') => setBulkStatus(v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={bulkStatus} onValueChange={(v: 'active' | 'inactive') => setBulkStatus(v)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsBulkStatusOpen(false)}>Cancel</Button>
               <Button onClick={handleBulkStatusUpdate}>Apply</Button>
@@ -362,23 +408,20 @@ export default function CatalogManager() {
         </DialogContent>
       </Dialog>
 
-      {/* Bulk Portal Dialog */}
+      {/* Bulk Portal Toggle Dialog */}
       <Dialog open={isBulkPortalOpen} onOpenChange={setIsBulkPortalOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Portal Enable/Disable ({selectedIds.length} products)</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Portal Visibility ({selectedIds.length} products)</DialogTitle></DialogHeader>
           <div className="space-y-3">
             {PORTALS.map(portal => (
-              <div key={portal} className="flex items-center justify-between p-3 border rounded-lg">
+              <div key={portal} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                 <span className="capitalize font-medium">{portal.replace('_', ' ')}</span>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="text-emerald-600" onClick={() => handleBulkPortalToggle(portal, 'enable')}>Enable</Button>
-                  <Button size="sm" variant="outline" className="text-destructive" onClick={() => handleBulkPortalToggle(portal, 'disable')}>Disable</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleBulkPortalToggle(portal, 'enable')}>Enable</Button>
+                  <Button size="sm" variant="outline" onClick={() => handleBulkPortalToggle(portal, 'disable')}>Disable</Button>
                 </div>
               </div>
             ))}
-            <div className="flex justify-end pt-2">
-              <Button variant="outline" onClick={() => setIsBulkPortalOpen(false)}>Close</Button>
-            </div>
           </div>
         </DialogContent>
       </Dialog>
