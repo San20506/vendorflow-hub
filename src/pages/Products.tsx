@@ -246,7 +246,7 @@ export default function Products() {
                           <Select value={formData.category} onValueChange={v => setFormData(f => ({ ...f, category: v }))}>
                             <SelectTrigger className={formErrors.category ? 'border-destructive' : ''}><SelectValue placeholder="Select category" /></SelectTrigger>
                             <SelectContent>
-                              {categories.map(cat => (
+                              {categories.map((cat: string) => (
                                 <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                               ))}
                             </SelectContent>
