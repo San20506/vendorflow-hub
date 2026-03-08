@@ -117,6 +117,11 @@ export default function Inventory() {
     return Array.from(unique);
   }, [inventoryState]);
 
+  const allBrands = useMemo(() => {
+    const unique = new Set(inventoryState.map((i: any) => i.brand as string).filter(Boolean));
+    return Array.from(unique);
+  }, [inventoryState]);
+
   const filteredInventory = useMemo(() => {
     return inventoryState.filter(item => {
       const matchesPortal = selectedPortal === 'all' || item.portal === selectedPortal;
