@@ -139,6 +139,60 @@ export type Database = {
           },
         ]
       }
+      automation_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          feature_id: string
+          id: string
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          feature_id: string
+          id?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          feature_id?: string
+          id?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
+      chat_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          messages: Json
+          title: string
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          title?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          title?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
       credit_notes: {
         Row: {
           cgst: number | null
