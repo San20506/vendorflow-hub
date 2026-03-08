@@ -239,11 +239,12 @@ export default function Dashboard() {
   []);
 
   const kpiData = useMemo(() => {
-    if (selectedPortal === 'all') return mockKPIData;
-    const po = mockOrders.filter(o => o.portal === selectedPortal);
-    const pi = mockInventory.filter(i => i.portal === selectedPortal);
-    const pr = mockReturns.filter(r => r.portal === selectedPortal);
-    const ps = mockSettlements.filter(s => s.portal === selectedPortal);
+    const defaultKpi = { totalSales: orders.reduce((s, o) => s + (o.totalAmount || 0), 0), ordersToday: orders.filter(o => new Date(o.orderDate).toDateString() === new Date().toDateString()).length, inventoryValue: inventoryItems.reduce((s, i) => s + (i.availableQuantity * 500), 0), lowStockItems: inventoryItems.filter(i => i.availableQuantity <= i.lowStockThreshold).length, pendingReturns: returns.filter(r => r.status === 'requested' || r.status === 'pending').length, pendingSettlements: settlements.filter(s => s.status === 'pending').length, salesGrowth: 0, ordersGrowth: 0 };
+    if (selectedPortal === 'all') return defaultKpi;
+    const po = orders.filter(o => o.portal === selectedPortal);
+    const pi = inventoryItems.filter(i => i.portal === selectedPortal);
+    const pr = returns.filter(r => r.portal === selectedPortal);
+    const ps = settlements.filter(s => s.portal === selectedPortal);
     return {
       totalSales: po.reduce((s, o) => s + o.totalAmount, 0),
       ordersToday: po.filter(o => new Date(o.orderDate).toDateString() === new Date().toDateString()).length,
