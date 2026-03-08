@@ -201,7 +201,7 @@ export default function Dashboard() {
   // ─── SALES CHART ───
   const salesChartData = useMemo(() => {
     const grouped: Record<string, { date: string; revenue: number; orders: number }> = {};
-    mockSalesData
+    salesData
       .filter(d => selectedPortal === 'all' || d.portal === selectedPortal)
       .forEach(d => {
         const dateKey = new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
