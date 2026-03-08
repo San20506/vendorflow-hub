@@ -105,11 +105,11 @@ export default function Products() {
   }, [searchQuery, categoryFilter, statusFilter, sortField, sortDir]);
 
   const stats = useMemo(() => ({
-    total: mockProducts.length,
-    active: mockProducts.filter(p => p.status === 'active').length,
-    inactive: mockProducts.filter(p => p.status === 'inactive').length,
+    total: allProducts.length,
+    active: allProducts.filter((p: any) => p.status === 'active').length,
+    inactive: allProducts.filter((p: any) => p.status === 'inactive').length,
     duplicates: duplicateSkus.length,
-  }), [duplicateSkus]);
+  }), [allProducts, duplicateSkus]);
 
   const formatCurrency = (value: number) => `₹${value.toLocaleString()}`;
   const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString('en-IN', {
