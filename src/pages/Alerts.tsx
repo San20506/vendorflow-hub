@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
-import { mockAlerts, portalConfigs } from '@/services/mockData';
+import { useState, useEffect, useMemo } from 'react';
+import { alertsDb } from '@/services/database';
+import { portalConfigs } from '@/services/mockData';
 import { AlertSeverity, AlertType } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,25 +40,45 @@ const typeIcons: Record<AlertType, React.ElementType> = {
 };
 
 export default function Alerts() {
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [severityFilter, setSeverityFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
 
+  const fetchAlerts = async () => {
+    try {
+      setLoading(true);
+      const data = await alertsDb.getAll();
+      setAlerts(data);
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { fetchAlerts(); }, []);
+
   const filteredAlerts = useMemo(() => {
-    return mockAlerts.filter(alert => {
+    return alerts.filter((alert: any) => {
       const matchesSeverity = severityFilter === 'all' || alert.severity === severityFilter;
       const matchesType = typeFilter === 'all' || alert.type === typeFilter;
       const matchesRead = !showUnreadOnly || !alert.read;
       return matchesSeverity && matchesType && matchesRead;
     });
-  }, [severityFilter, typeFilter, showUnreadOnly]);
+  }, [alerts, severityFilter, typeFilter, showUnreadOnly]);
 
   const stats = useMemo(() => ({
-    total: mockAlerts.length,
-    unread: mockAlerts.filter(a => !a.read).length,
-    critical: mockAlerts.filter(a => a.severity === 'critical').length,
-    warning: mockAlerts.filter(a => a.severity === 'warning').length,
-  }), []);
+    total: alerts.length,
+    unread: alerts.filter((a: any) => !a.read).length,
+    critical: alerts.filter((a: any) => a.severity === 'critical').length,
+    warning: alerts.filter((a: any) => a.severity === 'warning').length,
+  }), [alerts]);
+
+  const handleMarkAllRead = async () => {
+    try {
+      await alertsDb.markAllAsRead();
+      fetchAlerts();
+    } catch (err) { console.error(err); }
+  };
 
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -81,7 +102,7 @@ export default function Alerts() {
           <p className="text-muted-foreground">Stay updated on critical events and actions needed</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2" onClick={handleMarkAllRead}>
             <CheckCheck className="w-4 h-4" />
             Mark All Read
           </Button>

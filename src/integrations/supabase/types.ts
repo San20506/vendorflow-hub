@@ -50,6 +50,95 @@ export type Database = {
         }
         Relationships: []
       }
+      alerts: {
+        Row: {
+          action_url: string | null
+          created_at: string
+          id: string
+          message: string
+          portal: string | null
+          read: boolean | null
+          severity: string
+          title: string
+          type: string
+          vendor_id: string | null
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          portal?: string | null
+          read?: boolean | null
+          severity?: string
+          title: string
+          type?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          portal?: string | null
+          read?: boolean | null
+          severity?: string
+          title?: string
+          type?: string
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
+      attendance: {
+        Row: {
+          attendance_date: string
+          check_in: string | null
+          check_out: string | null
+          created_at: string
+          employee_id: string
+          hours_worked: number | null
+          id: string
+          method: string | null
+          network: string | null
+          status: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          attendance_date?: string
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          employee_id: string
+          hours_worked?: number | null
+          id?: string
+          method?: string | null
+          network?: string | null
+          status?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          attendance_date?: string
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string
+          employee_id?: string
+          hours_worked?: number | null
+          id?: string
+          method?: string | null
+          network?: string | null
+          status?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_notes: {
         Row: {
           cgst: number | null
@@ -109,6 +198,66 @@ export type Database = {
           },
         ]
       }
+      customers: {
+        Row: {
+          address: string | null
+          channels: string[] | null
+          city: string | null
+          created_at: string
+          email: string | null
+          first_order_date: string | null
+          id: string
+          last_order_date: string | null
+          name: string
+          phone: string | null
+          pincode: string | null
+          state: string | null
+          total_orders: number | null
+          total_returns: number | null
+          total_spent: number | null
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          channels?: string[] | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          first_order_date?: string | null
+          id?: string
+          last_order_date?: string | null
+          name: string
+          phone?: string | null
+          pincode?: string | null
+          state?: string | null
+          total_orders?: number | null
+          total_returns?: number | null
+          total_spent?: number | null
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          channels?: string[] | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          first_order_date?: string | null
+          id?: string
+          last_order_date?: string | null
+          name?: string
+          phone?: string | null
+          pincode?: string | null
+          state?: string | null
+          total_orders?: number | null
+          total_returns?: number | null
+          total_spent?: number | null
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
       debit_notes: {
         Row: {
           cgst: number | null
@@ -167,6 +316,150 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      employees: {
+        Row: {
+          created_at: string
+          department: string | null
+          id: string
+          join_date: string | null
+          monthly_salary: number | null
+          name: string
+          per_piece_rate: number | null
+          phone: string | null
+          role: string
+          status: string | null
+          type: string
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          id?: string
+          join_date?: string | null
+          monthly_salary?: number | null
+          name: string
+          per_piece_rate?: number | null
+          phone?: string | null
+          role: string
+          status?: string | null
+          type?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          id?: string
+          join_date?: string | null
+          monthly_salary?: number | null
+          name?: string
+          per_piece_rate?: number | null
+          phone?: string | null
+          role?: string
+          status?: string | null
+          type?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
+      expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string
+          expense_date: string
+          id: string
+          paid_by: string | null
+          payment_mode: string | null
+          receipt: boolean | null
+          vendor_id: string | null
+        }
+        Insert: {
+          amount?: number
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description: string
+          expense_date?: string
+          id?: string
+          paid_by?: string | null
+          payment_mode?: string | null
+          receipt?: boolean | null
+          vendor_id?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          expense_date?: string
+          id?: string
+          paid_by?: string | null
+          payment_mode?: string | null
+          receipt?: boolean | null
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
+      inventory: {
+        Row: {
+          aging_days: number | null
+          available_quantity: number | null
+          brand: string | null
+          channel_allocations: Json | null
+          created_at: string
+          id: string
+          low_stock_threshold: number | null
+          master_quantity: number | null
+          portal: string | null
+          product_name: string
+          reserved_quantity: number | null
+          sku_id: string
+          updated_at: string
+          vendor_id: string | null
+          warehouse: string | null
+        }
+        Insert: {
+          aging_days?: number | null
+          available_quantity?: number | null
+          brand?: string | null
+          channel_allocations?: Json | null
+          created_at?: string
+          id?: string
+          low_stock_threshold?: number | null
+          master_quantity?: number | null
+          portal?: string | null
+          product_name: string
+          reserved_quantity?: number | null
+          sku_id: string
+          updated_at?: string
+          vendor_id?: string | null
+          warehouse?: string | null
+        }
+        Update: {
+          aging_days?: number | null
+          available_quantity?: number | null
+          brand?: string | null
+          channel_allocations?: Json | null
+          created_at?: string
+          id?: string
+          low_stock_threshold?: number | null
+          master_quantity?: number | null
+          portal?: string | null
+          product_name?: string
+          reserved_quantity?: number | null
+          sku_id?: string
+          updated_at?: string
+          vendor_id?: string | null
+          warehouse?: string | null
+        }
+        Relationships: []
       }
       invoice_items: {
         Row: {
@@ -333,6 +626,36 @@ export type Database = {
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string
           value?: number | null
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
+      marketing_config: {
+        Row: {
+          channel: string
+          config: Json
+          created_at: string
+          enabled: boolean | null
+          id: string
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          channel: string
+          config?: Json
+          created_at?: string
+          enabled?: boolean | null
+          id?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          channel?: string
+          config?: Json
+          created_at?: string
+          enabled?: boolean | null
+          id?: string
+          updated_at?: string
           vendor_id?: string | null
         }
         Relationships: []
@@ -532,6 +855,44 @@ export type Database = {
         }
         Relationships: []
       }
+      product_health: {
+        Row: {
+          created_at: string
+          id: string
+          portal_status: Json
+          product_id: string | null
+          product_name: string
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          portal_status?: Json
+          product_id?: string | null
+          product_name: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          portal_status?: Json
+          product_id?: string | null
+          product_name?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_health_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           base_price: number
@@ -655,6 +1016,45 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          created_by: string | null
+          file_url: string | null
+          format: string | null
+          generated_at: string
+          id: string
+          name: string
+          scheduled: boolean | null
+          size: string | null
+          type: string
+          vendor_id: string | null
+        }
+        Insert: {
+          created_by?: string | null
+          file_url?: string | null
+          format?: string | null
+          generated_at?: string
+          id?: string
+          name: string
+          scheduled?: boolean | null
+          size?: string | null
+          type: string
+          vendor_id?: string | null
+        }
+        Update: {
+          created_by?: string | null
+          file_url?: string | null
+          format?: string | null
+          generated_at?: string
+          id?: string
+          name?: string
+          scheduled?: boolean | null
+          size?: string | null
+          type?: string
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
       returns: {
         Row: {
           claim_status: string | null
@@ -768,6 +1168,227 @@ export type Database = {
         }
         Relationships: []
       }
+      sku_mappings: {
+        Row: {
+          amazon_sku: string | null
+          blinkit_sku: string | null
+          brand: string | null
+          created_at: string
+          firstcry_sku: string | null
+          flipkart_sku: string | null
+          id: string
+          master_sku_id: string
+          meesho_sku: string | null
+          own_website_sku: string | null
+          product_name: string
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          amazon_sku?: string | null
+          blinkit_sku?: string | null
+          brand?: string | null
+          created_at?: string
+          firstcry_sku?: string | null
+          flipkart_sku?: string | null
+          id?: string
+          master_sku_id: string
+          meesho_sku?: string | null
+          own_website_sku?: string | null
+          product_name: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          amazon_sku?: string | null
+          blinkit_sku?: string | null
+          brand?: string | null
+          created_at?: string
+          firstcry_sku?: string | null
+          flipkart_sku?: string | null
+          id?: string
+          master_sku_id?: string
+          meesho_sku?: string | null
+          own_website_sku?: string | null
+          product_name?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
+      social_messages: {
+        Row: {
+          ai_confidence: number | null
+          auto_reply_flow: string | null
+          auto_reply_triggered: boolean | null
+          category: string | null
+          channel: string
+          conversation_history: Json | null
+          converted_to_task: boolean | null
+          created_at: string
+          escalated_to: string | null
+          follow_up_date: string | null
+          follow_up_status: string | null
+          human_replied: boolean | null
+          id: string
+          preview: string | null
+          saved_to_contacts: boolean | null
+          sender: string
+          sender_phone: string | null
+          status: string | null
+          subject: string | null
+          task_category: string | null
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          ai_confidence?: number | null
+          auto_reply_flow?: string | null
+          auto_reply_triggered?: boolean | null
+          category?: string | null
+          channel: string
+          conversation_history?: Json | null
+          converted_to_task?: boolean | null
+          created_at?: string
+          escalated_to?: string | null
+          follow_up_date?: string | null
+          follow_up_status?: string | null
+          human_replied?: boolean | null
+          id?: string
+          preview?: string | null
+          saved_to_contacts?: boolean | null
+          sender: string
+          sender_phone?: string | null
+          status?: string | null
+          subject?: string | null
+          task_category?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          ai_confidence?: number | null
+          auto_reply_flow?: string | null
+          auto_reply_triggered?: boolean | null
+          category?: string | null
+          channel?: string
+          conversation_history?: Json | null
+          converted_to_task?: boolean | null
+          created_at?: string
+          escalated_to?: string | null
+          follow_up_date?: string | null
+          follow_up_status?: string | null
+          human_replied?: boolean | null
+          id?: string
+          preview?: string | null
+          saved_to_contacts?: boolean | null
+          sender?: string
+          sender_phone?: string | null
+          status?: string | null
+          subject?: string | null
+          task_category?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
+      tailor_work: {
+        Row: {
+          completed: number | null
+          created_at: string
+          employee_id: string
+          id: string
+          pending: number | null
+          product_name: string
+          rate_per_piece: number | null
+          received: number | null
+          sku: string | null
+          total_earned: number | null
+          vendor_id: string | null
+          work_date: string
+        }
+        Insert: {
+          completed?: number | null
+          created_at?: string
+          employee_id: string
+          id?: string
+          pending?: number | null
+          product_name: string
+          rate_per_piece?: number | null
+          received?: number | null
+          sku?: string | null
+          total_earned?: number | null
+          vendor_id?: string | null
+          work_date?: string
+        }
+        Update: {
+          completed?: number | null
+          created_at?: string
+          employee_id?: string
+          id?: string
+          pending?: number | null
+          product_name?: string
+          rate_per_piece?: number | null
+          received?: number | null
+          sku?: string | null
+          total_earned?: number | null
+          vendor_id?: string | null
+          work_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tailor_work_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          portal: string | null
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          portal?: string | null
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          portal?: string | null
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -783,6 +1404,168 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      vendors: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          gst_address: string | null
+          gst_business_name: string | null
+          gst_number: string | null
+          gst_status: string | null
+          gst_verified: boolean | null
+          id: string
+          join_date: string | null
+          name: string
+          phone: string | null
+          status: string | null
+          subscription_plan: string | null
+          subscription_status: string | null
+          total_orders: number | null
+          total_products: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          gst_address?: string | null
+          gst_business_name?: string | null
+          gst_number?: string | null
+          gst_status?: string | null
+          gst_verified?: boolean | null
+          id?: string
+          join_date?: string | null
+          name: string
+          phone?: string | null
+          status?: string | null
+          subscription_plan?: string | null
+          subscription_status?: string | null
+          total_orders?: number | null
+          total_products?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          gst_address?: string | null
+          gst_business_name?: string | null
+          gst_number?: string | null
+          gst_status?: string | null
+          gst_verified?: boolean | null
+          id?: string
+          join_date?: string | null
+          name?: string
+          phone?: string | null
+          status?: string | null
+          subscription_plan?: string | null
+          subscription_status?: string | null
+          total_orders?: number | null
+          total_products?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      videos: {
+        Row: {
+          captured_at: string | null
+          created_at: string
+          expires_at: string | null
+          file_name: string | null
+          file_size: string | null
+          id: string
+          internal_status: string | null
+          invoice_image: boolean | null
+          notes: string | null
+          order_id: string
+          resolution: string | null
+          retention_days: number | null
+          updated_at: string
+          vendor_id: string | null
+          verified_by: string | null
+          video_status: string | null
+        }
+        Insert: {
+          captured_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          file_name?: string | null
+          file_size?: string | null
+          id?: string
+          internal_status?: string | null
+          invoice_image?: boolean | null
+          notes?: string | null
+          order_id: string
+          resolution?: string | null
+          retention_days?: number | null
+          updated_at?: string
+          vendor_id?: string | null
+          verified_by?: string | null
+          video_status?: string | null
+        }
+        Update: {
+          captured_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          file_name?: string | null
+          file_size?: string | null
+          id?: string
+          internal_status?: string | null
+          invoice_image?: boolean | null
+          notes?: string | null
+          order_id?: string
+          resolution?: string | null
+          retention_days?: number | null
+          updated_at?: string
+          vendor_id?: string | null
+          verified_by?: string | null
+          video_status?: string | null
+        }
+        Relationships: []
+      }
+      warehouses: {
+        Row: {
+          capacity: number | null
+          created_at: string
+          id: string
+          location: string | null
+          name: string
+          status: string | null
+          storage_cost_per_day: number | null
+          updated_at: string
+          utilized: number | null
+          vendor_id: string | null
+        }
+        Insert: {
+          capacity?: number | null
+          created_at?: string
+          id?: string
+          location?: string | null
+          name: string
+          status?: string | null
+          storage_cost_per_day?: number | null
+          updated_at?: string
+          utilized?: number | null
+          vendor_id?: string | null
+        }
+        Update: {
+          capacity?: number | null
+          created_at?: string
+          id?: string
+          location?: string | null
+          name?: string
+          status?: string | null
+          storage_cost_per_day?: number | null
+          updated_at?: string
+          utilized?: number | null
+          vendor_id?: string | null
         }
         Relationships: []
       }

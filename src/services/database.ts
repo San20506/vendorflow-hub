@@ -291,3 +291,352 @@ export const storageService = {
     return data.publicUrl;
   },
 };
+
+// ==================== EXPENSES ====================
+export const expensesDb = {
+  async getAll(filters?: { category?: string; search?: string }) {
+    let query = supabase.from('expenses' as any).select('*').order('expense_date', { ascending: false });
+    if (filters?.category) query = query.eq('category', filters.category);
+    if (filters?.search) query = query.or(`description.ilike.%${filters.search}%,paid_by.ilike.%${filters.search}%`);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(expense: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('expenses' as any).insert({ ...expense, vendor_id: userId, created_by: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async delete(id: string) {
+    const { error } = await supabase.from('expenses' as any).delete().eq('id', id);
+    if (error) throw error;
+  },
+};
+
+// ==================== EMPLOYEES ====================
+export const employeesDb = {
+  async getAll(search?: string) {
+    let query = supabase.from('employees' as any).select('*').order('created_at', { ascending: false });
+    if (search) query = query.ilike('name', `%${search}%`);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(employee: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('employees' as any).insert({ ...employee, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('employees' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
+
+// ==================== ATTENDANCE ====================
+export const attendanceDb = {
+  async getAll(filters?: { date?: string; employee_id?: string }) {
+    let query = supabase.from('attendance' as any).select('*').order('attendance_date', { ascending: false });
+    if (filters?.date) query = query.eq('attendance_date', filters.date);
+    if (filters?.employee_id) query = query.eq('employee_id', filters.employee_id);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(record: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('attendance' as any).insert({ ...record, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
+
+// ==================== TAILOR WORK ====================
+export const tailorWorkDb = {
+  async getAll() {
+    const { data, error } = await supabase.from('tailor_work' as any).select('*').order('work_date', { ascending: false });
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(work: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('tailor_work' as any).insert({ ...work, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
+
+// ==================== TASKS ====================
+export const tasksDb = {
+  async getAll(filters?: { status?: string; priority?: string; assigned_to?: string }) {
+    let query = supabase.from('tasks' as any).select('*').order('created_at', { ascending: false });
+    if (filters?.status) query = query.eq('status', filters.status);
+    if (filters?.priority) query = query.eq('priority', filters.priority);
+    if (filters?.assigned_to) query = query.eq('assigned_to', filters.assigned_to);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(task: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('tasks' as any).insert({ ...task, vendor_id: userId, created_by: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('tasks' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async delete(id: string) {
+    const { error } = await supabase.from('tasks' as any).delete().eq('id', id);
+    if (error) throw error;
+  },
+};
+
+// ==================== WAREHOUSES ====================
+export const warehousesDb = {
+  async getAll() {
+    const { data, error } = await supabase.from('warehouses' as any).select('*').order('name');
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(warehouse: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('warehouses' as any).insert({ ...warehouse, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('warehouses' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
+
+// ==================== VENDORS ====================
+export const vendorsDb = {
+  async getAll() {
+    const { data, error } = await supabase.from('vendors' as any).select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(vendor: any) {
+    const { data, error } = await supabase.from('vendors' as any).insert(vendor).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('vendors' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
+
+// ==================== CUSTOMERS ====================
+export const customersDb = {
+  async getAll(filters?: { search?: string }) {
+    let query = supabase.from('customers' as any).select('*').order('created_at', { ascending: false });
+    if (filters?.search) query = query.or(`name.ilike.%${filters.search}%,email.ilike.%${filters.search}%,pincode.ilike.%${filters.search}%,state.ilike.%${filters.search}%`);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(customer: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('customers' as any).insert({ ...customer, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('customers' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
+
+// ==================== INVENTORY ====================
+export const inventoryDb = {
+  async getAll(filters?: { portal?: string; warehouse?: string; search?: string }) {
+    let query = supabase.from('inventory' as any).select('*').order('updated_at', { ascending: false });
+    if (filters?.portal) query = query.eq('portal', filters.portal);
+    if (filters?.warehouse) query = query.eq('warehouse', filters.warehouse);
+    if (filters?.search) query = query.or(`product_name.ilike.%${filters.search}%,sku_id.ilike.%${filters.search}%`);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(item: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('inventory' as any).insert({ ...item, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('inventory' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
+
+// ==================== SKU MAPPINGS ====================
+export const skuMappingsDb = {
+  async getAll(search?: string) {
+    let query = supabase.from('sku_mappings' as any).select('*').order('created_at', { ascending: false });
+    if (search) query = query.or(`master_sku_id.ilike.%${search}%,product_name.ilike.%${search}%`);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(mapping: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('sku_mappings' as any).insert({ ...mapping, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('sku_mappings' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async delete(id: string) {
+    const { error } = await supabase.from('sku_mappings' as any).delete().eq('id', id);
+    if (error) throw error;
+  },
+};
+
+// ==================== ALERTS ====================
+export const alertsDb = {
+  async getAll(filters?: { severity?: string; type?: string; unread?: boolean }) {
+    let query = supabase.from('alerts' as any).select('*').order('created_at', { ascending: false });
+    if (filters?.severity) query = query.eq('severity', filters.severity);
+    if (filters?.type) query = query.eq('type', filters.type);
+    if (filters?.unread) query = query.eq('read', false);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async markAsRead(id: string) {
+    const { error } = await supabase.from('alerts' as any).update({ read: true }).eq('id', id);
+    if (error) throw error;
+  },
+  async markAllAsRead() {
+    const { error } = await supabase.from('alerts' as any).update({ read: true }).eq('read', false);
+    if (error) throw error;
+  },
+  async create(alert: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('alerts' as any).insert({ ...alert, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
+
+// ==================== VIDEOS ====================
+export const videosDb = {
+  async getAll(filters?: { status?: string; search?: string }) {
+    let query = supabase.from('videos' as any).select('*').order('created_at', { ascending: false });
+    if (filters?.status) query = query.eq('video_status', filters.status);
+    if (filters?.search) query = query.or(`order_id.ilike.%${filters.search}%,file_name.ilike.%${filters.search}%`);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(video: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('videos' as any).insert({ ...video, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('videos' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
+
+// ==================== REPORTS ====================
+export const reportsDb = {
+  async getAll() {
+    const { data, error } = await supabase.from('reports' as any).select('*').order('generated_at', { ascending: false });
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(report: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('reports' as any).insert({ ...report, vendor_id: userId, created_by: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('reports' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
+
+// ==================== MARKETING CONFIG ====================
+export const marketingConfigDb = {
+  async getAll() {
+    const { data, error } = await supabase.from('marketing_config' as any).select('*').order('channel');
+    if (error) throw error;
+    return data as any[];
+  },
+  async upsert(channel: string, config: any, enabled: boolean) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('marketing_config' as any).upsert({
+      vendor_id: userId, channel, config, enabled
+    }, { onConflict: 'vendor_id,channel' }).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
+
+// ==================== SOCIAL MESSAGES ====================
+export const socialMessagesDb = {
+  async getAll(filters?: { channel?: string; category?: string; search?: string }) {
+    let query = supabase.from('social_messages' as any).select('*').order('created_at', { ascending: false });
+    if (filters?.channel && filters.channel !== 'all') query = query.eq('channel', filters.channel);
+    if (filters?.category && filters.category !== 'all') query = query.eq('category', filters.category);
+    if (filters?.search) query = query.or(`sender.ilike.%${filters.search}%,subject.ilike.%${filters.search}%,preview.ilike.%${filters.search}%`);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(message: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('social_messages' as any).insert({ ...message, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('social_messages' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
+
+// ==================== PRODUCT HEALTH ====================
+export const productHealthDb = {
+  async getAll(filters?: { search?: string }) {
+    let query = supabase.from('product_health' as any).select('*').order('product_name');
+    if (filters?.search) query = query.ilike('product_name', `%${filters.search}%`);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(record: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('product_health' as any).insert({ ...record, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('product_health' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+};

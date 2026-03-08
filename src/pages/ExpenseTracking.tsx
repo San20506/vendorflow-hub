@@ -1,18 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { expensesDb } from '@/services/database';
 import {
-  Plus, Download, Search, Filter, IndianRupee, TrendingUp, TrendingDown,
-  Building2, Warehouse, Coffee, Bus, Pencil, Receipt, Calendar, Trash2
+  Plus, Download, Search, IndianRupee, TrendingUp, TrendingDown,
+  Building2, Warehouse, Coffee, Bus, Pencil, Receipt, Calendar, Trash2, Loader2
 } from 'lucide-react';
 
 const expenseCategories = [
@@ -25,68 +25,69 @@ const expenseCategories = [
   { id: 'tips_wages', label: 'Tips & Wages', icon: IndianRupee, color: 'bg-pink-100 text-pink-700' },
 ];
 
-interface Expense {
-  id: string;
-  date: string;
-  category: string;
-  description: string;
-  amount: number;
-  paidBy: string;
-  paymentMode: string;
-  receipt: boolean;
-}
-
-const mockExpenses: Expense[] = [
-  { id: '1', date: '2026-03-04', category: 'office_misc', description: 'Printer ink cartridge', amount: 1200, paidBy: 'Ravi', paymentMode: 'UPI', receipt: true },
-  { id: '2', date: '2026-03-04', category: 'food', description: 'Team lunch', amount: 2500, paidBy: 'Priya', paymentMode: 'Cash', receipt: true },
-  { id: '3', date: '2026-03-03', category: 'transport', description: 'Courier delivery charges', amount: 450, paidBy: 'Amit', paymentMode: 'UPI', receipt: false },
-  { id: '4', date: '2026-03-03', category: 'stationery', description: 'A4 paper & pens', amount: 800, paidBy: 'Ravi', paymentMode: 'Cash', receipt: true },
-  { id: '5', date: '2026-03-02', category: 'warehouse_misc', description: 'Packing tape & bubble wrap', amount: 1500, paidBy: 'Sunil', paymentMode: 'Card', receipt: true },
-  { id: '6', date: '2026-03-02', category: 'tips_wages', description: 'Daily helper wages', amount: 600, paidBy: 'Priya', paymentMode: 'Cash', receipt: false },
-  { id: '7', date: '2026-03-01', category: 'daily', description: 'Electricity bill (office)', amount: 3200, paidBy: 'Ravi', paymentMode: 'Online', receipt: true },
-  { id: '8', date: '2026-03-01', category: 'food', description: 'Tea & snacks for guests', amount: 350, paidBy: 'Amit', paymentMode: 'Cash', receipt: false },
-];
-
 export default function ExpenseTracking() {
   const { toast } = useToast();
-  const [expenses, setExpenses] = useState<Expense[]>(mockExpenses);
+  const [expenses, setExpenses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [filterPeriod, setFilterPeriod] = useState('this_month');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newExpense, setNewExpense] = useState({
-    category: '', description: '', amount: '', paidBy: '', paymentMode: 'Cash', receipt: false
+    category: '', description: '', amount: '', paid_by: '', payment_mode: 'Cash', receipt: false
   });
 
-  const filteredExpenses = expenses.filter(e => {
-    const matchSearch = e.description.toLowerCase().includes(search.toLowerCase()) || e.paidBy.toLowerCase().includes(search.toLowerCase());
-    const matchCategory = filterCategory === 'all' || e.category === filterCategory;
-    return matchSearch && matchCategory;
-  });
+  const fetchExpenses = async () => {
+    try {
+      setLoading(true);
+      const data = await expensesDb.getAll(filterCategory !== 'all' ? { category: filterCategory, search } : { search });
+      setExpenses(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const totalExpense = filteredExpenses.reduce((s, e) => s + e.amount, 0);
+  useEffect(() => { fetchExpenses(); }, [filterCategory, search]);
+
+  const filteredExpenses = expenses;
+  const totalExpense = filteredExpenses.reduce((s, e) => s + Number(e.amount), 0);
   const categoryTotals = expenseCategories.map(cat => ({
     ...cat,
-    total: expenses.filter(e => e.category === cat.id).reduce((s, e) => s + e.amount, 0),
+    total: expenses.filter(e => e.category === cat.id).reduce((s, e) => s + Number(e.amount), 0),
     count: expenses.filter(e => e.category === cat.id).length,
   }));
 
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
     if (!newExpense.category || !newExpense.description || !newExpense.amount) return;
-    const expense: Expense = {
-      id: Date.now().toString(),
-      date: new Date().toISOString().split('T')[0],
-      category: newExpense.category,
-      description: newExpense.description,
-      amount: parseFloat(newExpense.amount),
-      paidBy: newExpense.paidBy || 'Self',
-      paymentMode: newExpense.paymentMode,
-      receipt: newExpense.receipt,
-    };
-    setExpenses([expense, ...expenses]);
-    setShowAddDialog(false);
-    setNewExpense({ category: '', description: '', amount: '', paidBy: '', paymentMode: 'Cash', receipt: false });
-    toast({ title: 'Expense Added', description: `₹${expense.amount} recorded under ${expenseCategories.find(c => c.id === expense.category)?.label}` });
+    try {
+      await expensesDb.create({
+        category: newExpense.category,
+        description: newExpense.description,
+        amount: parseFloat(newExpense.amount),
+        paid_by: newExpense.paid_by || 'Self',
+        payment_mode: newExpense.payment_mode,
+        receipt: newExpense.receipt,
+        expense_date: new Date().toISOString().split('T')[0],
+      });
+      setShowAddDialog(false);
+      setNewExpense({ category: '', description: '', amount: '', paid_by: '', payment_mode: 'Cash', receipt: false });
+      toast({ title: 'Expense Added', description: `₹${newExpense.amount} recorded successfully` });
+      fetchExpenses();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await expensesDb.delete(id);
+      toast({ title: 'Removed' });
+      fetchExpenses();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
   };
 
   const getCategoryInfo = (id: string) => expenseCategories.find(c => c.id === id);
@@ -129,13 +130,13 @@ export default function ExpenseTracking() {
                   </div>
                   <div>
                     <Label>Paid By</Label>
-                    <Input value={newExpense.paidBy} onChange={e => setNewExpense({ ...newExpense, paidBy: e.target.value })} placeholder="Name" />
+                    <Input value={newExpense.paid_by} onChange={e => setNewExpense({ ...newExpense, paid_by: e.target.value })} placeholder="Name" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label>Payment Mode</Label>
-                    <Select value={newExpense.paymentMode} onValueChange={v => setNewExpense({ ...newExpense, paymentMode: v })}>
+                    <Select value={newExpense.payment_mode} onValueChange={v => setNewExpense({ ...newExpense, payment_mode: v })}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {['Cash', 'UPI', 'Card', 'Online', 'Wallet'].map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
@@ -156,58 +157,39 @@ export default function ExpenseTracking() {
         </div>
       </div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="border-l-4 border-l-primary">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <IndianRupee className="w-4 h-4 text-primary" />
-              <span className="text-xs text-muted-foreground">Total Expenses</span>
-            </div>
+            <div className="flex items-center gap-2 mb-1"><IndianRupee className="w-4 h-4 text-primary" /><span className="text-xs text-muted-foreground">Total Expenses</span></div>
             <p className="text-2xl font-bold">₹{totalExpense.toLocaleString('en-IN')}</p>
             <p className="text-xs text-muted-foreground mt-1">This month</p>
           </CardContent>
         </Card>
         <Card className="border-l-4 border-l-green-500">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingDown className="w-4 h-4 text-green-600" />
-              <span className="text-xs text-muted-foreground">Avg Daily</span>
-            </div>
+            <div className="flex items-center gap-2 mb-1"><TrendingDown className="w-4 h-4 text-green-600" /><span className="text-xs text-muted-foreground">Avg Daily</span></div>
             <p className="text-2xl font-bold">₹{Math.round(totalExpense / 30).toLocaleString('en-IN')}</p>
-            <p className="text-xs text-green-600 mt-1">↓ 8% vs last month</p>
           </CardContent>
         </Card>
         <Card className="border-l-4 border-l-orange-500">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Receipt className="w-4 h-4 text-orange-600" />
-              <span className="text-xs text-muted-foreground">Entries</span>
-            </div>
+            <div className="flex items-center gap-2 mb-1"><Receipt className="w-4 h-4 text-orange-600" /><span className="text-xs text-muted-foreground">Entries</span></div>
             <p className="text-2xl font-bold">{expenses.length}</p>
-            <p className="text-xs text-muted-foreground mt-1">Transactions</p>
           </CardContent>
         </Card>
         <Card className="border-l-4 border-l-red-500">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingUp className="w-4 h-4 text-red-600" />
-              <span className="text-xs text-muted-foreground">Top Category</span>
-            </div>
-            <p className="text-lg font-bold">{categoryTotals.sort((a, b) => b.total - a.total)[0]?.label.split(' ')[0]}</p>
-            <p className="text-xs text-red-600 mt-1">₹{categoryTotals.sort((a, b) => b.total - a.total)[0]?.total.toLocaleString('en-IN')}</p>
+            <div className="flex items-center gap-2 mb-1"><TrendingUp className="w-4 h-4 text-red-600" /><span className="text-xs text-muted-foreground">Top Category</span></div>
+            <p className="text-lg font-bold">{categoryTotals.sort((a, b) => b.total - a.total)[0]?.label.split(' ')[0] || '—'}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Category Breakdown */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
         {categoryTotals.map(cat => (
           <Card key={cat.id} className={`cursor-pointer transition-all hover:shadow-md ${filterCategory === cat.id ? 'ring-2 ring-primary' : ''}`} onClick={() => setFilterCategory(filterCategory === cat.id ? 'all' : cat.id)}>
             <CardContent className="p-3 text-center">
-              <div className={`w-8 h-8 rounded-lg ${cat.color} flex items-center justify-center mx-auto mb-2`}>
-                <cat.icon className="w-4 h-4" />
-              </div>
+              <div className={`w-8 h-8 rounded-lg ${cat.color} flex items-center justify-center mx-auto mb-2`}><cat.icon className="w-4 h-4" /></div>
               <p className="text-xs font-medium truncate">{cat.label.split(' ')[0]}</p>
               <p className="text-sm font-bold mt-1">₹{cat.total.toLocaleString('en-IN')}</p>
               <p className="text-[10px] text-muted-foreground">{cat.count} entries</p>
@@ -216,7 +198,6 @@ export default function ExpenseTracking() {
         ))}
       </div>
 
-      {/* Filters & Table */}
       <Card>
         <CardHeader className="pb-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -239,44 +220,46 @@ export default function ExpenseTracking() {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Paid By</TableHead>
-                <TableHead>Mode</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead>Receipt</TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredExpenses.map(expense => {
-                const cat = getCategoryInfo(expense.category);
-                return (
-                  <TableRow key={expense.id}>
-                    <TableCell className="text-sm">{expense.date}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={cat?.color}>{cat?.label.split(' ')[0]}</Badge>
-                    </TableCell>
-                    <TableCell className="font-medium">{expense.description}</TableCell>
-                    <TableCell className="text-sm">{expense.paidBy}</TableCell>
-                    <TableCell><Badge variant="secondary">{expense.paymentMode}</Badge></TableCell>
-                    <TableCell className="text-right font-semibold">₹{expense.amount.toLocaleString('en-IN')}</TableCell>
-                    <TableCell>{expense.receipt ? <Badge variant="outline" className="text-green-600 border-green-300">Yes</Badge> : <span className="text-muted-foreground text-xs">No</span>}</TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setExpenses(expenses.filter(e => e.id !== expense.id)); toast({ title: 'Removed' }); }}>
-                        <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-          {filteredExpenses.length === 0 && <p className="text-center text-muted-foreground py-8">No expenses found</p>}
+          {loading ? (
+            <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Paid By</TableHead>
+                  <TableHead>Mode</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead>Receipt</TableHead>
+                  <TableHead></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredExpenses.map(expense => {
+                  const cat = getCategoryInfo(expense.category);
+                  return (
+                    <TableRow key={expense.id}>
+                      <TableCell className="text-sm">{expense.expense_date}</TableCell>
+                      <TableCell><Badge variant="outline" className={cat?.color}>{cat?.label.split(' ')[0]}</Badge></TableCell>
+                      <TableCell className="font-medium">{expense.description}</TableCell>
+                      <TableCell className="text-sm">{expense.paid_by}</TableCell>
+                      <TableCell><Badge variant="secondary">{expense.payment_mode}</Badge></TableCell>
+                      <TableCell className="text-right font-semibold">₹{Number(expense.amount).toLocaleString('en-IN')}</TableCell>
+                      <TableCell>{expense.receipt ? <Badge variant="outline" className="text-green-600 border-green-300">Yes</Badge> : <span className="text-muted-foreground text-xs">No</span>}</TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(expense.id)}>
+                          <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+          {!loading && filteredExpenses.length === 0 && <p className="text-center text-muted-foreground py-8">No expenses found. Add your first expense above.</p>}
         </CardContent>
       </Card>
     </div>
