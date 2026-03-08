@@ -21,8 +21,35 @@ export default function MarketingConfig() {
   const [socialEnabled, setSocialEnabled] = useState(false);
   const [meetEnabled, setMeetEnabled] = useState(false);
 
-  const handleSave = (section: string) => {
-    toast({ title: `${section} Settings Saved`, description: 'Configuration updated successfully (UI only).' });
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const configs = await marketingConfigDb.getAll();
+        configs.forEach((c: any) => {
+          if (c.channel === 'email') { setEmailConfig(c.config); setEmailEnabled(c.enabled); }
+          if (c.channel === 'whatsapp') { setWhatsappConfig(c.config); setWhatsappEnabled(c.enabled); }
+          if (c.channel === 'social') { setSocialConfig(c.config); setSocialEnabled(c.enabled); }
+          if (c.channel === 'meet') { setMeetConfig(c.config); setMeetEnabled(c.enabled); }
+        });
+      } catch (err) { console.error(err); }
+    };
+    load();
+  }, []);
+
+  const handleSave = async (section: string) => {
+    try {
+      const channelMap: Record<string, { config: any; enabled: boolean }> = {
+        Email: { config: emailConfig, enabled: emailEnabled },
+        WhatsApp: { config: whatsappConfig, enabled: whatsappEnabled },
+        'Social Media': { config: socialConfig, enabled: socialEnabled },
+        'Google Meet': { config: meetConfig, enabled: meetEnabled },
+      };
+      const key = section === 'Email' ? 'email' : section === 'WhatsApp' ? 'whatsapp' : section === 'Social Media' ? 'social' : 'meet';
+      await marketingConfigDb.upsert(key, channelMap[section].config, channelMap[section].enabled);
+      toast({ title: `${section} Settings Saved`, description: 'Configuration updated successfully.' });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
   };
 
   return (

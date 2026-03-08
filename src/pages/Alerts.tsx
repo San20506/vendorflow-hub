@@ -102,7 +102,7 @@ export default function Alerts() {
           <p className="text-muted-foreground">Stay updated on critical events and actions needed</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2" onClick={handleMarkAllRead}>
             <CheckCheck className="w-4 h-4" />
             Mark All Read
           </Button>
