@@ -640,3 +640,44 @@ export const productHealthDb = {
     return data;
   },
 };
+
+// ==================== CHAT CONVERSATIONS ====================
+export const chatConversationsDb = {
+  async getAll() {
+    const { data, error } = await supabase.from('chat_conversations' as any).select('*').order('updated_at', { ascending: false });
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(title: string, messages: any[]) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('chat_conversations' as any).insert({ title, messages, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('chat_conversations' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async delete(id: string) {
+    const { error } = await supabase.from('chat_conversations' as any).delete().eq('id', id);
+    if (error) throw error;
+  },
+};
+
+// ==================== AUTOMATION SETTINGS ====================
+export const automationSettingsDb = {
+  async getAll() {
+    const { data, error } = await supabase.from('automation_settings' as any).select('*');
+    if (error) throw error;
+    return data as any[];
+  },
+  async upsert(featureId: string, enabled: boolean) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('automation_settings' as any).upsert({
+      feature_id: featureId, enabled, vendor_id: userId
+    }, { onConflict: 'feature_id,vendor_id' }).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
