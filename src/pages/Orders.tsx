@@ -153,12 +153,36 @@ export default function Orders() {
   const [activeTab, setActiveTab] = useState('orders');
   const [globalDateRange, setGlobalDateRange] = useState<DateRange>({ from: undefined, to: undefined });
 
+  // DB-backed orders state
+  const [allOrders, setAllOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const data = await ordersDb.getAll();
+        setAllOrders(data.map((o: any) => ({
+          ...o, orderId: o.order_number, orderDate: o.order_date, totalAmount: o.total_amount,
+          customerName: o.customer_name, customerId: o.id, customerEmail: o.customer_email,
+          customerPhone: o.customer_phone || '', shippingAddress: o.customer_address || '',
+          customerPinCode: o.customer_pincode || '', customerCity: o.customer_city || '',
+          customerState: o.customer_state || '', deliveryDate: o.delivered_date,
+          portalOrderId: o.order_number, items: [],
+        })));
+      } catch (e) { console.error(e); }
+    };
+    fetchOrders();
+  }, []);
+
   // Video reconciliation state
-  const [videoRecords, setVideoRecords] = useState<Record<string, VideoRecord>>(() => generateVideoRecords(mockOrders));
+  const [videoRecords, setVideoRecords] = useState<Record<string, VideoRecord>>({});
   const [returnPolicyDays] = useState(15);
   const [videoRetentionDays] = useState(100);
 
-  const customerProfiles = useMemo(() => computeCustomerProfiles(mockOrders), []);
+  useEffect(() => {
+    if (allOrders.length > 0) setVideoRecords(generateVideoRecords(allOrders));
+  }, [allOrders]);
+
+  const customerProfiles = useMemo(() => computeCustomerProfiles(allOrders), [allOrders]);
 
   const getCustomerType = (customerId: string): 'new' | 'repeat' => {
     return (customerProfiles[customerId]?.orderCount ?? 0) > 1 ? 'repeat' : 'new';
