@@ -48,6 +48,7 @@ import Insights from "./pages/Insights";
 import MarketingConfig from "./pages/MarketingConfig";
 import ExpenseTracking from "./pages/ExpenseTracking";
 import StaffManagement from "./pages/StaffManagement";
+import TechnicalDocs from "./pages/TechnicalDocs";
 import DemoLayout from "./pages/demo/DemoLayout";
 import DemoDashboard from "./pages/demo/DemoDashboard";
 import DemoSalesAnalysis from "./pages/demo/DemoSalesAnalysis";
