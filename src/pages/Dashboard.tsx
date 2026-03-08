@@ -91,7 +91,7 @@ export default function Dashboard() {
   }, [selectedPortal, dateRange]);
 
   const filteredReturns = useMemo(() => {
-    return mockReturns.filter(r => {
+    return returns.filter(r => {
       if (selectedPortal !== 'all' && r.portal !== selectedPortal) return false;
       if (dateRange.from && new Date(r.requestDate) < dateRange.from) return false;
       if (dateRange.to && new Date(r.requestDate) > dateRange.to) return false;
