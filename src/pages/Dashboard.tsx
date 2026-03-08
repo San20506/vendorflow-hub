@@ -218,7 +218,7 @@ export default function Dashboard() {
 
   const duplicateCustomerCount = useMemo(() => {
     const m: Record<string, number> = {};
-    mockOrders.forEach(o => { m[o.customerEmail || o.customerId] = (m[o.customerEmail || o.customerId] || 0) + 1; });
+    orders.forEach(o => { m[o.customerEmail || o.customerId] = (m[o.customerEmail || o.customerId] || 0) + 1; });
     return Object.values(m).filter(c => c > 1).length;
   }, []);
 
