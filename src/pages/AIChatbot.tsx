@@ -3,15 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
-import { MessageSquare, Brain, Workflow, Lock, Sparkles, FolderOpen, Zap, BarChart3, Package, RotateCcw, CreditCard, Users, Bell, Star, ThumbsDown, Search, Bot, Save, Send, Loader2, User } from 'lucide-react';
+import { MessageSquare, Brain, Workflow, Lock, Sparkles, FolderOpen, Zap, BarChart3, Package, RotateCcw, CreditCard, Users, Bell, Star, ThumbsDown, Search, Bot, Send, Loader2, User, Plus, Trash2, History } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { chatConversationsDb, automationSettingsDb } from '@/services/database';
 
 interface AutomationFeature {
   id: string;
@@ -22,7 +22,7 @@ interface AutomationFeature {
   status: 'active' | 'beta' | 'coming';
 }
 
-const initialFeatures: AutomationFeature[] = [
+const defaultFeatures: AutomationFeature[] = [
   { id: 'auto-restock', name: 'Auto Restock Alerts', description: 'Automatically trigger alerts when inventory drops below threshold', icon: Package, enabled: true, status: 'active' },
   { id: 'smart-pricing', name: 'Smart Pricing Engine', description: 'AI-driven dynamic pricing recommendations across channels', icon: Zap, enabled: true, status: 'active' },
   { id: 'order-routing', name: 'Intelligent Order Routing', description: 'Route orders to nearest warehouse for faster delivery', icon: Workflow, enabled: false, status: 'beta' },
@@ -86,9 +86,8 @@ async function streamChat({ messages, onDelta, onDone, onError }: {
   const reader = resp.body.getReader();
   const decoder = new TextDecoder();
   let textBuffer = "";
-  let streamDone = false;
 
-  while (!streamDone) {
+  while (true) {
     const { done, value } = await reader.read();
     if (done) break;
     textBuffer += decoder.decode(value, { stream: true });
@@ -101,7 +100,7 @@ async function streamChat({ messages, onDelta, onDone, onError }: {
       if (line.startsWith(":") || line.trim() === "") continue;
       if (!line.startsWith("data: ")) continue;
       const jsonStr = line.slice(6).trim();
-      if (jsonStr === "[DONE]") { streamDone = true; break; }
+      if (jsonStr === "[DONE]") { onDone(); return; }
       try {
         const parsed = JSON.parse(jsonStr);
         const content = parsed.choices?.[0]?.delta?.content as string | undefined;
@@ -112,30 +111,13 @@ async function streamChat({ messages, onDelta, onDone, onError }: {
       }
     }
   }
-
-  // Final flush
-  if (textBuffer.trim()) {
-    for (let raw of textBuffer.split("\n")) {
-      if (!raw) continue;
-      if (raw.endsWith("\r")) raw = raw.slice(0, -1);
-      if (raw.startsWith(":") || raw.trim() === "") continue;
-      if (!raw.startsWith("data: ")) continue;
-      const jsonStr = raw.slice(6).trim();
-      if (jsonStr === "[DONE]") continue;
-      try {
-        const parsed = JSON.parse(jsonStr);
-        const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-        if (content) onDelta(content);
-      } catch { /* ignore */ }
-    }
-  }
   onDone();
 }
 
 export default function AIChatbot() {
   const { toast } = useToast();
-  const [features, setFeatures] = useState(initialFeatures);
-  const [chatbotConfig, setChatbotConfig] = useState({ name: 'VendorFlow Assistant', greeting: 'Hello! How can I help you today?', responseDelay: '1', maxHistory: '50' });
+  const [features, setFeatures] = useState(defaultFeatures);
+  const [featuresLoaded, setFeaturesLoaded] = useState(false);
 
   // Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -143,15 +125,83 @@ export default function AIChatbot() {
   const [isStreaming, setIsStreaming] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Chat history
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [activeConvId, setActiveConvId] = useState<string | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(true);
+
   // AI Insights state
   const [insightLoading, setInsightLoading] = useState<string | null>(null);
   const [insightResults, setInsightResults] = useState<Record<string, string>>({});
 
+  // Load chat history & automation settings on mount
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    const loadData = async () => {
+      try {
+        const [convs, settings] = await Promise.all([
+          chatConversationsDb.getAll(),
+          automationSettingsDb.getAll(),
+        ]);
+        setConversations(convs);
+        if (settings.length > 0) {
+          setFeatures(prev => prev.map(f => {
+            const saved = settings.find((s: any) => s.feature_id === f.id);
+            return saved ? { ...f, enabled: saved.enabled } : f;
+          }));
+        }
+        setFeaturesLoaded(true);
+      } catch (e) {
+        console.error(e);
+        setFeaturesLoaded(true);
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [chatMessages]);
+
+  // Auto-save conversation after each assistant reply
+  useEffect(() => {
+    if (isStreaming || chatMessages.length === 0) return;
+    const save = async () => {
+      try {
+        const title = chatMessages[0]?.content?.slice(0, 60) || 'New Chat';
+        if (activeConvId) {
+          await chatConversationsDb.update(activeConvId, { messages: chatMessages, title });
+          setConversations(prev => prev.map(c => c.id === activeConvId ? { ...c, messages: chatMessages, title, updated_at: new Date().toISOString() } : c));
+        } else {
+          const created: any = await chatConversationsDb.create(title, chatMessages);
+          setActiveConvId(created.id);
+          setConversations(prev => [created, ...prev]);
+        }
+      } catch (e) { console.error('Failed to save chat:', e); }
+    };
+    save();
+  }, [isStreaming]);
+
+  const startNewChat = () => {
+    setChatMessages([]);
+    setActiveConvId(null);
+  };
+
+  const loadConversation = (conv: any) => {
+    setChatMessages(conv.messages || []);
+    setActiveConvId(conv.id);
+  };
+
+  const deleteConversation = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await chatConversationsDb.delete(id);
+      setConversations(prev => prev.filter(c => c.id !== id));
+      if (activeConvId === id) { setChatMessages([]); setActiveConvId(null); }
+      toast({ title: 'Chat deleted' });
+    } catch (err) { console.error(err); }
+  };
 
   const sendMessage = async () => {
     if (!chatInput.trim() || isStreaming) return;
@@ -210,17 +260,19 @@ export default function AIChatbot() {
     }
   };
 
-  const toggleFeature = (id: string) => {
+  const toggleFeature = async (id: string) => {
     const feature = features.find(f => f.id === id);
     if (feature?.status === 'coming') {
       toast({ title: 'Coming Soon', description: `${feature.name} is planned for a future release.` });
       return;
     }
-    setFeatures(prev => prev.map(f => f.id === id ? { ...f, enabled: !f.enabled } : f));
-    const updated = features.find(f => f.id === id);
-    if (updated) {
-      toast({ title: updated.enabled ? 'Feature Disabled' : 'Feature Enabled', description: `${updated.name} has been ${updated.enabled ? 'disabled' : 'enabled'}.` });
-    }
+    const newEnabled = !feature?.enabled;
+    setFeatures(prev => prev.map(f => f.id === id ? { ...f, enabled: newEnabled } : f));
+    toast({ title: newEnabled ? 'Feature Enabled' : 'Feature Disabled', description: `${feature?.name} has been ${newEnabled ? 'enabled' : 'disabled'}.` });
+
+    try {
+      await automationSettingsDb.upsert(id, newEnabled);
+    } catch (e) { console.error('Failed to persist toggle:', e); }
   };
 
   const activeCount = features.filter(f => f.enabled).length;
@@ -256,81 +308,105 @@ export default function AIChatbot() {
           <TabsTrigger value="keywords" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Keywords</TabsTrigger>
         </TabsList>
 
-        {/* AI Chat Tab */}
+        {/* AI Chat Tab with History */}
         <TabsContent value="chat" className="space-y-0">
-          <Card className="flex flex-col h-[600px]">
-            <CardHeader className="pb-3 border-b">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-primary/10"><Bot className="w-5 h-5 text-primary" /></div>
-                <div>
-                  <CardTitle className="text-base">VendorFlow AI Assistant</CardTitle>
-                  <CardDescription className="text-xs">Powered by AI • Ask anything about your business</CardDescription>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            {/* Chat History Sidebar */}
+            <Card className="lg:col-span-1">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm flex items-center gap-1.5"><History className="w-4 h-4" />History</CardTitle>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={startNewChat}><Plus className="w-4 h-4" /></Button>
                 </div>
-                <Badge variant="outline" className="ml-auto bg-emerald-500/10 text-emerald-600 border-emerald-500/30 text-xs">Online</Badge>
-              </div>
-            </CardHeader>
-            <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-              <div className="space-y-4">
-                {chatMessages.length === 0 && (
-                  <div className="text-center py-12 space-y-4">
-                    <Sparkles className="w-12 h-12 text-primary/30 mx-auto" />
-                    <div>
-                      <p className="font-medium text-foreground">Welcome to VendorFlow AI</p>
-                      <p className="text-sm text-muted-foreground mt-1">Ask me anything about your orders, inventory, returns, or pricing strategy.</p>
-                    </div>
-                    <div className="flex flex-wrap gap-2 justify-center max-w-md mx-auto">
-                      {quickQuestions.map((q, i) => (
-                        <Button key={i} variant="outline" size="sm" className="text-xs" onClick={() => { setChatInput(q); }}>
-                          {q}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {chatMessages.map((msg, i) => (
-                  <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    {msg.role === 'assistant' && (
-                      <div className="p-1.5 rounded-lg bg-primary/10 h-fit shrink-0"><Bot className="w-4 h-4 text-primary" /></div>
-                    )}
-                    <div className={`max-w-[80%] rounded-xl px-4 py-3 ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted/50 border'}`}>
-                      {msg.role === 'assistant' ? (
-                        <div className="prose prose-sm dark:prose-invert max-w-none text-sm [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                          <ReactMarkdown>{msg.content}</ReactMarkdown>
+              </CardHeader>
+              <CardContent className="p-0">
+                <ScrollArea className="h-[520px]">
+                  {historyLoading ? (
+                    <div className="flex items-center justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>
+                  ) : conversations.length === 0 ? (
+                    <p className="text-center text-xs text-muted-foreground py-8">No chat history yet</p>
+                  ) : (
+                    conversations.map(conv => (
+                      <div
+                        key={conv.id}
+                        onClick={() => loadConversation(conv)}
+                        className={`px-3 py-2.5 border-b cursor-pointer hover:bg-muted/30 transition-colors group ${activeConvId === conv.id ? 'bg-primary/5 border-l-2 border-l-primary' : ''}`}
+                      >
+                        <div className="flex items-start justify-between gap-1">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-medium truncate">{conv.title}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(conv.updated_at).toLocaleDateString()}</p>
+                          </div>
+                          <Button variant="ghost" size="icon" className="h-5 w-5 opacity-0 group-hover:opacity-100 shrink-0" onClick={(e) => deleteConversation(conv.id, e)}>
+                            <Trash2 className="w-3 h-3 text-muted-foreground" />
+                          </Button>
                         </div>
-                      ) : (
-                        <p className="text-sm">{msg.content}</p>
-                      )}
-                    </div>
-                    {msg.role === 'user' && (
-                      <div className="p-1.5 rounded-lg bg-primary h-fit shrink-0"><User className="w-4 h-4 text-primary-foreground" /></div>
-                    )}
+                      </div>
+                    ))
+                  )}
+                </ScrollArea>
+              </CardContent>
+            </Card>
+
+            {/* Chat Area */}
+            <Card className="lg:col-span-3 flex flex-col h-[600px]">
+              <CardHeader className="pb-3 border-b">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-lg bg-primary/10"><Bot className="w-5 h-5 text-primary" /></div>
+                  <div>
+                    <CardTitle className="text-base">VendorFlow AI Assistant</CardTitle>
+                    <CardDescription className="text-xs">Powered by AI • Ask anything about your business</CardDescription>
                   </div>
-                ))}
-                {isStreaming && chatMessages[chatMessages.length - 1]?.role !== 'assistant' && (
-                  <div className="flex gap-3">
-                    <div className="p-1.5 rounded-lg bg-primary/10 h-fit"><Bot className="w-4 h-4 text-primary" /></div>
-                    <div className="bg-muted/50 border rounded-xl px-4 py-3">
-                      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                  <Badge variant="outline" className="ml-auto bg-emerald-500/10 text-emerald-600 border-emerald-500/30 text-xs">Online</Badge>
+                </div>
+              </CardHeader>
+              <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+                <div className="space-y-4">
+                  {chatMessages.length === 0 && (
+                    <div className="text-center py-12 space-y-4">
+                      <Sparkles className="w-12 h-12 text-primary/30 mx-auto" />
+                      <div>
+                        <p className="font-medium text-foreground">Welcome to VendorFlow AI</p>
+                        <p className="text-sm text-muted-foreground mt-1">Ask me anything about your orders, inventory, returns, or pricing strategy.</p>
+                      </div>
+                      <div className="flex flex-wrap gap-2 justify-center max-w-md mx-auto">
+                        {quickQuestions.map((q, i) => (
+                          <Button key={i} variant="outline" size="sm" className="text-xs" onClick={() => setChatInput(q)}>{q}</Button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                  {chatMessages.map((msg, i) => (
+                    <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      {msg.role === 'assistant' && <div className="p-1.5 rounded-lg bg-primary/10 h-fit shrink-0"><Bot className="w-4 h-4 text-primary" /></div>}
+                      <div className={`max-w-[80%] rounded-xl px-4 py-3 ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted/50 border'}`}>
+                        {msg.role === 'assistant' ? (
+                          <div className="prose prose-sm dark:prose-invert max-w-none text-sm [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                            <ReactMarkdown>{msg.content}</ReactMarkdown>
+                          </div>
+                        ) : <p className="text-sm">{msg.content}</p>}
+                      </div>
+                      {msg.role === 'user' && <div className="p-1.5 rounded-lg bg-primary h-fit shrink-0"><User className="w-4 h-4 text-primary-foreground" /></div>}
+                    </div>
+                  ))}
+                  {isStreaming && chatMessages[chatMessages.length - 1]?.role !== 'assistant' && (
+                    <div className="flex gap-3">
+                      <div className="p-1.5 rounded-lg bg-primary/10 h-fit"><Bot className="w-4 h-4 text-primary" /></div>
+                      <div className="bg-muted/50 border rounded-xl px-4 py-3"><Loader2 className="w-4 h-4 animate-spin text-muted-foreground" /></div>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+              <div className="p-4 border-t">
+                <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
+                  <Input placeholder="Ask about orders, inventory, pricing..." value={chatInput} onChange={e => setChatInput(e.target.value)} disabled={isStreaming} className="flex-1" />
+                  <Button type="submit" disabled={isStreaming || !chatInput.trim()} size="icon">
+                    {isStreaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  </Button>
+                </form>
               </div>
-            </ScrollArea>
-            <div className="p-4 border-t">
-              <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
-                <Input
-                  placeholder="Ask about orders, inventory, pricing..."
-                  value={chatInput}
-                  onChange={e => setChatInput(e.target.value)}
-                  disabled={isStreaming}
-                  className="flex-1"
-                />
-                <Button type="submit" disabled={isStreaming || !chatInput.trim()} size="icon">
-                  {isStreaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                </Button>
-              </form>
-            </div>
-          </Card>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* AI Insights Tab */}
@@ -350,12 +426,7 @@ export default function AIChatbot() {
                   <CardDescription>{item.desc}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button
-                    onClick={() => runInsight(item.type)}
-                    disabled={insightLoading === item.type}
-                    className="w-full gap-2"
-                    variant="outline"
-                  >
+                  <Button onClick={() => runInsight(item.type)} disabled={insightLoading === item.type} className="w-full gap-2" variant="outline">
                     {insightLoading === item.type ? <><Loader2 className="w-4 h-4 animate-spin" />Analyzing...</> : <><Sparkles className="w-4 h-4" />Generate Insight</>}
                   </Button>
                   {insightResults[item.type] && (
@@ -373,11 +444,10 @@ export default function AIChatbot() {
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
-          {/* Feature Toggle Panel */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <div><CardTitle>Automation Feature Controls</CardTitle><CardDescription>Enable or disable automation features.</CardDescription></div>
+                <div><CardTitle>Automation Feature Controls</CardTitle><CardDescription>Enable or disable automation features. Settings are saved automatically.</CardDescription></div>
                 <Badge variant="secondary">{features.length} features</Badge>
               </div>
             </CardHeader>

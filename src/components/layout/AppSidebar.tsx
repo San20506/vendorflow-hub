@@ -171,6 +171,7 @@ const navigationSections: NavSection[] = [
           { title: 'Subscription', url: '/subscription', icon: Crown, roles: ['admin'] },
           { title: 'AI Hub', url: '/chatbot', icon: MessageSquare, roles: ['admin'] },
           { title: 'Support', url: '/support', icon: LifeBuoy, roles: ['admin', 'vendor', 'operations'] },
+          { title: 'Technical Docs', url: '/technical-docs', icon: FileText, roles: ['admin'] },
         ],
       },
     ],
