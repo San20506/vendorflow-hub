@@ -99,8 +99,24 @@ export default function Settlements() {
   const [trendView, setTrendView] = useState<'weekly' | 'monthly'>('weekly');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('all');
 
+  const [allSettlements, setAllSettlements] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchSettlements = async () => {
+      try {
+        const data = await settlementsDb.getAll();
+        setAllSettlements(data.map((s: any) => ({
+          ...s, settlementId: s.settlement_id, netAmount: s.net_amount,
+          settlementDate: s.settlement_date, amount: s.amount ?? 0,
+          commission: s.commission ?? 0,
+        })));
+      } catch (e) { console.error(e); }
+    };
+    fetchSettlements();
+  }, []);
+
   const filteredSettlements = useMemo(() => {
-    return mockSettlements.filter(settlement => {
+    return allSettlements.filter(settlement => {
       const matchesPortal = selectedPortal === 'all' || settlement.portal === selectedPortal;
       const matchesStatus = statusFilter === 'all' || settlement.status === statusFilter;
       return matchesPortal && matchesStatus;
