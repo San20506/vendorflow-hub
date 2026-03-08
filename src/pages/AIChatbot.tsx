@@ -174,7 +174,7 @@ export default function AIChatbot() {
           await chatConversationsDb.update(activeConvId, { messages: chatMessages, title });
           setConversations(prev => prev.map(c => c.id === activeConvId ? { ...c, messages: chatMessages, title, updated_at: new Date().toISOString() } : c));
         } else {
-          const created = await chatConversationsDb.create(title, chatMessages);
+          const created: any = await chatConversationsDb.create(title, chatMessages);
           setActiveConvId(created.id);
           setConversations(prev => [created, ...prev]);
         }
