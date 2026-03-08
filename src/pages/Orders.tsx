@@ -261,7 +261,7 @@ export default function Orders() {
   const runVideoCleanup = () => {
     setVideoRecords(prev => {
       const updated = { ...prev };
-      mockOrders.forEach(o => {
+      allOrders.forEach(o => {
         const daysSince = Math.floor((Date.now() - new Date(o.orderDate).getTime()) / (1000 * 60 * 60 * 24));
         const isReturn = ['returned', 'rto', 'customer_return', 'courier_return'].includes(o.status);
         const rec = updated[o.orderId];
