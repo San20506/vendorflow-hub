@@ -3,16 +3,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Portal } from '@/types';
 import { portalConfigs } from '@/services/mockData';
 import { ordersDb, inventoryDb, returnsDb, settlementsDb } from '@/services/database';
+import { supabase } from '@/integrations/supabase/client';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { InventoryChart, PortalSalesChart, CHART_COLORS } from '@/components/dashboard/Charts';
 import { GlobalDateFilter, DateRange } from '@/components/GlobalDateFilter';
+import { EmptyState } from '@/components/EmptyState';
+import { OnboardingWizard } from '@/components/OnboardingWizard';
 import { Progress } from '@/components/ui/progress';
 import {
   DollarSign, ShoppingCart, Package, AlertTriangle, RotateCcw, CreditCard,
   TrendingUp, TrendingDown, Star, Users, UserPlus, UserCheck, Percent,
   Plus, ShieldCheck, ShieldAlert, Hash, UserX, CheckCircle2, BarChart3,
   ArrowUpRight, ArrowDownRight, Clock, ShieldX, PackageCheck, PackageX,
-  CalendarClock, Truck,
+  CalendarClock, Truck, Rocket, Upload,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -259,8 +262,77 @@ export default function Dashboard() {
   const maxProductUnits = topProductsByOrders.length > 0 ? topProductsByOrders[0].units : 1;
   const maxBrandRevenue = topBrandsByRevenue.length > 0 ? topBrandsByRevenue[0].revenue : 1;
 
+  const hasNoData = orders.length === 0 && inventoryItems.length === 0 && !isLoading;
+
+  const handleSeedDemoData = async () => {
+    setIsLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const response = await supabase.functions.invoke('seed-demo-data');
+      if (response.data?.seeded) {
+        // Refetch data
+        const [ordersData, returnsData, inventoryData, settlementsData] = await Promise.all([
+          ordersDb.getAll(), returnsDb.getAll(), inventoryDb.getAll(), settlementsDb.getAll(),
+        ]);
+        setOrders(ordersData.map((o: any) => ({
+          ...o, orderId: o.order_number, orderDate: o.order_date, totalAmount: o.total_amount,
+          customerName: o.customer_name, customerId: o.id, customerEmail: o.customer_email,
+          customerPhone: o.customer_phone, customerPinCode: o.customer_pincode,
+          customerCity: o.customer_city, customerState: o.customer_state,
+          shippingAddress: o.customer_address, deliveryDate: o.delivered_date,
+          portalOrderId: o.order_number, items: [],
+        })));
+        setReturns(returnsData.map((r: any) => ({
+          ...r, orderId: r.order_number, requestDate: r.requested_at, items: [],
+          claimEligible: false,
+        })));
+        setInventoryItems(inventoryData.map((i: any) => ({
+          ...i, skuId: i.sku_id, productName: i.product_name,
+          availableQuantity: i.available_quantity ?? 0,
+          lowStockThreshold: i.low_stock_threshold ?? 10,
+        })));
+        setSettlements(settlementsData.map((s: any) => ({
+          ...s, settlementId: s.settlement_id, netAmount: s.net_amount,
+          settlementDate: s.settlement_date,
+        })));
+      }
+    } catch (e) { console.error('Seed error:', e); }
+    setIsLoading(false);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in relative">
+      <OnboardingWizard />
+
+      {/* ═══ EMPTY STATE ═══ */}
+      {hasNoData && (
+        <Card className="border-dashed border-2 border-primary/20 bg-primary/5">
+          <CardContent className="py-10">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                <Rocket className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">Your dashboard is ready!</h3>
+              <p className="text-sm text-muted-foreground max-w-md mb-6">
+                Start by adding products and importing orders, or load sample data to explore the platform instantly.
+              </p>
+              <div className="flex items-center gap-3 flex-wrap justify-center">
+                <Button onClick={handleSeedDemoData} className="gap-2">
+                  <Rocket className="w-4 h-4" /> Load Demo Data
+                </Button>
+                <Button variant="outline" onClick={() => window.location.href = '/products'} className="gap-2">
+                  <Plus className="w-4 h-4" /> Add Products
+                </Button>
+                <Button variant="outline" onClick={() => window.location.href = '/data-import'} className="gap-2">
+                  <Upload className="w-4 h-4" /> Import Data
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* ═══ PAGE HEADER ═══ */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
