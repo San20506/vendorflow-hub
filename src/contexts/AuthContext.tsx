@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Set up auth listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
-        // Use setTimeout to avoid potential deadlocks with Supabase client
+        // Use setTimeout to avoid deadlocks with Supabase client
         setTimeout(async () => {
           try {
             const appUser = await buildAppUser(session);

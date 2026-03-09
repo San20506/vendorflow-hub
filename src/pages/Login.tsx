@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, UserRole } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,6 +27,15 @@ export default function Login() {
   const { login, signup } = useAuth();
   const navigate = useNavigate();
 
+  const { user: authUser } = useAuth();
+
+  // Navigate to dashboard once auth state is confirmed
+  useEffect(() => {
+    if (authUser) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [authUser, navigate]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -40,6 +49,9 @@ export default function Login() {
 
     try {
       await login(email, password);
+
+      // Small delay to let auth state change process
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Validate selected role matches database role
       const { data: { user } } = await supabase.auth.getUser();
@@ -58,11 +70,9 @@ export default function Login() {
           return;
         }
       }
-
-      navigate('/dashboard');
+      // Navigation handled by useEffect once authUser is set
     } catch (err: any) {
       setError(err.message || 'Invalid credentials. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   };
