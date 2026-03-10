@@ -46,11 +46,13 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [ordersData, returnsData, inventoryData, settlementsData] = await Promise.all([
+        const [ordersData, returnsData, inventoryData, settlementsData, expensesData, invoicesData] = await Promise.all([
           ordersDb.getAll(),
           returnsDb.getAll(),
           inventoryDb.getAll(),
           settlementsDb.getAll(),
+          expensesDb.getAll(),
+          supabase.from('invoices').select('*').then(r => r.data || []),
         ]);
         setOrders(ordersData.map((o: any) => ({
           ...o, orderId: o.order_number, orderDate: o.order_date, totalAmount: o.total_amount,
