@@ -40,6 +40,8 @@ export default function Dashboard() {
   const [salesData, setSalesData] = useState<any[]>([]);
   const [inventoryItems, setInventoryItems] = useState<any[]>([]);
   const [settlements, setSettlements] = useState<any[]>([]);
+  const [expenses, setExpenses] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
