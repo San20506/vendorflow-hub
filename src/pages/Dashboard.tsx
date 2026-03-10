@@ -3,7 +3,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Portal } from '@/types';
 import { portalConfigs } from '@/services/mockData';
 import { ordersDb, inventoryDb, returnsDb, settlementsDb, expensesDb } from '@/services/database';
-import { supabase as supabaseClient } from '@/integrations/supabase/client';
 import { supabase } from '@/integrations/supabase/client';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { InventoryChart, PortalSalesChart, CHART_COLORS } from '@/components/dashboard/Charts';
