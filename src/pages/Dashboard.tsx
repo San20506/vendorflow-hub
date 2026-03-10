@@ -578,6 +578,11 @@ export default function Dashboard() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
+           BLOCK: FINANCIAL OVERVIEW
+         ═══════════════════════════════════════════════════════════════ */}
+      <FinancialOverview orders={orders} settlements={settlements} expenses={expenses} invoices={invoices} />
+
+      {/* ═══════════════════════════════════════════════════════════════
            BLOCK 3: RETURN INSIGHTS
          ═══════════════════════════════════════════════════════════════ */}
       <div>
