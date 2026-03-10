@@ -7,6 +7,7 @@ import { supabase as supabaseClient } from '@/integrations/supabase/client';
 import { supabase } from '@/integrations/supabase/client';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { InventoryChart, PortalSalesChart, CHART_COLORS } from '@/components/dashboard/Charts';
+import { FinancialOverview } from '@/components/dashboard/FinancialOverview';
 import { GlobalDateFilter, DateRange } from '@/components/GlobalDateFilter';
 import { EmptyState } from '@/components/EmptyState';
 import { OnboardingWizard } from '@/components/OnboardingWizard';
