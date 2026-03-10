@@ -125,6 +125,7 @@ const navigationSections: NavSection[] = [
       {
         label: 'Marketing',
         items: [
+          { title: 'Broadcast Center', url: '/broadcast', icon: Megaphone, roles: ['admin', 'vendor'] },
           { title: 'Unified Inbox', url: '/social-insights', icon: Share2, roles: ['admin', 'vendor'] },
           { title: 'Marketing Config', url: '/marketing-config', icon: Megaphone, roles: ['admin'] },
           { title: 'Own Website', url: '/ecommerce', icon: Globe, roles: ['admin', 'vendor'] },

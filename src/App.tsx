@@ -49,6 +49,7 @@ import MarketingConfig from "./pages/MarketingConfig";
 import ExpenseTracking from "./pages/ExpenseTracking";
 import StaffManagement from "./pages/StaffManagement";
 import TechnicalDocs from "./pages/TechnicalDocs";
+import Broadcast from "./pages/Broadcast";
 import DemoLayout from "./pages/demo/DemoLayout";
 import DemoDashboard from "./pages/demo/DemoDashboard";
 import DemoSalesAnalysis from "./pages/demo/DemoSalesAnalysis";
@@ -115,6 +116,7 @@ const App = () => (
             <Route path="/expenses" element={<AppLayout><ExpenseTracking /></AppLayout>} />
             <Route path="/staff" element={<AppLayout><StaffManagement /></AppLayout>} />
             <Route path="/technical-docs" element={<AppLayout><TechnicalDocs /></AppLayout>} />
+            <Route path="/broadcast" element={<AppLayout><Broadcast /></AppLayout>} />
             {/* Demo Routes */}
             <Route path="/demo" element={<DemoLayout><DemoDashboard /></DemoLayout>} />
             <Route path="/demo/sales" element={<DemoLayout><DemoSalesAnalysis /></DemoLayout>} />
