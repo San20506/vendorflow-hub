@@ -49,6 +49,8 @@ import MarketingConfig from "./pages/MarketingConfig";
 import ExpenseTracking from "./pages/ExpenseTracking";
 import StaffManagement from "./pages/StaffManagement";
 import TechnicalDocs from "./pages/TechnicalDocs";
+import ProfitCalculator from "./pages/ProfitCalculator";
+import PayoutComparison from "./pages/PayoutComparison";
 import Broadcast from "./pages/Broadcast";
 import DemoLayout from "./pages/demo/DemoLayout";
 import DemoDashboard from "./pages/demo/DemoDashboard";
