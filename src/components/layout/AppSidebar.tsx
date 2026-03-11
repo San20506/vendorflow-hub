@@ -57,6 +57,8 @@ import {
   Megaphone,
   Wallet,
   Scissors,
+  Calculator,
+  ArrowUpDown,
 } from 'lucide-react';
 
 interface NavItem {
@@ -111,6 +113,8 @@ const navigationSections: NavSection[] = [
           { title: 'Settlements', url: '/settlements', icon: CreditCard, roles: ['admin', 'vendor'] },
           { title: 'Reconciliation', url: '/reconciliation', icon: Scale, roles: ['admin', 'operations'] },
           { title: 'Price & Payout', url: '/price-payout', icon: IndianRupee, roles: ['admin', 'vendor'] },
+          { title: 'Profit Calculator', url: '/profit-calculator', icon: Calculator, roles: ['admin', 'vendor'] },
+          { title: 'Payout Comparison', url: '/payout-comparison', icon: ArrowUpDown, roles: ['admin', 'vendor'] },
           { title: 'Finance & Tax', url: '/finance', icon: Receipt, roles: ['admin', 'vendor'] },
           { title: 'Expense Tracking', url: '/expenses', icon: Wallet, roles: ['admin', 'operations'] },
         ],
