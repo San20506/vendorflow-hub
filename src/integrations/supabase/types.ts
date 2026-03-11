@@ -632,55 +632,76 @@ export type Database = {
       }
       leads: {
         Row: {
+          address: string | null
           assigned_to: string | null
+          city: string | null
           company_name: string
           contact_person: string
           created_at: string
           created_by: string | null
           email: string | null
+          gstin: string | null
           id: string
+          imported_via: string | null
           notes: string | null
           phone: string | null
           priority: Database["public"]["Enums"]["lead_priority"] | null
           source: string | null
+          state: string | null
           status: Database["public"]["Enums"]["lead_status"]
           updated_at: string
           value: number | null
           vendor_id: string | null
+          website: string | null
+          whatsapp: string | null
         }
         Insert: {
+          address?: string | null
           assigned_to?: string | null
+          city?: string | null
           company_name: string
           contact_person: string
           created_at?: string
           created_by?: string | null
           email?: string | null
+          gstin?: string | null
           id?: string
+          imported_via?: string | null
           notes?: string | null
           phone?: string | null
           priority?: Database["public"]["Enums"]["lead_priority"] | null
           source?: string | null
+          state?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string
           value?: number | null
           vendor_id?: string | null
+          website?: string | null
+          whatsapp?: string | null
         }
         Update: {
+          address?: string | null
           assigned_to?: string | null
+          city?: string | null
           company_name?: string
           contact_person?: string
           created_at?: string
           created_by?: string | null
           email?: string | null
+          gstin?: string | null
           id?: string
+          imported_via?: string | null
           notes?: string | null
           phone?: string | null
           priority?: Database["public"]["Enums"]["lead_priority"] | null
           source?: string | null
+          state?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           updated_at?: string
           value?: number | null
           vendor_id?: string | null
+          website?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }
