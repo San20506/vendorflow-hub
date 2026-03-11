@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,14 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, UserPlus, Users, Phone, Mail, TrendingUp, Clock, CheckCircle2, XCircle, AlertCircle, Search, Download, Eye, Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Plus, Phone, TrendingUp, CheckCircle2, XCircle, AlertCircle, Search, Download, Eye, Loader2, Upload, Globe, Building2, MapPin, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { leadsDb } from '@/services/database';
+import LeadImport from '@/components/leads/LeadImport';
 
 type LeadStatus = 'new' | 'contacted' | 'qualified' | 'negotiation' | 'won' | 'lost';
-type LeadSource = 'indiamart' | 'justdial' | 'tradeindia' | 'website' | 'referral' | 'whatsapp' | 'social_media';
 
 const sourceConfig: Record<string, { label: string; icon: string; color: string }> = {
   indiamart: { label: 'IndiaMART', icon: '🏭', color: 'bg-blue-500/10 text-blue-600 border-blue-500/30' },
@@ -46,7 +46,12 @@ export default function LeadManagement() {
   const [sourceFilter, setSourceFilter] = useState('all');
   const [selectedLead, setSelectedLead] = useState<any | null>(null);
   const [showNewLead, setShowNewLead] = useState(false);
-  const [newLead, setNewLead] = useState({ company_name: '', contact_person: '', phone: '', email: '', source: 'website', status: 'new' as LeadStatus, priority: 'medium' as any, value: 0, notes: '' });
+  const [showImport, setShowImport] = useState(false);
+  const [importSource, setImportSource] = useState('indiamart');
+  const [newLead, setNewLead] = useState({
+    company_name: '', contact_person: '', phone: '', email: '', whatsapp: '', website: '', gstin: '', address: '', city: '', state: '',
+    source: 'website', status: 'new' as LeadStatus, priority: 'medium' as any, value: 0, notes: '',
+  });
 
   const fetchLeads = async () => {
     try {
@@ -64,10 +69,10 @@ export default function LeadManagement() {
 
   const handleCreateLead = async () => {
     try {
-      await leadsDb.create(newLead);
+      await leadsDb.create(newLead as any);
       toast({ title: 'Lead Created', description: `${newLead.company_name} added to pipeline` });
       setShowNewLead(false);
-      setNewLead({ company_name: '', contact_person: '', phone: '', email: '', source: 'website', status: 'new', priority: 'medium', value: 0, notes: '' });
+      setNewLead({ company_name: '', contact_person: '', phone: '', email: '', whatsapp: '', website: '', gstin: '', address: '', city: '', state: '', source: 'website', status: 'new', priority: 'medium', value: 0, notes: '' });
       fetchLeads();
     } catch (e: any) {
       toast({ title: 'Error', description: e.message, variant: 'destructive' });
@@ -91,7 +96,7 @@ export default function LeadManagement() {
     won: leads.filter(l => l.status === 'won').length,
     lost: leads.filter(l => l.status === 'lost').length,
     totalValue: leads.filter(l => l.status !== 'lost').reduce((s, l) => s + (l.value || 0), 0),
-    unassigned: leads.filter(l => !l.assigned_to).length,
+    imported: leads.filter(l => l.imported_via).length,
   }), [leads]);
 
   const pipelineData = useMemo(() => {
@@ -113,8 +118,17 @@ export default function LeadManagement() {
           <h1 className="text-2xl font-bold text-foreground">Lead Management</h1>
           <p className="text-muted-foreground">Track and manage business leads from all sources</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button variant="outline" className="gap-2" onClick={() => toast({ title: 'Exported' })}><Download className="w-4 h-4" />Export</Button>
+          <Select value={importSource} onValueChange={setImportSource}>
+            <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {Object.entries(sourceConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.icon} {v.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Button variant="outline" className="gap-2" onClick={() => setShowImport(true)}>
+            <Upload className="w-4 h-4" />Import Leads
+          </Button>
           <Button className="gap-2" onClick={() => setShowNewLead(true)}><Plus className="w-4 h-4" />Add Lead</Button>
         </div>
       </div>
@@ -126,7 +140,7 @@ export default function LeadManagement() {
         <Card><CardContent className="pt-5 pb-4"><p className="text-xl font-bold text-emerald-600">{stats.won}</p><p className="text-xs text-muted-foreground">Won</p></CardContent></Card>
         <Card><CardContent className="pt-5 pb-4"><p className="text-xl font-bold text-rose-600">{stats.lost}</p><p className="text-xs text-muted-foreground">Lost</p></CardContent></Card>
         <Card><CardContent className="pt-5 pb-4"><p className="text-xl font-bold">{fmt(stats.totalValue)}</p><p className="text-xs text-muted-foreground">Pipeline Value</p></CardContent></Card>
-        <Card><CardContent className="pt-5 pb-4"><p className="text-xl font-bold text-orange-600">{stats.unassigned}</p><p className="text-xs text-muted-foreground">Unassigned</p></CardContent></Card>
+        <Card><CardContent className="pt-5 pb-4"><p className="text-xl font-bold text-primary">{stats.imported}</p><p className="text-xs text-muted-foreground">Imported</p></CardContent></Card>
       </div>
 
       <Card>
@@ -187,8 +201,20 @@ export default function LeadManagement() {
                 const StIcon = st.icon;
                 return (
                   <TableRow key={lead.id}>
-                    <TableCell><div><p className="font-medium">{lead.company_name}</p><p className="text-xs text-muted-foreground">{lead.contact_person}</p></div></TableCell>
-                    <TableCell><div><p className="text-sm">{lead.phone || '—'}</p><p className="text-xs text-muted-foreground">{lead.email || '—'}</p></div></TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{lead.company_name}</p>
+                        <p className="text-xs text-muted-foreground">{lead.contact_person}</p>
+                        {lead.imported_via && <Badge variant="outline" className="text-[10px] mt-0.5 bg-muted/50">Imported</Badge>}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-0.5">
+                        <p className="text-sm">{lead.phone || '—'}</p>
+                        <p className="text-xs text-muted-foreground">{lead.email || '—'}</p>
+                        {lead.whatsapp && <p className="text-xs text-emerald-600 flex items-center gap-1"><MessageCircle className="w-3 h-3" />{lead.whatsapp}</p>}
+                      </div>
+                    </TableCell>
                     <TableCell><Badge variant="outline" className={src.color}>{src.icon} {src.label}</Badge></TableCell>
                     <TableCell><Badge variant="outline" className={st.color}><StIcon className="w-3 h-3 mr-1" />{st.label}</Badge></TableCell>
                     <TableCell><Badge variant="outline" className={lead.priority === 'high' ? 'bg-rose-500/10 text-rose-600 border-rose-500/30' : lead.priority === 'medium' ? 'bg-amber-500/10 text-amber-600 border-amber-500/30' : 'bg-muted text-muted-foreground'}>{lead.priority}</Badge></TableCell>
@@ -197,13 +223,13 @@ export default function LeadManagement() {
                   </TableRow>
                 );
               })}
-              {leads.length === 0 && <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No leads found. Add your first lead above.</TableCell></TableRow>}
+              {leads.length === 0 && <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No leads found. Import leads or add your first one.</TableCell></TableRow>}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
-      {/* Lead Detail */}
+      {/* Lead Detail Dialog */}
       <Dialog open={!!selectedLead} onOpenChange={open => !open && setSelectedLead(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{selectedLead?.company_name}</DialogTitle></DialogHeader>
@@ -215,6 +241,32 @@ export default function LeadManagement() {
                 <div><p className="text-muted-foreground">Email</p><p>{selectedLead.email || '—'}</p></div>
                 <div><p className="text-muted-foreground">Value</p><p className="font-bold">{fmt(selectedLead.value || 0)}</p></div>
               </div>
+
+              {/* Enrichment fields */}
+              {(selectedLead.whatsapp || selectedLead.website || selectedLead.gstin || selectedLead.address) && (
+                <div className="border-t pt-3 space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Enrichment Data</p>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    {selectedLead.whatsapp && (
+                      <div className="flex items-start gap-2"><MessageCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" /><div><p className="text-muted-foreground text-xs">WhatsApp</p><p>{selectedLead.whatsapp}</p></div></div>
+                    )}
+                    {selectedLead.website && (
+                      <div className="flex items-start gap-2"><Globe className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" /><div><p className="text-muted-foreground text-xs">Website</p><a href={selectedLead.website.startsWith('http') ? selectedLead.website : `https://${selectedLead.website}`} target="_blank" rel="noreferrer" className="text-primary hover:underline">{selectedLead.website}</a></div></div>
+                    )}
+                    {selectedLead.gstin && (
+                      <div className="flex items-start gap-2"><Building2 className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" /><div><p className="text-muted-foreground text-xs">GSTIN</p><p className="font-mono text-xs">{selectedLead.gstin}</p></div></div>
+                    )}
+                    {(selectedLead.address || selectedLead.city || selectedLead.state) && (
+                      <div className="flex items-start gap-2"><MapPin className="w-4 h-4 text-rose-500 mt-0.5 shrink-0" /><div><p className="text-muted-foreground text-xs">Address</p><p>{[selectedLead.address, selectedLead.city, selectedLead.state].filter(Boolean).join(', ')}</p></div></div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {selectedLead.imported_via && (
+                <Badge variant="outline" className="bg-muted/50">📥 Imported via {selectedLead.imported_via}</Badge>
+              )}
+
               {selectedLead.notes && <div><p className="text-sm text-muted-foreground">Notes</p><p className="text-sm">{selectedLead.notes}</p></div>}
               <div className="flex gap-2 flex-wrap">
                 {(['new', 'contacted', 'qualified', 'negotiation', 'won', 'lost'] as LeadStatus[]).map(s => (
@@ -228,9 +280,9 @@ export default function LeadManagement() {
         </DialogContent>
       </Dialog>
 
-      {/* New Lead */}
+      {/* New Lead Dialog */}
       <Dialog open={showNewLead} onOpenChange={setShowNewLead}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Add New Lead</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -240,6 +292,18 @@ export default function LeadManagement() {
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Phone</Label><Input value={newLead.phone} onChange={e => setNewLead(p => ({ ...p, phone: e.target.value }))} /></div>
               <div><Label>Email</Label><Input value={newLead.email} onChange={e => setNewLead(p => ({ ...p, email: e.target.value }))} /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>WhatsApp Number</Label><Input value={newLead.whatsapp} onChange={e => setNewLead(p => ({ ...p, whatsapp: e.target.value }))} placeholder="e.g. 9876543210" /></div>
+              <div><Label>Website</Label><Input value={newLead.website} onChange={e => setNewLead(p => ({ ...p, website: e.target.value }))} placeholder="www.example.com" /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>GST Number</Label><Input value={newLead.gstin} onChange={e => setNewLead(p => ({ ...p, gstin: e.target.value }))} placeholder="e.g. 27AABCA1234C1Z5" /></div>
+              <div><Label>Address</Label><Input value={newLead.address} onChange={e => setNewLead(p => ({ ...p, address: e.target.value }))} /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>City</Label><Input value={newLead.city} onChange={e => setNewLead(p => ({ ...p, city: e.target.value }))} /></div>
+              <div><Label>State</Label><Input value={newLead.state} onChange={e => setNewLead(p => ({ ...p, state: e.target.value }))} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Source</Label>
@@ -254,10 +318,13 @@ export default function LeadManagement() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowNewLead(false)}>Cancel</Button>
-            <Button onClick={handleCreateLead}>Create Lead</Button>
+            <Button onClick={handleCreateLead} disabled={!newLead.company_name || !newLead.contact_person}>Create Lead</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Import Dialog */}
+      <LeadImport open={showImport} onOpenChange={setShowImport} defaultSource={importSource} onComplete={fetchLeads} />
     </div>
   );
 }
