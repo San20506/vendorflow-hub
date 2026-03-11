@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { Portal } from '@/types';
-import { portalConfigs } from '@/services/mockData';
+import { getChannels, subscribeChannels } from '@/services/channelManager';
 import { cn } from '@/lib/utils';
 
 interface PortalFilterProps {
@@ -10,6 +10,8 @@ interface PortalFilterProps {
 }
 
 export function PortalFilter({ selectedPortal, onPortalChange, className }: PortalFilterProps) {
+  const channels = useSyncExternalStore(subscribeChannels, getChannels);
+
   return (
     <div className={cn('flex items-center gap-2 flex-wrap', className)}>
       <button
@@ -24,7 +26,7 @@ export function PortalFilter({ selectedPortal, onPortalChange, className }: Port
         All Portals
       </button>
       
-      {portalConfigs.map((portal) => (
+      {channels.map((portal) => (
         <button
           key={portal.id}
           onClick={() => onPortalChange(portal.id)}
