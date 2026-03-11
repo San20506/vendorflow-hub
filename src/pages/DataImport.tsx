@@ -1,10 +1,10 @@
 import { useState, useRef, useCallback } from 'react';
-import { ExcelUpload } from '@/components/ExcelUpload';
+import { SmartExcelImport } from '@/components/SmartExcelImport';
 import { BarcodeScanner } from '@/components/BarcodeScanner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileSpreadsheet, Scan, Package, RotateCcw, CheckCircle, AlertTriangle, XCircle, Lightbulb, Upload, FolderOpen, X, File, Image, FileText } from 'lucide-react';
+import { FileSpreadsheet, Package, RotateCcw, CheckCircle, AlertTriangle, XCircle, Lightbulb, Upload, FolderOpen, X, File, Image, FileText } from 'lucide-react';
 
 const validationChecks = [
   { label: 'Orders Imported', status: 'success' as const, detail: '1,247 records synced' },
@@ -34,8 +34,8 @@ function formatFileSize(bytes: number) {
 }
 
 function getFileIcon(type: string) {
-  if (type.startsWith('image/')) return <Image className="w-5 h-5 text-blue-500" />;
-  if (type.includes('spreadsheet') || type.includes('csv') || type.includes('excel')) return <FileSpreadsheet className="w-5 h-5 text-emerald-600" />;
+  if (type.startsWith('image/')) return <Image className="w-5 h-5 text-primary" />;
+  if (type.includes('spreadsheet') || type.includes('csv') || type.includes('excel')) return <FileSpreadsheet className="w-5 h-5 text-primary" />;
   return <FileText className="w-5 h-5 text-muted-foreground" />;
 }
 
@@ -76,17 +76,18 @@ export default function DataImport() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Data Import & Scanning</h1>
-          <p className="text-muted-foreground">Upload Excel files or scan barcodes for quick data entry</p>
+          <p className="text-muted-foreground">Smart Excel import with AI column mapping, validation & barcode scanning</p>
         </div>
         <Badge variant="outline">✔ Updated</Badge>
       </div>
 
+      {/* Quick action cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="cursor-pointer hover:shadow-md transition-shadow">
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-lg bg-primary/10"><FileSpreadsheet className="w-6 h-6 text-primary" /></div>
-              <div><h3 className="font-semibold">Excel Upload</h3><p className="text-sm text-muted-foreground">Bulk import data</p></div>
+              <div><h3 className="font-semibold">Smart Import</h3><p className="text-sm text-muted-foreground">AI-powered Excel import</p></div>
             </div>
           </CardContent>
         </Card>
@@ -112,10 +113,13 @@ export default function DataImport() {
         </Card>
       </div>
 
+      {/* Smart Excel Import - main feature */}
+      <SmartExcelImport />
+
       {/* Multi-File Upload Zone */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Upload className="w-5 h-5 text-primary" />Multi-File Upload</CardTitle>
+          <CardTitle className="flex items-center gap-2"><Upload className="w-5 h-5 text-primary" />Bulk File Upload</CardTitle>
           <CardDescription>Drag & drop multiple files or select a folder</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -218,8 +222,6 @@ export default function DataImport() {
           </ul>
         </CardContent>
       </Card>
-
-      <ExcelUpload />
     </div>
   );
 }
