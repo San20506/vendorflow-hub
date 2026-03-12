@@ -203,21 +203,21 @@ export function AppSidebar() {
   })).filter(section => section.groups.length > 0);
 
   return (
-    <Sidebar className="border-r-0" collapsible="icon">
+    <Sidebar className="border-r border-sidebar-border" collapsible="icon">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
           <button
             onClick={() => !isCollapsed && setIsEditingBrand(!isEditingBrand)}
-            className="flex items-center justify-center w-9 h-9 rounded-lg bg-sidebar-primary hover:opacity-80 transition-opacity cursor-pointer"
+            className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
             title="Click to edit branding"
           >
-            <Package className="w-5 h-5 text-sidebar-primary-foreground" />
+            <Package className="w-5 h-5 text-primary-foreground" />
           </button>
           {!isCollapsed && (
             isEditingBrand ? (
               <div className="flex flex-col gap-1">
                 <input
-                  className="bg-sidebar-accent text-sidebar-foreground text-sm font-semibold rounded px-1.5 py-0.5 border border-sidebar-border w-[120px]"
+                  className="bg-accent text-foreground text-sm font-semibold rounded-lg px-1.5 py-0.5 border border-border w-[120px]"
                   value={brandName}
                   onChange={(e) => setBrandName(e.target.value)}
                   onBlur={() => setIsEditingBrand(false)}
@@ -225,7 +225,7 @@ export function AppSidebar() {
                   autoFocus
                 />
                 <input
-                  className="bg-sidebar-accent text-sidebar-foreground/60 text-[10px] rounded px-1.5 py-0.5 border border-sidebar-border w-[120px]"
+                  className="bg-accent text-muted-foreground text-[10px] rounded-lg px-1.5 py-0.5 border border-border w-[120px]"
                   value={brandSubtitle}
                   onChange={(e) => setBrandSubtitle(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && setIsEditingBrand(false)}
@@ -233,8 +233,8 @@ export function AppSidebar() {
               </div>
             ) : (
               <div className="flex flex-col cursor-pointer" onClick={() => setIsEditingBrand(true)} title="Click to edit">
-                <span className="font-semibold text-sidebar-foreground">{brandName}</span>
-                <span className="text-xs text-sidebar-foreground/60">{brandSubtitle}</span>
+                <span className="font-bold text-sidebar-foreground">{brandName}</span>
+                <span className="text-xs text-muted-foreground">{brandSubtitle}</span>
               </div>
             )
           )}
@@ -246,7 +246,7 @@ export function AppSidebar() {
           <div key={section.heading}>
             {!isCollapsed && (
               <div className={`px-3 py-2.5 ${sectionIndex > 0 ? 'mt-3 border-t border-sidebar-border pt-4' : ''}`}>
-                <span className="text-[11px] font-bold text-sidebar-primary uppercase tracking-widest">
+                <span className="text-[11px] font-bold text-primary uppercase tracking-widest">
                   {section.heading}
                 </span>
               </div>
@@ -258,7 +258,7 @@ export function AppSidebar() {
               <Collapsible key={group.label} defaultOpen={sectionIndex === 0 && index < 2} className="group/collapsible">
                 <SidebarGroup className="p-0">
                   {!isCollapsed ? (
-                    <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2 text-xs font-medium text-sidebar-foreground/50 uppercase tracking-wider hover:text-sidebar-foreground/80 transition-colors">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors">
                       {group.label}
                       <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-data-[state=closed]/collapsible:rotate-[-90deg]" />
                     </CollapsibleTrigger>
@@ -284,8 +284,8 @@ export function AppSidebar() {
                                   className={`
                                     flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
                                     ${isActive 
-                                      ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium' 
-                                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                                      ? 'bg-primary text-primary-foreground font-medium shadow-sm' 
+                                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                                     }
                                   `}
                                 >

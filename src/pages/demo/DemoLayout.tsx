@@ -16,22 +16,17 @@ const navItems = [
 ];
 
 export default function DemoLayout({ children }: { children: ReactNode }) {
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-    return () => { document.documentElement.classList.remove('dark'); };
-  }, []);
-
   const location = useLocation();
 
   return (
-    <div className="flex min-h-screen bg-[#0a0e1a] text-gray-100">
+    <div className="flex min-h-screen bg-background text-foreground">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-white/10 bg-[#0d1224] flex flex-col">
-        <div className="p-5 border-b border-white/10">
-          <h1 className="text-lg font-bold tracking-tight text-white">
+      <aside className="w-64 border-r border-border bg-card flex flex-col">
+        <div className="p-5 border-b border-border">
+          <h1 className="text-lg font-bold tracking-tight text-foreground">
             🛒 Multi Portal
           </h1>
-          <p className="text-xs text-gray-400 mt-0.5">E-Commerce Integration</p>
+          <p className="text-xs text-muted-foreground mt-0.5">E-Commerce Integration</p>
         </div>
         <nav className="flex-1 p-3 space-y-1">
           {navItems.map((item) => (
@@ -43,8 +38,8 @@ export default function DemoLayout({ children }: { children: ReactNode }) {
                 cn(
                   'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
                   isActive
-                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                    : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                 )
               }
             >
@@ -53,10 +48,10 @@ export default function DemoLayout({ children }: { children: ReactNode }) {
             </NavLink>
           ))}
         </nav>
-        <div className="p-3 border-t border-white/10">
+        <div className="p-3 border-t border-border">
           <NavLink
             to="/dashboard"
-            className="flex items-center gap-2 px-3 py-2 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft className="w-3 h-3" />
             Back to Main App
