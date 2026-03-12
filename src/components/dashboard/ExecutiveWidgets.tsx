@@ -179,6 +179,47 @@ export function ExecutiveWidgets({ orders, formatCurrency }: ExecutiveWidgetsPro
     return { total, done, inProgress, pending, overdue, highPriority, completionRate };
   }, [tasks]);
 
+  // ─── CUSTOMER STATE-WISE ───
+  const customerByState = useMemo(() => {
+    const map: Record<string, { state: string; count: number; revenue: number }> = {};
+    customers.forEach(c => {
+      const state = c.state || 'Unknown';
+      if (!map[state]) map[state] = { state, count: 0, revenue: 0 };
+      map[state].count += 1;
+      map[state].revenue += c.total_spent || 0;
+    });
+    return Object.values(map).sort((a, b) => b.count - a.count).slice(0, 8);
+  }, [customers]);
+
+  // ─── VENDOR STATE-WISE ───
+  const vendorByState = useMemo(() => {
+    const map: Record<string, { state: string; count: number; active: number }> = {};
+    vendors.forEach(v => {
+      // Extract state from address if available
+      const addr = v.gst_address || v.address || '';
+      const parts = addr.split(',').map((s: string) => s.trim());
+      const state = parts.length > 1 ? parts[parts.length - 1] : (addr || 'Unknown');
+      if (!map[state]) map[state] = { state, count: 0, active: 0 };
+      map[state].count += 1;
+      if (v.status === 'active') map[state].active += 1;
+    });
+    return Object.values(map).sort((a, b) => b.count - a.count).slice(0, 8);
+  }, [vendors]);
+
+  // ─── LEADS STATUS ───
+  const leadsStatus = useMemo(() => {
+    const total = leads.length;
+    const newLeads = leads.filter(l => l.status === 'new').length;
+    const contacted = leads.filter(l => l.status === 'contacted').length;
+    const qualified = leads.filter(l => l.status === 'qualified').length;
+    const negotiation = leads.filter(l => l.status === 'negotiation').length;
+    const won = leads.filter(l => l.status === 'won' || l.status === 'converted').length;
+    const lost = leads.filter(l => l.status === 'lost').length;
+    const totalValue = leads.reduce((s, l) => s + (l.value || 0), 0);
+    const conversionRate = total > 0 ? Math.round((won / total) * 100) : 0;
+    return { total, newLeads, contacted, qualified, negotiation, won, lost, totalValue, conversionRate };
+  }, [leads]);
+
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
