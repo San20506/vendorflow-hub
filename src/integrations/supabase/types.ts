@@ -255,12 +255,15 @@ export type Database = {
       customers: {
         Row: {
           address: string | null
+          block_reason: string | null
+          blocked_at: string | null
           channels: string[] | null
           city: string | null
           created_at: string
           email: string | null
           first_order_date: string | null
           id: string
+          is_blocked: boolean | null
           last_order_date: string | null
           name: string
           phone: string | null
@@ -275,12 +278,15 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          block_reason?: string | null
+          blocked_at?: string | null
           channels?: string[] | null
           city?: string | null
           created_at?: string
           email?: string | null
           first_order_date?: string | null
           id?: string
+          is_blocked?: boolean | null
           last_order_date?: string | null
           name: string
           phone?: string | null
@@ -295,12 +301,15 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          block_reason?: string | null
+          blocked_at?: string | null
           channels?: string[] | null
           city?: string | null
           created_at?: string
           email?: string | null
           first_order_date?: string | null
           id?: string
+          is_blocked?: boolean | null
           last_order_date?: string | null
           name?: string
           phone?: string | null
