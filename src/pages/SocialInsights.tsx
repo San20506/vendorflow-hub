@@ -14,11 +14,11 @@ import {
   MessageCircle, Instagram, Facebook, Mail, Search, Send, Bot, Zap, UserPlus, AlertTriangle,
   ChevronRight, Phone, Users, CheckCircle, Clock, XCircle, Sparkles, Tag, Brain, RotateCcw, Ban, CalendarClock, Loader2,
   ShoppingCart, ArrowRight, Flame, ThermometerSun, Snowflake, Shield, Bell, Settings2, Play, GitBranch, User,
-  TrendingUp, AlertCircle, Smile, Frown, Meh, Angry,
+  TrendingUp, AlertCircle, Smile, Frown, Meh, Angry, ClipboardList, ListTodo,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { socialMessagesDb, alertsDb, customersDb } from '@/services/database';
+import { socialMessagesDb, alertsDb, customersDb, tasksDb } from '@/services/database';
 import { supabase } from '@/integrations/supabase/client';
 
 type Channel = 'all' | 'instagram' | 'facebook' | 'whatsapp' | 'email' | 'marketplace';
@@ -566,6 +566,77 @@ export default function SocialInsights() {
                         </CardContent>
                       </Card>
                     )}
+
+                    {/* Task Category & Add to Task Manager */}
+                    <Card className="border-dashed">
+                      <CardContent className="p-3 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <ListTodo className="w-4 h-4 text-primary" />
+                          <span className="font-semibold text-sm">Message Action</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            { value: 'done', label: 'Done', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30', icon: CheckCircle },
+                            { value: 'follow_up', label: 'Follow-up', color: 'bg-amber-500/10 text-amber-600 border-amber-500/30', icon: CalendarClock },
+                            { value: 'additional_info', label: 'Additional Info Required', color: 'bg-blue-500/10 text-blue-600 border-blue-500/30', icon: AlertCircle },
+                            { value: 'ignore', label: 'Ignore', color: 'bg-muted text-muted-foreground', icon: Ban },
+                          ].map(opt => {
+                            const OptIcon = opt.icon;
+                            const isActive = selectedMessage.task_category === opt.value;
+                            return (
+                              <Button
+                                key={opt.value}
+                                size="sm"
+                                variant={isActive ? 'default' : 'outline'}
+                                className={`gap-1.5 text-xs ${!isActive ? opt.color : ''}`}
+                                onClick={async () => {
+                                  await socialMessagesDb.update(selectedMessage.id, { task_category: opt.value });
+                                  setSelectedMessage((prev: any) => prev ? { ...prev, task_category: opt.value } : prev);
+                                  setMessages(prev => prev.map(m => m.id === selectedMessage.id ? { ...m, task_category: opt.value } : m));
+                                  toast({ title: `Marked as ${opt.label}` });
+                                }}
+                              >
+                                <OptIcon className="w-3 h-3" />{opt.label}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                        {!selectedMessage.converted_to_task && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1.5 w-full border-primary/30 text-primary hover:bg-primary/5"
+                            onClick={async () => {
+                              try {
+                                const taskCategory = selectedMessage.task_category || 'follow_up';
+                                const priorityMap: Record<string, string> = { done: 'low', follow_up: 'medium', additional_info: 'high', ignore: 'low' };
+                                await tasksDb.create({
+                                  title: `[Inbox] ${selectedMessage.sender} — ${categoryConfig[selectedMessage.category]?.label || selectedMessage.category}`,
+                                  description: `Channel: ${selectedMessage.channel}\nMessage: ${selectedMessage.preview || selectedMessage.subject || ''}\nAction: ${taskCategory}\nPhone: ${selectedMessage.sender_phone || 'N/A'}`,
+                                  priority: priorityMap[taskCategory] || 'medium',
+                                  status: taskCategory === 'done' ? 'completed' : 'pending',
+                                  portal: selectedMessage.channel,
+                                });
+                                await socialMessagesDb.update(selectedMessage.id, { converted_to_task: true });
+                                setSelectedMessage((prev: any) => prev ? { ...prev, converted_to_task: true } : prev);
+                                setMessages(prev => prev.map(m => m.id === selectedMessage.id ? { ...m, converted_to_task: true } : m));
+                                toast({ title: '✅ Added to Task Manager', description: `Task created for ${selectedMessage.sender}` });
+                              } catch (err: any) {
+                                console.error('Create task error:', err);
+                                toast({ title: 'Failed to create task', description: err.message, variant: 'destructive' });
+                              }
+                            }}
+                          >
+                            <ClipboardList className="w-3.5 h-3.5" />Add to Task Manager
+                          </Button>
+                        )}
+                        {selectedMessage.converted_to_task && (
+                          <div className="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/10 text-emerald-600 text-xs font-medium">
+                            <CheckCircle className="w-3.5 h-3.5" />Already added to Task Manager
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
 
                     {/* Conversation History */}
                     <ScrollArea className="h-[250px] border rounded-lg p-4">
