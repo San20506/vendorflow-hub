@@ -55,6 +55,7 @@ export function ExecutiveWidgets({ orders, formatCurrency }: ExecutiveWidgetsPro
   const [products, setProducts] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
+  const [leads, setLeads] = useState<any[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -64,9 +65,10 @@ export function ExecutiveWidgets({ orders, formatCurrency }: ExecutiveWidgetsPro
       supabase.from('products').select('id, name, sku, status, portals_enabled, category, brand').then(r => r.data || []),
       supabase.from('tasks').select('*').then(r => r.data || []),
       supabase.from('customers').select('*').then(r => r.data || []),
-    ]).then(([v, ph, sm, pr, t, c]) => {
+      supabase.from('leads').select('*').then(r => r.data || []),
+    ]).then(([v, ph, sm, pr, t, c, l]) => {
       setVendors(v); setProductHealth(ph); setSkuMappings(sm);
-      setProducts(pr); setTasks(t); setCustomers(c);
+      setProducts(pr); setTasks(t); setCustomers(c); setLeads(l);
     });
   }, []);
 
