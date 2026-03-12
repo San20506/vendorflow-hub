@@ -189,6 +189,33 @@ export const IMPORT_MODULES: ImportModule[] = [
       { order_number: 'ORD-2026-002', portal: 'FirstCry', customer_name: 'Priya Patel', reason: 'Not as described', refund_amount: 1599, status: 'refund_initiated', requested_at: '2026-03-06', claim_status: 'claimed' },
     ],
   },
+  {
+    id: 'gst_finance',
+    label: 'GST / Finance',
+    icon: 'IndianRupee',
+    dbTable: 'gst_records',
+    fields: [
+      { key: 'gstin', label: 'GSTIN', required: false, type: 'text', validate: v => v && v.length !== 15 ? 'GSTIN must be 15 characters' : null },
+      { key: 'invoice_number', label: 'Invoice Number', required: true, type: 'text' },
+      { key: 'invoice_date', label: 'Invoice Date', required: false, type: 'date' },
+      { key: 'party_name', label: 'Party Name', required: false, type: 'text' },
+      { key: 'portal', label: 'Portal', required: false, type: 'select', options: ['Amazon', 'Flipkart', 'Meesho', 'Myntra', 'FirstCry', 'Blinkit'], defaultValue: 'FirstCry' },
+      { key: 'taxable_value', label: 'Taxable Value (₹)', required: false, type: 'number', defaultValue: 0 },
+      { key: 'cgst', label: 'CGST (₹)', required: false, type: 'number', defaultValue: 0 },
+      { key: 'sgst', label: 'SGST (₹)', required: false, type: 'number', defaultValue: 0 },
+      { key: 'igst', label: 'IGST (₹)', required: false, type: 'number', defaultValue: 0 },
+      { key: 'total_tax', label: 'Total Tax (₹)', required: false, type: 'number', defaultValue: 0 },
+      { key: 'total_amount', label: 'Total Amount (₹)', required: false, type: 'number', defaultValue: 0 },
+      { key: 'hsn_code', label: 'HSN Code', required: false, type: 'text' },
+      { key: 'gst_percent', label: 'GST %', required: false, type: 'number', validate: v => v && (v < 0 || v > 28) ? 'GST must be 0-28%' : null },
+      { key: 'filing_period', label: 'Filing Period', required: false, type: 'text' },
+      { key: 'status', label: 'Status', required: false, type: 'select', options: ['pending', 'filed', 'reconciled', 'mismatch', 'Account Approved', 'Account Rejected'] },
+    ],
+    sampleData: [
+      { gstin: '27AABCT1234F1ZV', invoice_number: 'INV-FC-2026-001', invoice_date: '2026-03-01', party_name: 'FirstCry Newborn Care', portal: 'FirstCry', taxable_value: 50000, cgst: 4500, sgst: 4500, igst: 0, total_tax: 9000, total_amount: 59000, hsn_code: '95030090', gst_percent: 18, filing_period: 'Mar-2026', status: 'reconciled' },
+      { gstin: '07AABCF5678G2ZP', invoice_number: 'INV-FC-2026-002', invoice_date: '2026-03-05', party_name: 'FirstCry Delhi Hub', portal: 'FirstCry', taxable_value: 30000, cgst: 0, sgst: 0, igst: 5400, total_tax: 5400, total_amount: 35400, hsn_code: '61091000', gst_percent: 18, filing_period: 'Mar-2026', status: 'pending' },
+    ],
+  },
 ];
 
 export function getModuleById(id: string): ImportModule | undefined {
