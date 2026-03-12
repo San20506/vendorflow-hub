@@ -681,3 +681,49 @@ export const automationSettingsDb = {
     return data;
   },
 };
+
+// ==================== DROPDOWN OPTIONS ====================
+export const dropdownOptionsDb = {
+  async getByFieldType(fieldType: string) {
+    const { data, error } = await supabase
+      .from('dropdown_options' as any)
+      .select('*')
+      .eq('field_type', fieldType)
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    return data as any[];
+  },
+  async getAll() {
+    const { data, error } = await supabase
+      .from('dropdown_options' as any)
+      .select('*')
+      .order('field_type')
+      .order('sort_order', { ascending: true });
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(option: { field_type: string; label: string; value: string; is_default?: boolean; sort_order?: number }) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase
+      .from('dropdown_options' as any)
+      .insert({ ...option, vendor_id: userId })
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: { label?: string; value?: string; sort_order?: number }) {
+    const { data, error } = await supabase
+      .from('dropdown_options' as any)
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  },
+  async delete(id: string) {
+    const { error } = await supabase.from('dropdown_options' as any).delete().eq('id', id);
+    if (error) throw error;
+  },
+};

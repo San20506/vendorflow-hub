@@ -374,6 +374,39 @@ export type Database = {
           },
         ]
       }
+      dropdown_options: {
+        Row: {
+          created_at: string | null
+          field_type: string
+          id: string
+          is_default: boolean | null
+          label: string
+          sort_order: number | null
+          value: string
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          field_type: string
+          id?: string
+          is_default?: boolean | null
+          label: string
+          sort_order?: number | null
+          value: string
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          field_type?: string
+          id?: string
+          is_default?: boolean | null
+          label?: string
+          sort_order?: number | null
+          value?: string
+          vendor_id?: string | null
+        }
+        Relationships: []
+      }
       employees: {
         Row: {
           created_at: string
