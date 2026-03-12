@@ -24,7 +24,7 @@ import { Switch } from '@/components/ui/switch';
 import { 
   Search, Download, ShoppingCart, Package, Truck, CheckCircle, Clock,
   X, Eye, Users, UserPlus, UserCheck, Star, Layers, RotateCcw, AlertTriangle,
-  MapPin, Timer, ArrowDownToLine, Ban, Video, Trash2, Shield,
+  MapPin, Timer, ArrowDownToLine, Ban, Video, Trash2, Shield, Printer,
 } from 'lucide-react';
 import { DateFilter, ExportButton, useRowSelection, SelectAllCheckbox, RowCheckbox } from '@/components/TableEnhancements';
 import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
@@ -283,6 +283,95 @@ export default function Orders() {
     month: 'short',
     year: 'numeric',
   });
+
+  const printOrderInvoice = (order: Order) => {
+    const portal = portalConfigs.find(p => p.id === order.portal);
+    const portalName = portal?.name || order.portal;
+    const invoiceWindow = window.open('', '_blank', 'width=800,height=900');
+    if (!invoiceWindow) { toast({ title: 'Please allow popups to print invoice', variant: 'destructive' }); return; }
+
+    const itemsHtml = order.items.length > 0
+      ? order.items.map((item, i) => `
+        <tr>
+          <td style="padding:8px;border-bottom:1px solid #e5e7eb;">${i + 1}</td>
+          <td style="padding:8px;border-bottom:1px solid #e5e7eb;">${item.productName}</td>
+          <td style="padding:8px;border-bottom:1px solid #e5e7eb;">${item.skuId}</td>
+          <td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center;">${item.quantity}</td>
+          <td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right;">₹${item.price.toLocaleString()}</td>
+          <td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right;">₹${(item.price * item.quantity).toLocaleString()}</td>
+        </tr>`).join('')
+      : `<tr><td colspan="6" style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center;">Order total: ₹${order.totalAmount.toLocaleString()}</td></tr>`;
+
+    invoiceWindow.document.write(`<!DOCTYPE html><html><head><title>Invoice - ${order.orderId}</title>
+      <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Segoe UI', sans-serif; padding:40px; color:#1a1a2e; }
+        .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; padding-bottom:20px; border-bottom:3px solid #1a1a2e; }
+        .portal-badge { background:#f0f4ff; color:#3b5bdb; padding:6px 16px; border-radius:6px; font-weight:600; font-size:13px; }
+        .grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:28px; }
+        .section { background:#f8f9fa; padding:16px; border-radius:8px; }
+        .section h3 { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#868e96; margin-bottom:8px; }
+        .section p { font-size:13px; line-height:1.6; }
+        table { width:100%; border-collapse:collapse; margin-bottom:24px; }
+        th { background:#1a1a2e; color:#fff; padding:10px 8px; text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; }
+        th:nth-child(4), th:nth-child(5), th:nth-child(6) { text-align:right; }
+        td { font-size:13px; }
+        .total-row { background:#f0f4ff; }
+        .total-row td { padding:12px 8px; font-weight:700; font-size:15px; }
+        .footer { text-align:center; margin-top:40px; padding-top:16px; border-top:1px solid #dee2e6; color:#868e96; font-size:11px; }
+        @media print { body { padding:20px; } .no-print { display:none; } }
+      </style>
+    </head><body>
+      <div class="no-print" style="text-align:right;margin-bottom:16px;">
+        <button onclick="window.print()" style="background:#1a1a2e;color:#fff;border:none;padding:10px 24px;border-radius:6px;cursor:pointer;font-size:14px;">🖨️ Print Invoice</button>
+      </div>
+      <div class="header">
+        <div>
+          <h1 style="font-size:28px;font-weight:800;letter-spacing:-0.5px;">ORDER INVOICE</h1>
+          <p style="color:#868e96;font-size:13px;margin-top:4px;">Invoice generated on ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+        </div>
+        <div style="text-align:right;">
+          <span class="portal-badge">${portalName}</span>
+          <p style="font-size:13px;margin-top:8px;color:#868e96;">Order #${order.orderId}</p>
+          <p style="font-size:13px;color:#868e96;">Date: ${formatDate(order.orderDate)}</p>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="section">
+          <h3>Ship To</h3>
+          <p><strong>${order.customerName}</strong></p>
+          <p>${order.shippingAddress || 'N/A'}</p>
+          ${order.customerCity ? `<p>${order.customerCity}${order.customerState ? ', ' + order.customerState : ''} ${order.customerPinCode || ''}</p>` : ''}
+          <p>Phone: ${order.customerPhone || 'N/A'}</p>
+          ${order.customerEmail ? `<p>Email: ${order.customerEmail}</p>` : ''}
+        </div>
+        <div class="section">
+          <h3>Order Details</h3>
+          <p><strong>Portal Order ID:</strong> ${order.portalOrderId}</p>
+          <p><strong>Status:</strong> ${statusConfig[order.status]?.label || order.status}</p>
+          ${order.trackingNumber ? `<p><strong>Tracking:</strong> ${order.trackingNumber}</p>` : ''}
+          ${order.deliveryDate ? `<p><strong>Delivery Date:</strong> ${formatDate(order.deliveryDate)}</p>` : ''}
+        </div>
+      </div>
+      <table>
+        <thead><tr>
+          <th>#</th><th>Product</th><th>SKU</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Rate</th><th style="text-align:right;">Amount</th>
+        </tr></thead>
+        <tbody>
+          ${itemsHtml}
+          <tr class="total-row">
+            <td colspan="5" style="text-align:right;padding:12px 8px;">Grand Total</td>
+            <td style="text-align:right;padding:12px 8px;">₹${order.totalAmount.toLocaleString()}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="footer">
+        <p>This is a computer-generated invoice for order ${order.orderId} via ${portalName}.</p>
+        <p>Generated from VendorFlow Hub</p>
+      </div>
+    </body></html>`);
+    invoiceWindow.document.close();
+  };
 
   const exportLabel = useMemo(() => {
     const parts = ['Export'];
@@ -641,15 +730,30 @@ export default function Orders() {
                           </Select>
                         </TableCell>
                         <TableCell className="text-center">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => setSelectedOrder(order)}
-                            className="gap-1"
-                          >
-                            <Eye className="w-4 h-4" />
-                            View
-                          </Button>
+                          <div className="flex items-center justify-center gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setSelectedOrder(order)}
+                              className="gap-1"
+                            >
+                              <Eye className="w-4 h-4" />
+                              View
+                            </Button>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => printOrderInvoice(order)}
+                                >
+                                  <Printer className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Print Invoice</TooltipContent>
+                            </Tooltip>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -671,15 +775,23 @@ export default function Orders() {
         <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                Order Details - {selectedOrder?.orderId}
-                {selectedOrder && selectedOrder.items.length > 1 && (
-                  <Badge variant="secondary" className="gap-1 bg-purple-500/10 text-purple-600">
-                    <Layers className="w-3 h-3" />
-                    Multi-SKU ({selectedOrder.items.length})
-                  </Badge>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="flex items-center gap-2">
+                  Order Details - {selectedOrder?.orderId}
+                  {selectedOrder && selectedOrder.items.length > 1 && (
+                    <Badge variant="secondary" className="gap-1 bg-purple-500/10 text-purple-600">
+                      <Layers className="w-3 h-3" />
+                      Multi-SKU ({selectedOrder.items.length})
+                    </Badge>
+                  )}
+                </DialogTitle>
+                {selectedOrder && (
+                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => printOrderInvoice(selectedOrder)}>
+                    <Printer className="w-4 h-4" />
+                    Print Invoice
+                  </Button>
                 )}
-              </DialogTitle>
+              </div>
             </DialogHeader>
             
             {selectedOrder && (
