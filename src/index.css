@@ -4,37 +4,37 @@
 @tailwind components;
 @tailwind utilities;
 
-/* VendorFlow Design System — Clean Modern SaaS
-   Inspired by CittaAI: Light, bright, blue-accented enterprise aesthetic
+/* VendorFlow Design System — Glass UI
+   Frosted glass aesthetic with depth, translucency and soft light
 */
 
 @layer base {
   :root {
-    /* Background & Surfaces — clean white/light gray */
-    --background: 210 20% 98%;
+    /* Background — subtle gradient base */
+    --background: 220 25% 95%;
     --foreground: 220 30% 15%;
     
-    /* Cards — pure white, elevated */
+    /* Cards — frosted glass */
     --card: 0 0% 100%;
     --card-foreground: 220 30% 15%;
     
-    /* Popovers & Dropdowns */
+    /* Popovers */
     --popover: 0 0% 100%;
     --popover-foreground: 220 30% 15%;
     
-    /* Primary — Bright Blue (CittaAI-style) */
+    /* Primary — Vibrant Blue */
     --primary: 217 91% 50%;
     --primary-foreground: 0 0% 100%;
     
-    /* Secondary — Soft blue-gray */
+    /* Secondary */
     --secondary: 214 32% 95%;
     --secondary-foreground: 220 30% 25%;
     
-    /* Muted — Subtle backgrounds */
+    /* Muted */
     --muted: 210 20% 96%;
     --muted-foreground: 215 16% 47%;
     
-    /* Accent — Light blue highlight */
+    /* Accent */
     --accent: 214 95% 93%;
     --accent-foreground: 217 91% 50%;
     
@@ -51,12 +51,12 @@
     --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
     
-    /* Borders & Inputs */
+    /* Borders — translucent */
     --border: 214 32% 91%;
     --input: 214 32% 91%;
     --ring: 217 91% 50%;
     
-    --radius: 0.625rem;
+    --radius: 0.75rem;
     
     /* Portal Brand Colors */
     --amazon: 33 100% 50%;
@@ -76,17 +76,23 @@
     --chart-5: 340 82% 52%;
     
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 50%) 0%, hsl(217 91% 60%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(214 95% 93%) 0%, hsl(214 95% 96%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 20% 99%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 50%) 0%, hsl(230 80% 60%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(214 95% 93% / 0.8) 0%, hsl(230 80% 96% / 0.6) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100% / 0.85) 0%, hsl(220 30% 98% / 0.7) 100%);
     
-    /* Shadows — softer, more diffuse */
-    --shadow-sm: 0 1px 3px 0 hsl(217 91% 50% / 0.04);
-    --shadow-md: 0 4px 12px -2px hsl(217 91% 50% / 0.08);
-    --shadow-lg: 0 12px 24px -4px hsl(217 91% 50% / 0.1);
-    --shadow-xl: 0 20px 40px -8px hsl(217 91% 50% / 0.12);
+    /* Glass effect tokens */
+    --glass-bg: hsl(0 0% 100% / 0.7);
+    --glass-border: hsl(0 0% 100% / 0.5);
+    --glass-blur: 16px;
+    --glass-bg-strong: hsl(0 0% 100% / 0.85);
     
-    /* Sidebar — Light white with blue accents */
+    /* Shadows — colored, diffuse */
+    --shadow-sm: 0 1px 3px 0 hsl(217 91% 50% / 0.05), 0 1px 2px -1px hsl(217 91% 50% / 0.04);
+    --shadow-md: 0 4px 16px -2px hsl(217 91% 50% / 0.08), 0 2px 6px -2px hsl(217 91% 50% / 0.05);
+    --shadow-lg: 0 12px 32px -4px hsl(217 91% 50% / 0.1), 0 4px 12px -4px hsl(217 91% 50% / 0.06);
+    --shadow-xl: 0 24px 48px -8px hsl(217 91% 50% / 0.14), 0 8px 16px -6px hsl(217 91% 50% / 0.06);
+    
+    /* Sidebar — frosted glass */
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 30% 25%;
     --sidebar-primary: 217 91% 50%;
@@ -98,22 +104,22 @@
   }
 
   .dark {
-    --background: 220 25% 7%;
+    --background: 225 25% 6%;
     --foreground: 210 40% 98%;
     
-    --card: 220 25% 10%;
+    --card: 225 25% 10%;
     --card-foreground: 210 40% 98%;
     
-    --popover: 220 25% 10%;
+    --popover: 225 25% 10%;
     --popover-foreground: 210 40% 98%;
     
-    --primary: 217 91% 55%;
+    --primary: 217 91% 58%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 220 25% 14%;
+    --secondary: 225 25% 14%;
     --secondary-foreground: 210 40% 98%;
     
-    --muted: 220 25% 14%;
+    --muted: 225 25% 13%;
     --muted-foreground: 215 20% 65%;
     
     --accent: 217 50% 18%;
@@ -131,18 +137,26 @@
     --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
     
-    --border: 220 25% 18%;
-    --input: 220 25% 18%;
-    --ring: 217 91% 55%;
+    --border: 225 20% 16%;
+    --input: 225 20% 16%;
+    --ring: 217 91% 58%;
     
-    --sidebar-background: 220 25% 7%;
+    --glass-bg: hsl(225 25% 10% / 0.7);
+    --glass-border: hsl(225 20% 20% / 0.5);
+    --glass-blur: 16px;
+    --glass-bg-strong: hsl(225 25% 10% / 0.85);
+    
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 55%) 0%, hsl(230 80% 65%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(225 25% 10% / 0.85) 0%, hsl(225 25% 12% / 0.7) 100%);
+    
+    --sidebar-background: 225 25% 6%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 217 91% 55%;
+    --sidebar-primary: 217 91% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 25% 14%;
+    --sidebar-accent: 225 25% 14%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 220 25% 14%;
-    --sidebar-ring: 217 91% 55%;
+    --sidebar-border: 225 20% 14%;
+    --sidebar-ring: 217 91% 58%;
   }
 }
 
@@ -154,24 +168,51 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Inter', system-ui, sans-serif;
+    background: linear-gradient(135deg, hsl(220 25% 95%) 0%, hsl(230 30% 92%) 40%, hsl(210 20% 96%) 100%);
+    background-attachment: fixed;
+  }
+
+  .dark body,
+  body:is(.dark *) {
+    background: linear-gradient(135deg, hsl(225 25% 6%) 0%, hsl(230 30% 8%) 40%, hsl(220 20% 5%) 100%);
+    background-attachment: fixed;
   }
 }
 
 @layer components {
-  /* KPI Card Styles */
+  /* Glass Card — the core glass effect */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    @apply rounded-xl shadow-sm transition-all duration-300;
+  }
+
+  .glass-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: hsl(217 91% 50% / 0.15);
+  }
+
+  /* KPI Card Styles — glass effect */
   .kpi-card {
-    @apply bg-card rounded-xl p-6 shadow-sm border border-border transition-all duration-200;
-    background: var(--gradient-card);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    @apply rounded-xl p-6 shadow-sm transition-all duration-300;
   }
   
   .kpi-card:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+    border-color: hsl(217 91% 50% / 0.2);
   }
   
   /* Status Badges */
   .status-badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    backdrop-filter: blur(8px);
   }
   
   .status-pending {
@@ -204,21 +245,24 @@
     @apply bg-meesho/10 text-meesho;
   }
   
-  /* Data Table */
+  /* Data Table — glass rows */
   .data-table {
     @apply w-full text-sm;
   }
   
   .data-table th {
-    @apply px-4 py-3 text-left font-semibold text-muted-foreground uppercase tracking-wider text-xs bg-muted/50;
+    @apply px-4 py-3 text-left font-semibold text-muted-foreground uppercase tracking-wider text-xs;
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
   }
   
   .data-table td {
-    @apply px-4 py-3 border-b border-border;
+    @apply px-4 py-3 border-b;
+    border-color: var(--glass-border);
   }
   
   .data-table tr:hover td {
-    @apply bg-muted/30;
+    background: hsl(217 91% 50% / 0.03);
   }
   
   /* Sidebar Navigation */
@@ -234,22 +278,32 @@
     @apply bg-sidebar-primary text-sidebar-primary-foreground font-medium;
   }
   
-  /* Chart Container */
+  /* Chart Container — glass */
   .chart-container {
-    @apply bg-card rounded-xl p-6 shadow-sm border border-border;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    @apply rounded-xl p-6 shadow-sm;
   }
   
   /* Alert Severity */
   .alert-critical {
-    @apply border-l-4 border-l-destructive bg-destructive/5;
+    @apply border-l-4 border-l-destructive;
+    background: hsl(0 84% 60% / 0.05);
+    backdrop-filter: blur(8px);
   }
   
   .alert-warning {
-    @apply border-l-4 border-l-warning bg-warning/5;
+    @apply border-l-4 border-l-warning;
+    background: hsl(38 92% 50% / 0.05);
+    backdrop-filter: blur(8px);
   }
   
   .alert-info {
-    @apply border-l-4 border-l-info bg-info/5;
+    @apply border-l-4 border-l-info;
+    background: hsl(199 89% 48% / 0.05);
+    backdrop-filter: blur(8px);
   }
 }
 
@@ -259,6 +313,21 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* Glass utility classes */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+  }
+
+  .glass-strong {
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border);
   }
   
   .animate-fade-in {
