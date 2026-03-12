@@ -368,6 +368,28 @@ export const tailorWorkDb = {
     return data;
   },
 };
+// ==================== LEAVE REQUESTS ====================
+export const leaveRequestsDb = {
+  async getAll(filters?: { employee_id?: string; status?: string }) {
+    let query = supabase.from('leave_requests' as any).select('*').order('created_at', { ascending: false });
+    if (filters?.employee_id) query = query.eq('employee_id', filters.employee_id);
+    if (filters?.status) query = query.eq('status', filters.status);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(record: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('leave_requests' as any).insert({ ...record, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('leave_requests' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
 
 // ==================== TASKS ====================
 export const tasksDb = {
