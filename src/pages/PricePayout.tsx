@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { IndianRupee, TrendingUp, Download, FileSpreadsheet, AlertTriangle, CheckCircle2, XCircle, Shield } from 'lucide-react';
+import { IndianRupee, TrendingUp, Download, FileSpreadsheet, AlertTriangle, CheckCircle2, XCircle, Shield, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import PriceAuditEngine from '@/components/settlements/PriceAuditEngine';
+import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
 import { useToast } from '@/hooks/use-toast';
 
 interface PriceBreakdown {
