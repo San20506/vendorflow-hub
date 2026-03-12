@@ -217,9 +217,10 @@ export default function SystemSettings() {
       </div>
 
       <Tabs defaultValue="fields" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-10">
           <TabsTrigger value="channels" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Channels</TabsTrigger>
           <TabsTrigger value="fields" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Field Config</TabsTrigger>
+          <TabsTrigger value="dropdowns" className="text-xs sm:text-sm data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">Dropdowns</TabsTrigger>
           <TabsTrigger value="features" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Features</TabsTrigger>
           <TabsTrigger value="financial" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Financial</TabsTrigger>
           <TabsTrigger value="services" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Services</TabsTrigger>
