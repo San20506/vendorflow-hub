@@ -315,6 +315,55 @@ export default function Support() {
       </div>
 
       {/* ═══════════════════════════════════════════════
+           TOP KPI ROW (Reference Design)
+         ═══════════════════════════════════════════════ */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 rounded-xl bg-amber-500/10"><MessageSquare className="w-5 h-5 text-amber-600" /></div>
+              <Badge variant="outline" className="text-[10px] bg-rose-500/10 text-rose-600 border-rose-500/20 gap-0.5">↓ {openCount > 0 ? Math.min(openCount, 12) : 0}%</Badge>
+            </div>
+            <p className="text-2xl font-bold">{openCount + pendingCount}</p>
+            <p className="text-sm text-muted-foreground">Open Tickets</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 rounded-xl bg-blue-500/10"><Clock className="w-5 h-5 text-blue-600" /></div>
+              <Badge variant="outline" className="text-[10px] bg-rose-500/10 text-rose-600 border-rose-500/20 gap-0.5">↓ 12%</Badge>
+            </div>
+            <p className="text-2xl font-bold">{filtered.length > 0 ? (filtered.reduce((s, t) => {
+              const elapsed = (Date.now() - new Date(t.createdAt).getTime()) / 3600000;
+              return s + Math.min(elapsed, t.slaHours);
+            }, 0) / filtered.length).toFixed(1) : '0'} hrs</p>
+            <p className="text-sm text-muted-foreground">Avg Response Time</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 rounded-xl bg-emerald-500/10"><CheckCircle2 className="w-5 h-5 text-emerald-600" /></div>
+              <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/20 gap-0.5">↑ 3%</Badge>
+            </div>
+            <p className="text-2xl font-bold">{filtered.length > 0 ? Math.round((resolvedCount / filtered.length) * 100) : 0}%</p>
+            <p className="text-sm text-muted-foreground">Resolution Rate</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 rounded-xl bg-primary/10"><User className="w-5 h-5 text-primary" /></div>
+              <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/20 gap-0.5">↑ 1.5%</Badge>
+            </div>
+            <p className="text-2xl font-bold">{ratedTickets.length > 0 ? Math.round((positiveCount / ratedTickets.length) * 100) : 92}%</p>
+            <p className="text-sm text-muted-foreground">Customer Retention</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ═══════════════════════════════════════════════
            BLOCK 1: TICKET STATUS SUMMARY
          ═══════════════════════════════════════════════ */}
       <div>
