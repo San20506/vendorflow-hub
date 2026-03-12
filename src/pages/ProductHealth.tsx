@@ -159,11 +159,13 @@ export default function ProductHealth() {
             <div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
+               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
                     <TableHead className="w-10"><SelectAllCheckbox checked={rowSelection.isAllSelected} onCheckedChange={rowSelection.toggleAll} /></TableHead>
                     <TableHead className="font-semibold">Product Name</TableHead>
+                    <TableHead className="text-center font-semibold"><span className="flex items-center justify-center gap-1"><Star className="w-3.5 h-3.5 text-amber-500" />Rating</span></TableHead>
+                    <TableHead className="text-center font-semibold"><span className="flex items-center justify-center gap-1"><MessageSquare className="w-3.5 h-3.5 text-primary" />Reviews</span></TableHead>
                     {portalConfigs.map(p => (
                       <TableHead key={p.id} className="text-center font-semibold">
                         <span className="flex items-center justify-center gap-1">{p.icon} {p.name}</span>
@@ -176,10 +178,31 @@ export default function ProductHealth() {
                   {filteredProducts.map(product => {
                     const ps = (product.portal_status || {}) as Record<string, string>;
                     const overall = getOverallStatus(ps);
+                    const rating = product.rating != null ? Number(product.rating) : null;
+                    const reviewCount = product.review_count ?? 0;
                     return (
                       <TableRow key={product.id} className={rowSelection.isSelected(product.id) ? 'bg-primary/5' : ''}>
                         <TableCell><RowCheckbox checked={rowSelection.isSelected(product.id)} onCheckedChange={() => rowSelection.toggle(product.id)} /></TableCell>
                         <TableCell className="font-medium">{product.product_name}</TableCell>
+                        <TableCell className="text-center">
+                          {rating !== null ? (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <span className={`inline-flex items-center gap-1 font-semibold text-sm ${rating >= 4 ? 'text-emerald-600' : rating >= 3 ? 'text-amber-600' : 'text-rose-600'}`}>
+                                    <Star className="w-3.5 h-3.5 fill-current" />{rating.toFixed(1)}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>{rating >= 4 ? 'Excellent' : rating >= 3 ? 'Average' : 'Needs Attention'}</TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className="text-sm font-medium">{reviewCount > 0 ? reviewCount.toLocaleString('en-IN') : '—'}</span>
+                        </TableCell>
                         {portalConfigs.map(p => (
                           <TableCell key={p.id} className="text-center">{getStatusBadge((ps[p.id] || 'not_active') as ProductHealthStatus)}</TableCell>
                         ))}
