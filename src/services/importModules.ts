@@ -209,7 +209,7 @@ export const IMPORT_MODULES: ImportModule[] = [
       { key: 'hsn_code', label: 'HSN Code', required: false, type: 'text' },
       { key: 'gst_percent', label: 'GST %', required: false, type: 'number', validate: v => v && (v < 0 || v > 28) ? 'GST must be 0-28%' : null },
       { key: 'filing_period', label: 'Filing Period', required: false, type: 'text' },
-      { key: 'status', label: 'Status', required: false, type: 'select', options: ['pending', 'filed', 'reconciled', 'mismatch', 'Account Approved', 'Account Rejected'] },
+      { key: 'status', label: 'Status', required: false, type: 'select', options: ['pending', 'filed', 'reconciled', 'mismatch', 'Review', 'Account Approved', 'Account Rejected'] },
     ],
     sampleData: [
       { gstin: '27AABCT1234F1ZV', invoice_number: 'INV-FC-2026-001', invoice_date: '2026-03-01', party_name: 'FirstCry Newborn Care', portal: 'FirstCry', taxable_value: 50000, cgst: 4500, sgst: 4500, igst: 0, total_tax: 9000, total_amount: 59000, hsn_code: '95030090', gst_percent: 18, filing_period: 'Mar-2026', status: 'reconciled' },
