@@ -284,8 +284,8 @@ export function AppSidebar() {
                                   className={`
                                     flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
                                     ${isActive 
-                                      ? 'bg-sidebar-primary text-sidebar-primary-foreground font-medium' 
-                                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                                      ? 'bg-primary text-primary-foreground font-medium shadow-sm' 
+                                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                                     }
                                   `}
                                 >
