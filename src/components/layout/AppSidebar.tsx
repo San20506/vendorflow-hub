@@ -105,6 +105,7 @@ const navigationSections: NavSection[] = [
           { title: 'Orders', url: '/orders', icon: ShoppingCart, roles: ['admin', 'vendor', 'operations'] },
           { title: 'Consolidated Orders', url: '/consolidated-orders', icon: FileSpreadsheet, roles: ['admin', 'operations'] },
           { title: 'Returns & Claims', url: '/returns', icon: RotateCcw, roles: ['admin', 'operations'] },
+          { title: 'Purchase & Inward', url: '/purchase', icon: Receipt, roles: ['admin', 'vendor', 'operations'] },
         ],
       },
       {

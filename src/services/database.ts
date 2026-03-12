@@ -749,3 +749,69 @@ export const dropdownOptionsDb = {
     if (error) throw error;
   },
 };
+
+// ==================== PURCHASE ORDERS ====================
+export const purchaseOrdersDb = {
+  async getAll(search?: string) {
+    let query = supabase.from('purchase_orders' as any).select('*').order('created_at', { ascending: false });
+    if (search) query = query.or(`po_number.ilike.%${search}%,supplier_name.ilike.%${search}%`);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(record: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('purchase_orders' as any).insert({ ...record, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('purchase_orders' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
+
+// ==================== PURCHASE INVOICES ====================
+export const purchaseInvoicesDb = {
+  async getAll(search?: string) {
+    let query = supabase.from('purchase_invoices' as any).select('*').order('created_at', { ascending: false });
+    if (search) query = query.or(`bill_number.ilike.%${search}%,supplier_name.ilike.%${search}%`);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(record: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('purchase_invoices' as any).insert({ ...record, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('purchase_invoices' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
+
+// ==================== INWARD STOCK ====================
+export const inwardStockDb = {
+  async getAll(search?: string) {
+    let query = supabase.from('inward_stock' as any).select('*').order('created_at', { ascending: false });
+    if (search) query = query.or(`grn_number.ilike.%${search}%,supplier_name.ilike.%${search}%`);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as any[];
+  },
+  async create(record: any) {
+    const userId = await getCurrentUserId();
+    const { data, error } = await supabase.from('inward_stock' as any).insert({ ...record, vendor_id: userId }).select().single();
+    if (error) throw error;
+    return data;
+  },
+  async update(id: string, updates: any) {
+    const { data, error } = await supabase.from('inward_stock' as any).update(updates).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+};
