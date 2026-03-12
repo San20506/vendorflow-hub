@@ -75,6 +75,9 @@ export default function PricePayout() {
   const [selectedChannel, setSelectedChannel] = useState('All Channels');
   const [reconChannel, setReconChannel] = useState('All Channels');
   const [activeTab, setActiveTab] = useState('payout');
+  const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
+  const [sortField, setSortField] = useState<string>('default');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   // Payout data
   const filteredData = useMemo(() => {
