@@ -974,6 +974,8 @@ export type Database = {
           portal_status: Json
           product_id: string | null
           product_name: string
+          rating: number | null
+          review_count: number | null
           sku_mapping_id: string | null
           updated_at: string
           vendor_id: string | null
@@ -985,6 +987,8 @@ export type Database = {
           portal_status?: Json
           product_id?: string | null
           product_name: string
+          rating?: number | null
+          review_count?: number | null
           sku_mapping_id?: string | null
           updated_at?: string
           vendor_id?: string | null
@@ -996,6 +1000,8 @@ export type Database = {
           portal_status?: Json
           product_id?: string | null
           product_name?: string
+          rating?: number | null
+          review_count?: number | null
           sku_mapping_id?: string | null
           updated_at?: string
           vendor_id?: string | null
