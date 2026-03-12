@@ -202,7 +202,14 @@ export function validateRows(rows: Record<string, any>[], moduleId: string): {
       let val = row[field.key];
       const isEmpty = val === undefined || val === null || val === '';
 
-      // Apply default value for missing fields
+      // Apply intelligent defaults for missing fields
+      if (isEmpty && moduleId === 'orders' && field.key === 'order_number') {
+        const autoOrderNumber = `AUTO-FC-${Date.now()}-${idx + 1}`;
+        row[field.key] = autoOrderNumber;
+        val = autoOrderNumber;
+        return; // skip required check — generated order number applied
+      }
+
       if (isEmpty && field.defaultValue !== undefined) {
         row[field.key] = field.defaultValue;
         val = field.defaultValue;
