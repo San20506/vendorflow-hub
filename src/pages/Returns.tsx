@@ -11,12 +11,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import {
   Search, RotateCcw, CheckCircle, XCircle, Clock, AlertTriangle, IndianRupee,
   ChevronRight, ArrowUpDown, ArrowUp, ArrowDown, Package, Truck, Ban,
-  FileText, ShieldCheck, Warehouse, Link2, FileSpreadsheet, FileDown,
+  FileSpreadsheet, FileDown, ShieldCheck, Warehouse, Link2,
   MessageSquare, PackageX, PackageMinus, Eye,
 } from 'lucide-react';
 import { DateFilter, ExportButton, useRowSelection, SelectAllCheckbox, RowCheckbox } from '@/components/TableEnhancements';
@@ -24,19 +22,19 @@ import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
 
-// Return types — expanded
-type ReturnType = 'customer_return' | 'courier_return' | 'rto' | 'damaged_product' | 'missing_product' | 'partial_received' | 'before_pickup_cancel' | 'upcoming_return' | 'pending_return';
+// Return types
+type ReturnType = 'customer_return' | 'courier_return' | 'rto' | 'before_pickup_cancel' | 'pending_return' | 'upcoming_return' | 'damaged_product' | 'missing_product' | 'partial_received';
 
 const returnTypeConfig: Record<ReturnType, { label: string; color: string; icon: React.ElementType }> = {
   customer_return: { label: 'Customer Return', color: 'bg-rose-500/10 text-rose-600', icon: RotateCcw },
   courier_return: { label: 'Courier Return', color: 'bg-amber-500/10 text-amber-600', icon: Truck },
   rto: { label: 'RTO', color: 'bg-orange-500/10 text-orange-600', icon: Ban },
+  before_pickup_cancel: { label: 'Before Pickup Cancel', color: 'bg-muted text-muted-foreground', icon: XCircle },
+  pending_return: { label: 'Pending Return', color: 'bg-purple-500/10 text-purple-600', icon: Clock },
+  upcoming_return: { label: 'Upcoming Return', color: 'bg-blue-500/10 text-blue-600', icon: Package },
   damaged_product: { label: 'Damaged Product', color: 'bg-destructive/10 text-destructive', icon: PackageX },
   missing_product: { label: 'Missing Product', color: 'bg-purple-500/10 text-purple-600', icon: Package },
   partial_received: { label: 'Partial Received', color: 'bg-info/10 text-info', icon: PackageMinus },
-  before_pickup_cancel: { label: 'Before Pickup Cancel', color: 'bg-muted text-muted-foreground', icon: XCircle },
-  upcoming_return: { label: 'Upcoming Return', color: 'bg-blue-500/10 text-blue-600', icon: Clock },
-  pending_return: { label: 'Pending Return', color: 'bg-purple-500/10 text-purple-600', icon: Package },
 };
 
 type LifecycleStage = 'return_initiated' | 'pickup_completed' | 'warehouse_received' | 'physical_verification' | 'claim_raised' | 'claim_approved' | 'claim_rejected' | 'refund_approved' | 'settlement_adjusted';
@@ -127,7 +125,7 @@ const mockLifecycleData: ReturnLifecycle[] = [
     returnId: 'RET-2024-003', orderId: 'ORD-2024-001', portal: 'amazon', productName: 'Premium Wireless Earbuds Pro', skuId: 'SKU-AMZ-001',
     reason: 'not_as_described', returnType: 'customer_return', refundAmount: 2999, currentStage: 'warehouse_received', responsibleUser: 'QC Team',
     warehouseReceived: true, physicalVerification: 'pending', refundApproved: false, returnDate: daysAgo(3),
-    customerReturnNote: 'The product looks different from the listing image. Color is not matching and build quality is poor.',
+    customerReturnNote: 'The product looks different from the listing image.',
     claimEligibility: { status: 'pending_review', withinWindow: true, conditionEligible: true, categoryRestricted: false, reason: 'Awaiting physical verification' },
     timeline: [
       { stage: 'return_initiated', timestamp: daysAgo(3), user: 'Customer', note: 'Product not matching description' },
@@ -153,36 +151,30 @@ const mockLifecycleData: ReturnLifecycle[] = [
     returnId: 'RET-2024-005', orderId: 'ORD-2024-009', portal: 'meesho', productName: 'Yoga Mat Premium', skuId: 'SKU-MSH-007',
     reason: 'changed_mind', returnType: 'pending_return', refundAmount: 899, currentStage: 'return_initiated', responsibleUser: 'Logistics',
     warehouseReceived: false, physicalVerification: 'pending', refundApproved: false, returnDate: daysAgo(1),
-    customerReturnNote: 'Customer changed mind after ordering. No issue with product.',
+    customerReturnNote: 'Customer changed mind after ordering.',
     claimEligibility: { status: 'pending_review', withinWindow: true, conditionEligible: true, categoryRestricted: false, reason: 'Pending pickup' },
-    timeline: [
-      { stage: 'return_initiated', timestamp: daysAgo(1), user: 'Customer', note: 'Customer changed mind' },
-    ],
+    timeline: [{ stage: 'return_initiated', timestamp: daysAgo(1), user: 'Customer', note: 'Customer changed mind' }],
   },
   {
     returnId: 'RET-2024-006', orderId: 'ORD-2024-011', portal: 'flipkart', productName: 'Premium Wireless Earbuds Pro', skuId: 'SKU-FLK-001',
     reason: 'wrong_item', returnType: 'upcoming_return', refundAmount: 2999, currentStage: 'return_initiated', responsibleUser: 'Logistics',
     warehouseReceived: false, physicalVerification: 'pending', refundApproved: false, returnDate: daysAgo(0),
-    customerReturnNote: 'I ordered black color earbuds but received white. Need correct item.',
+    customerReturnNote: 'I ordered black color earbuds but received white.',
     claimEligibility: { status: 'eligible', withinWindow: true, conditionEligible: true, categoryRestricted: false },
-    timeline: [
-      { stage: 'return_initiated', timestamp: daysAgo(0), user: 'Customer', note: 'Received wrong item' },
-    ],
+    timeline: [{ stage: 'return_initiated', timestamp: daysAgo(0), user: 'Customer', note: 'Received wrong item' }],
   },
   {
     returnId: 'RET-2024-007', orderId: 'ORD-2024-010', portal: 'amazon', productName: 'Smart Fitness Watch X2', skuId: 'SKU-AMZ-002',
     reason: 'damaged', returnType: 'before_pickup_cancel', refundAmount: 4999, currentStage: 'return_initiated', responsibleUser: 'Operations',
     warehouseReceived: false, physicalVerification: 'pending', refundApproved: false, returnDate: daysAgo(0),
     claimEligibility: { status: 'ineligible', withinWindow: true, conditionEligible: true, categoryRestricted: true, reason: 'Electronics category: no return after unboxing' },
-    timeline: [
-      { stage: 'return_initiated', timestamp: daysAgo(0), user: 'Customer', note: 'Cancelled before pickup scheduled' },
-    ],
+    timeline: [{ stage: 'return_initiated', timestamp: daysAgo(0), user: 'Customer', note: 'Cancelled before pickup scheduled' }],
   },
   {
     returnId: 'RET-2024-008', orderId: 'ORD-2024-013', portal: 'flipkart', productName: 'Running Shoes Pro Max', skuId: 'SKU-FLK-008',
     reason: 'damaged', returnType: 'missing_product', refundAmount: 3499, currentStage: 'claim_raised', responsibleUser: 'Operations',
     warehouseReceived: true, physicalVerification: 'passed', refundApproved: false, returnDate: daysAgo(4),
-    customerReturnNote: 'Box arrived but shoes were missing from the package. Only packaging material inside.',
+    customerReturnNote: 'Box arrived but shoes were missing from the package.',
     claimEligibility: { status: 'eligible', withinWindow: true, conditionEligible: true, categoryRestricted: false },
     timeline: [
       { stage: 'return_initiated', timestamp: daysAgo(4), user: 'Customer', note: 'Product missing from box' },
@@ -195,7 +187,7 @@ const mockLifecycleData: ReturnLifecycle[] = [
     returnId: 'RET-2024-009', orderId: 'ORD-2024-014', portal: 'meesho', productName: 'Kitchen Organizer Set', skuId: 'SKU-MSH-009',
     reason: 'damaged', returnType: 'partial_received', refundAmount: 1299, currentStage: 'warehouse_received', responsibleUser: 'QC Team',
     warehouseReceived: true, physicalVerification: 'pending', refundApproved: false, returnDate: daysAgo(2),
-    customerReturnNote: 'Ordered 5-piece set but only 3 pieces received. Missing lid and tray.',
+    customerReturnNote: 'Ordered 5-piece set but only 3 pieces received.',
     claimEligibility: { status: 'pending_review', withinWindow: true, conditionEligible: true, categoryRestricted: false, reason: 'Partial delivery — verifying' },
     timeline: [
       { stage: 'return_initiated', timestamp: daysAgo(2), user: 'Customer', note: 'Partial items received' },
@@ -207,7 +199,7 @@ const mockLifecycleData: ReturnLifecycle[] = [
     returnId: 'RET-2024-010', orderId: 'ORD-2024-015', portal: 'amazon', productName: 'Bluetooth Speaker Mini', skuId: 'SKU-AMZ-010',
     reason: 'damaged', returnType: 'courier_return', refundAmount: 1599, currentStage: 'pickup_completed', responsibleUser: 'Logistics',
     warehouseReceived: false, physicalVerification: 'pending', refundApproved: false, returnDate: daysAgo(3),
-    customerReturnNote: 'Courier damaged the product during transit. Cracked body and speaker not working.',
+    customerReturnNote: 'Courier damaged the product during transit.',
     claimEligibility: { status: 'eligible', withinWindow: true, conditionEligible: true, categoryRestricted: false },
     timeline: [
       { stage: 'return_initiated', timestamp: daysAgo(3), user: 'Courier', note: 'Transit damage reported' },
@@ -216,14 +208,11 @@ const mockLifecycleData: ReturnLifecycle[] = [
   },
 ];
 
-// Sorting
 type SortField = 'date' | 'refund' | 'status' | null;
 type SortDir = 'asc' | 'desc';
-
 const stageOrder: LifecycleStage[] = ['return_initiated', 'pickup_completed', 'warehouse_received', 'physical_verification', 'claim_raised', 'claim_approved', 'claim_rejected', 'refund_approved', 'settlement_adjusted'];
-
-// Claim stages (used in claims tab)
-const claimStages: LifecycleStage[] = ['claim_raised', 'claim_approved', 'claim_rejected', 'refund_approved', 'settlement_adjusted'];
+const claimStages: LifecycleStage[] = ['claim_raised', 'claim_approved', 'claim_rejected', 'refund_approved'];
+const settlementStages: LifecycleStage[] = ['refund_approved', 'settlement_adjusted'];
 
 export default function Returns() {
   const { toast } = useToast();
@@ -250,72 +239,78 @@ export default function Returns() {
     return sortDir === 'asc' ? <ArrowUp className="w-3 h-3 ml-1" /> : <ArrowDown className="w-3 h-3 ml-1" />;
   };
 
-  // Portal-filtered data for KPI cards
   const portalFiltered = useMemo(() => {
     if (selectedPortal === 'all') return lifecycleData;
     return lifecycleData.filter(r => r.portal === selectedPortal);
   }, [lifecycleData, selectedPortal]);
 
-  // Filtered data for returns tab
+  const sortData = (data: ReturnLifecycle[]) => {
+    if (!sortField) return data;
+    return [...data].sort((a, b) => {
+      let cmp = 0;
+      if (sortField === 'date') cmp = new Date(a.returnDate).getTime() - new Date(b.returnDate).getTime();
+      if (sortField === 'refund') cmp = a.refundAmount - b.refundAmount;
+      if (sortField === 'status') cmp = stageOrder.indexOf(a.currentStage) - stageOrder.indexOf(b.currentStage);
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  };
+
+  const searchFilter = (r: ReturnLifecycle) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return r.returnId.toLowerCase().includes(q) || r.orderId.toLowerCase().includes(q) || r.productName.toLowerCase().includes(q);
+  };
+
+  // Tab 1: Returns
   const filteredReturns = useMemo(() => {
     let data = portalFiltered.filter(r => {
+      if (!searchFilter(r)) return false;
       if (stageFilter !== 'all' && r.currentStage !== stageFilter) return false;
       if (returnTypeFilter !== 'all' && r.returnType !== returnTypeFilter) return false;
-      if (searchQuery && !r.returnId.toLowerCase().includes(searchQuery.toLowerCase()) && !r.orderId.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      // Returns tab: exclude pure claim-only stages (show items still in return flow)
       return true;
     });
-
-    if (sortField) {
-      data = [...data].sort((a, b) => {
-        let cmp = 0;
-        if (sortField === 'date') cmp = new Date(a.returnDate).getTime() - new Date(b.returnDate).getTime();
-        if (sortField === 'refund') cmp = a.refundAmount - b.refundAmount;
-        if (sortField === 'status') cmp = stageOrder.indexOf(a.currentStage) - stageOrder.indexOf(b.currentStage);
-        return sortDir === 'asc' ? cmp : -cmp;
-      });
-    }
-    return data;
+    return sortData(data);
   }, [portalFiltered, stageFilter, returnTypeFilter, searchQuery, sortField, sortDir]);
 
-  // Filtered data for claims tab
+  // Tab 2: Claims Eligible
   const filteredClaims = useMemo(() => {
     let data = portalFiltered.filter(r => {
-      if (searchQuery && !r.returnId.toLowerCase().includes(searchQuery.toLowerCase()) && !r.orderId.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      return claimStages.includes(r.currentStage);
+      if (!searchFilter(r)) return false;
+      return claimStages.includes(r.currentStage) || r.claimEligibility.status !== 'ineligible';
     });
-    if (sortField) {
-      data = [...data].sort((a, b) => {
-        let cmp = 0;
-        if (sortField === 'date') cmp = new Date(a.returnDate).getTime() - new Date(b.returnDate).getTime();
-        if (sortField === 'refund') cmp = a.refundAmount - b.refundAmount;
-        if (sortField === 'status') cmp = stageOrder.indexOf(a.currentStage) - stageOrder.indexOf(b.currentStage);
-        return sortDir === 'asc' ? cmp : -cmp;
-      });
-    }
-    return data;
+    return sortData(data);
   }, [portalFiltered, searchQuery, sortField, sortDir]);
 
-  const currentFiltered = activeTab === 'returns' ? filteredReturns : filteredClaims;
+  // Tab 3: Settlements
+  const filteredSettlements = useMemo(() => {
+    let data = portalFiltered.filter(r => {
+      if (!searchFilter(r)) return false;
+      return settlementStages.includes(r.currentStage) || !!r.linkedSettlementId;
+    });
+    return sortData(data);
+  }, [portalFiltered, searchQuery, sortField, sortDir]);
+
+  const currentFiltered = activeTab === 'returns' ? filteredReturns : activeTab === 'claims' ? filteredClaims : filteredSettlements;
   const rowSelection = useRowSelection(currentFiltered.map(r => r.returnId));
 
-  // KPIs based on portal-filtered data
+  // KPIs
   const summary = useMemo(() => ({
     total: portalFiltered.length,
-    pending: portalFiltered.filter(r => ['return_initiated', 'pickup_completed', 'warehouse_received', 'physical_verification'].includes(r.currentStage)).length,
-    claimsPending: portalFiltered.filter(r => r.currentStage === 'claim_raised').length,
-    approved: portalFiltered.filter(r => ['claim_approved', 'refund_approved', 'settlement_adjusted'].includes(r.currentStage)).length,
-    rejected: portalFiltered.filter(r => r.currentStage === 'claim_rejected').length,
-    financialImpact: portalFiltered.filter(r => r.currentStage !== 'claim_rejected').reduce((s, r) => s + r.refundAmount, 0),
+    pending: portalFiltered.filter(r => ['return_initiated', 'pickup_completed'].includes(r.currentStage)).length,
+    warehouseReceived: portalFiltered.filter(r => r.warehouseReceived).length,
     warehousePending: portalFiltered.filter(r => !r.warehouseReceived).length,
+    claimsPending: portalFiltered.filter(r => r.currentStage === 'claim_raised').length,
+    claimsApproved: portalFiltered.filter(r => ['claim_approved', 'refund_approved', 'settlement_adjusted'].includes(r.currentStage)).length,
+    claimsRejected: portalFiltered.filter(r => r.currentStage === 'claim_rejected').length,
+    financialImpact: portalFiltered.filter(r => r.currentStage !== 'claim_rejected').reduce((s, r) => s + r.refundAmount, 0),
     linkedSettlements: portalFiltered.filter(r => r.linkedSettlementId).length,
-    // Return type counts
+    settledAmount: portalFiltered.filter(r => r.currentStage === 'settlement_adjusted').reduce((s, r) => s + r.refundAmount, 0),
     customerReturn: portalFiltered.filter(r => r.returnType === 'customer_return').length,
     courierReturn: portalFiltered.filter(r => r.returnType === 'courier_return').length,
     rto: portalFiltered.filter(r => r.returnType === 'rto').length,
-    damaged: portalFiltered.filter(r => r.returnType === 'damaged_product').length,
-    missing: portalFiltered.filter(r => r.returnType === 'missing_product').length,
-    partial: portalFiltered.filter(r => r.returnType === 'partial_received').length,
+    beforePickup: portalFiltered.filter(r => r.returnType === 'before_pickup_cancel').length,
+    pendingReturn: portalFiltered.filter(r => r.returnType === 'pending_return').length,
+    upcomingReturn: portalFiltered.filter(r => r.returnType === 'upcoming_return').length,
   }), [portalFiltered]);
 
   const advanceStage = (returnId: string) => {
@@ -325,11 +320,7 @@ export default function Returns() {
       const currentIdx = advanceOrder.indexOf(r.currentStage);
       if (currentIdx < 0 || currentIdx >= advanceOrder.length - 1) return r;
       const nextStage = advanceOrder[currentIdx + 1];
-      const updated = {
-        ...r,
-        currentStage: nextStage,
-        timeline: [...r.timeline, { stage: nextStage, timestamp: new Date().toISOString(), user: 'Admin' }],
-      };
+      const updated = { ...r, currentStage: nextStage, timeline: [...r.timeline, { stage: nextStage, timestamp: new Date().toISOString(), user: 'Admin' }] };
       if (nextStage === 'warehouse_received') updated.warehouseReceived = true;
       if (nextStage === 'physical_verification') updated.physicalVerification = 'passed' as const;
       if (nextStage === 'refund_approved') updated.refundApproved = true;
@@ -339,10 +330,8 @@ export default function Returns() {
     toast({ title: 'Stage Advanced', description: `Return ${returnId} moved to next stage` });
   };
 
-  const dateLabel = dateFilter === 'today' ? 'Today' : dateFilter === '7days' ? 'Last 7 Days' : dateFilter === '30days' ? 'Last 30 Days' : 'Custom';
-
   const handleExport = (type: 'excel' | 'pdf') => {
-    toast({ title: `${type.toUpperCase()} Export`, description: `${currentFiltered.length} items exported as ${type.toUpperCase()}` });
+    toast({ title: `${type.toUpperCase()} Export`, description: `${currentFiltered.length} items exported` });
   };
 
   const getEligibilityBadge = (info: ClaimEligibilityInfo) => {
@@ -351,8 +340,8 @@ export default function Returns() {
     return <Badge variant="secondary" className="gap-1 bg-amber-500/10 text-amber-600 text-xs"><Clock className="w-3 h-3" />Pending</Badge>;
   };
 
-  // Shared table render
-  const renderTable = (data: ReturnLifecycle[], showReturnType: boolean) => (
+  // Generic table renderer
+  const renderTable = (data: ReturnLifecycle[], columns: { returnType?: boolean; whRecon?: boolean; claim?: boolean; settlement?: boolean }) => (
     <Card>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
@@ -364,15 +353,16 @@ export default function Returns() {
                 <TableHead className="font-semibold">Order ID</TableHead>
                 <TableHead className="font-semibold">Product</TableHead>
                 <TableHead className="font-semibold">Portal</TableHead>
-                {showReturnType && <TableHead className="font-semibold">Return Type</TableHead>}
+                {columns.returnType && <TableHead className="font-semibold">Return Type</TableHead>}
                 <TableHead className="font-semibold cursor-pointer select-none" onClick={() => toggleSort('date')}>
                   <span className="flex items-center">Date<SortIcon field="date" /></span>
                 </TableHead>
                 <TableHead className="text-right font-semibold cursor-pointer select-none" onClick={() => toggleSort('refund')}>
                   <span className="flex items-center justify-end">Refund ₹<SortIcon field="refund" /></span>
                 </TableHead>
-                <TableHead className="font-semibold">WH Recon</TableHead>
-                <TableHead className="font-semibold">Claim</TableHead>
+                {columns.whRecon && <TableHead className="font-semibold">WH Recon</TableHead>}
+                {columns.claim && <TableHead className="font-semibold">Claim</TableHead>}
+                {columns.settlement && <TableHead className="font-semibold">Settlement</TableHead>}
                 <TableHead className="font-semibold cursor-pointer select-none" onClick={() => toggleSort('status')}>
                   <span className="flex items-center">Stage<SortIcon field="status" /></span>
                 </TableHead>
@@ -399,7 +389,7 @@ export default function Returns() {
                       </div>
                     </TableCell>
                     <TableCell><Badge variant="outline" className="gap-1">{portal?.icon} {portal?.name}</Badge></TableCell>
-                    {showReturnType && (
+                    {columns.returnType && (
                       <TableCell>
                         <Badge variant="secondary" className={`gap-1 text-xs ${rtConfig.color}`}>
                           <RTIcon className="w-3 h-3" />{rtConfig.label}
@@ -408,43 +398,45 @@ export default function Returns() {
                     )}
                     <TableCell className="text-sm text-muted-foreground">{format(new Date(r.returnDate), 'dd MMM yyyy')}</TableCell>
                     <TableCell className="text-right font-medium">₹{r.refundAmount.toLocaleString()}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-0.5">
-                        <Badge variant="secondary" className={`text-[10px] gap-0.5 ${r.warehouseReceived ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground'}`}>
-                          {r.warehouseReceived ? <CheckCircle className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />}
-                          {r.warehouseReceived ? 'Received' : 'Pending'}
-                        </Badge>
-                        <Badge variant="secondary" className={`text-[10px] gap-0.5 ${
-                          r.physicalVerification === 'passed' ? 'bg-emerald-500/10 text-emerald-600' :
-                          r.physicalVerification === 'failed' ? 'bg-rose-500/10 text-rose-600' : 'bg-muted text-muted-foreground'
-                        }`}>
-                          {r.physicalVerification === 'passed' ? <ShieldCheck className="w-2.5 h-2.5" /> :
-                           r.physicalVerification === 'failed' ? <XCircle className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />}
-                          QC: {r.physicalVerification.charAt(0).toUpperCase() + r.physicalVerification.slice(1)}
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell>{getEligibilityBadge(r.claimEligibility)}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Badge variant="secondary" className={`gap-1 text-xs ${stage.color}`}>
-                          <StageIcon className="w-3 h-3" />{stage.label}
-                        </Badge>
-                        {r.linkedSettlementId && (
-                          <Badge variant="outline" className="text-[10px] gap-0.5">
-                            <Link2 className="w-2.5 h-2.5" />{r.linkedSettlementId}
+                    {columns.whRecon && (
+                      <TableCell>
+                        <div className="flex flex-col gap-0.5">
+                          <Badge variant="secondary" className={`text-[10px] gap-0.5 ${r.warehouseReceived ? 'bg-emerald-500/10 text-emerald-600' : 'bg-muted text-muted-foreground'}`}>
+                            {r.warehouseReceived ? <CheckCircle className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />}
+                            {r.warehouseReceived ? 'Received' : 'Pending'}
                           </Badge>
+                          <Badge variant="secondary" className={`text-[10px] gap-0.5 ${
+                            r.physicalVerification === 'passed' ? 'bg-emerald-500/10 text-emerald-600' :
+                            r.physicalVerification === 'failed' ? 'bg-rose-500/10 text-rose-600' : 'bg-muted text-muted-foreground'
+                          }`}>
+                            {r.physicalVerification === 'passed' ? <ShieldCheck className="w-2.5 h-2.5" /> :
+                             r.physicalVerification === 'failed' ? <XCircle className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />}
+                            QC: {r.physicalVerification.charAt(0).toUpperCase() + r.physicalVerification.slice(1)}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                    )}
+                    {columns.claim && <TableCell>{getEligibilityBadge(r.claimEligibility)}</TableCell>}
+                    {columns.settlement && (
+                      <TableCell>
+                        {r.linkedSettlementId ? (
+                          <Badge variant="outline" className="text-xs gap-0.5"><Link2 className="w-2.5 h-2.5" />{r.linkedSettlementId}</Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-[10px] bg-muted text-muted-foreground"><Clock className="w-2.5 h-2.5" />Pending</Badge>
                         )}
-                      </div>
+                      </TableCell>
+                    )}
+                    <TableCell>
+                      <Badge variant="secondary" className={`gap-1 text-xs ${stage.color}`}>
+                        <StageIcon className="w-3 h-3" />{stage.label}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       {r.customerReturnNote ? (
                         <div className="max-w-[150px]" title={r.customerReturnNote}>
                           <p className="text-xs text-muted-foreground truncate">{r.customerReturnNote}</p>
                         </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
+                      ) : <span className="text-xs text-muted-foreground">—</span>}
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="flex items-center gap-1 justify-center">
@@ -471,9 +463,10 @@ export default function Returns() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Returns, Claims & Settlement Lifecycle</h1>
+          <h1 className="text-2xl font-bold text-foreground">Returns & Claims Management</h1>
           <p className="text-muted-foreground">Full lifecycle tracking with warehouse reconciliation & claim eligibility</p>
         </div>
         <div className="flex items-center gap-2">
@@ -484,22 +477,22 @@ export default function Returns() {
             <FileDown className="w-4 h-4" />PDF
           </Button>
           <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
-          <ExportButton label={rowSelection.count > 0 ? undefined : `Export – ${dateLabel}`} selectedCount={rowSelection.count} />
+          <ExportButton selectedCount={rowSelection.count} />
         </div>
       </div>
 
-      {/* Summary Cards — reactive to portal filter */}
+      {/* Top KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
         <Card><CardContent className="p-3"><div className="flex flex-col items-center text-center gap-1"><RotateCcw className="w-5 h-5 text-primary" /><p className="text-xl font-bold">{summary.total}</p><p className="text-[11px] text-muted-foreground leading-tight">Total Returns</p></div></CardContent></Card>
-        <Card className="border-warning/30"><CardContent className="p-3"><div className="flex flex-col items-center text-center gap-1"><Clock className="w-5 h-5 text-warning" /><p className="text-xl font-bold text-warning">{summary.claimsPending}</p><p className="text-[11px] text-muted-foreground leading-tight">Pending Claims</p></div></CardContent></Card>
-        <Card className="border-success/30"><CardContent className="p-3"><div className="flex flex-col items-center text-center gap-1"><CheckCircle className="w-5 h-5 text-success" /><p className="text-xl font-bold text-success">{summary.approved}</p><p className="text-[11px] text-muted-foreground leading-tight">Approved</p></div></CardContent></Card>
-        <Card className="border-destructive/30"><CardContent className="p-3"><div className="flex flex-col items-center text-center gap-1"><XCircle className="w-5 h-5 text-destructive" /><p className="text-xl font-bold text-destructive">{summary.rejected}</p><p className="text-[11px] text-muted-foreground leading-tight">Rejected</p></div></CardContent></Card>
-        <Card><CardContent className="p-3"><div className="flex flex-col items-center text-center gap-1"><IndianRupee className="w-5 h-5 text-info" /><p className="text-xl font-bold">₹{(summary.financialImpact / 1000).toFixed(1)}K</p><p className="text-[11px] text-muted-foreground leading-tight">Financial Impact</p></div></CardContent></Card>
+        <Card className="border-warning/30"><CardContent className="p-3"><div className="flex flex-col items-center text-center gap-1"><Clock className="w-5 h-5 text-warning" /><p className="text-xl font-bold text-warning">{summary.pending}</p><p className="text-[11px] text-muted-foreground leading-tight">Pending Pickup</p></div></CardContent></Card>
+        <Card className="border-success/30"><CardContent className="p-3"><div className="flex flex-col items-center text-center gap-1"><Warehouse className="w-5 h-5 text-success" /><p className="text-xl font-bold text-success">{summary.warehouseReceived}</p><p className="text-[11px] text-muted-foreground leading-tight">WH Received</p></div></CardContent></Card>
         <Card className="border-amber-500/30"><CardContent className="p-3"><div className="flex flex-col items-center text-center gap-1"><Warehouse className="w-5 h-5 text-amber-600" /><p className="text-xl font-bold text-amber-600">{summary.warehousePending}</p><p className="text-[11px] text-muted-foreground leading-tight">WH Pending</p></div></CardContent></Card>
-        <Card><CardContent className="p-3"><div className="flex flex-col items-center text-center gap-1"><Link2 className="w-5 h-5 text-primary" /><p className="text-xl font-bold">{summary.linkedSettlements}</p><p className="text-[11px] text-muted-foreground leading-tight">Linked Settlements</p></div></CardContent></Card>
+        <Card className="border-purple-500/30"><CardContent className="p-3"><div className="flex flex-col items-center text-center gap-1"><AlertTriangle className="w-5 h-5 text-purple-600" /><p className="text-xl font-bold text-purple-600">{summary.claimsPending}</p><p className="text-[11px] text-muted-foreground leading-tight">Claims Pending</p></div></CardContent></Card>
+        <Card><CardContent className="p-3"><div className="flex flex-col items-center text-center gap-1"><IndianRupee className="w-5 h-5 text-info" /><p className="text-xl font-bold">₹{(summary.financialImpact / 1000).toFixed(1)}K</p><p className="text-[11px] text-muted-foreground leading-tight">Financial Impact</p></div></CardContent></Card>
+        <Card><CardContent className="p-3"><div className="flex flex-col items-center text-center gap-1"><Link2 className="w-5 h-5 text-primary" /><p className="text-xl font-bold">{summary.linkedSettlements}</p><p className="text-[11px] text-muted-foreground leading-tight">Settled</p></div></CardContent></Card>
       </div>
 
-      {/* Portal Filter + Search Row */}
+      {/* Portal Filter + Search */}
       <Card>
         <CardContent className="p-4">
           <div className="flex flex-col lg:flex-row gap-4">
@@ -508,37 +501,41 @@ export default function Returns() {
               <DateFilter value={dateFilter} onChange={setDateFilter} />
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input placeholder="Search Return ID or Order ID..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-9" />
+                <Input placeholder="Search Return ID, Order ID, or Product..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-9" />
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Tabs: Returns | Claims */}
+      {/* 3 Separate Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="h-auto gap-1 flex-wrap">
-          <TabsTrigger value="returns" className="gap-1.5">
+          <TabsTrigger value="returns" className="gap-1.5 data-[state=active]:bg-rose-500/10 data-[state=active]:text-rose-600">
             <RotateCcw className="w-4 h-4" />Returns
             <Badge variant="secondary" className="text-xs ml-1">{filteredReturns.length}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="claims" className="gap-1.5">
-            <ShieldCheck className="w-4 h-4" />Claims & Settlements
+          <TabsTrigger value="claims" className="gap-1.5 data-[state=active]:bg-purple-500/10 data-[state=active]:text-purple-600">
+            <ShieldCheck className="w-4 h-4" />Claims Eligible
             <Badge variant="secondary" className="text-xs ml-1">{filteredClaims.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="settlements" className="gap-1.5 data-[state=active]:bg-emerald-500/10 data-[state=active]:text-emerald-600">
+            <IndianRupee className="w-4 h-4" />Settlements
+            <Badge variant="secondary" className="text-xs ml-1">{filteredSettlements.length}</Badge>
           </TabsTrigger>
         </TabsList>
 
-        {/* Returns Tab */}
+        {/* ========== TAB 1: RETURNS ========== */}
         <TabsContent value="returns" className="space-y-4 mt-4">
-          {/* Return Type Summary Cards */}
+          {/* Return Type Filter Cards */}
           <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
             {([
               { type: 'customer_return' as ReturnType, count: summary.customerReturn, label: 'Customer Return', icon: RotateCcw, color: 'text-rose-600' },
               { type: 'courier_return' as ReturnType, count: summary.courierReturn, label: 'Courier Return', icon: Truck, color: 'text-amber-600' },
               { type: 'rto' as ReturnType, count: summary.rto, label: 'RTO', icon: Ban, color: 'text-orange-600' },
-              { type: 'damaged_product' as ReturnType, count: summary.damaged, label: 'Damaged', icon: PackageX, color: 'text-destructive' },
-              { type: 'missing_product' as ReturnType, count: summary.missing, label: 'Missing', icon: Package, color: 'text-purple-600' },
-              { type: 'partial_received' as ReturnType, count: summary.partial, label: 'Partial Received', icon: PackageMinus, color: 'text-info' },
+              { type: 'before_pickup_cancel' as ReturnType, count: summary.beforePickup, label: 'Before Pickup Cancel', icon: XCircle, color: 'text-muted-foreground' },
+              { type: 'pending_return' as ReturnType, count: summary.pendingReturn, label: 'Pending Return', icon: Clock, color: 'text-purple-600' },
+              { type: 'upcoming_return' as ReturnType, count: summary.upcomingReturn, label: 'Upcoming Return', icon: Package, color: 'text-blue-600' },
             ]).map(item => (
               <Card
                 key={item.type}
@@ -556,17 +553,17 @@ export default function Returns() {
             ))}
           </div>
 
-          {/* Additional Filters */}
+          {/* Filters */}
           <div className="flex flex-wrap gap-3">
             <Select value={returnTypeFilter} onValueChange={setReturnTypeFilter}>
-              <SelectTrigger className="w-[190px]"><SelectValue placeholder="Return Type" /></SelectTrigger>
+              <SelectTrigger className="w-[200px]"><SelectValue placeholder="Return Type" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Return Types</SelectItem>
                 {Object.entries(returnTypeConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={stageFilter} onValueChange={setStageFilter}>
-              <SelectTrigger className="w-[190px]"><SelectValue placeholder="Lifecycle Stage" /></SelectTrigger>
+              <SelectTrigger className="w-[200px]"><SelectValue placeholder="Lifecycle Stage" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Stages</SelectItem>
                 {Object.entries(stageConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
@@ -574,10 +571,10 @@ export default function Returns() {
             </Select>
           </div>
 
-          {renderTable(filteredReturns, true)}
+          {renderTable(filteredReturns, { returnType: true, whRecon: true, claim: true })}
         </TabsContent>
 
-        {/* Claims Tab */}
+        {/* ========== TAB 2: CLAIMS ELIGIBLE ========== */}
         <TabsContent value="claims" className="space-y-4 mt-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Card className="border-purple-500/30">
@@ -602,23 +599,67 @@ export default function Returns() {
               <CardContent className="p-3">
                 <div className="flex flex-col items-center text-center gap-1">
                   <XCircle className="w-5 h-5 text-destructive" />
-                  <p className="text-xl font-bold text-destructive">{portalFiltered.filter(r => r.currentStage === 'claim_rejected').length}</p>
+                  <p className="text-xl font-bold text-destructive">{summary.claimsRejected}</p>
                   <p className="text-[11px] text-muted-foreground leading-tight">Rejected</p>
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-primary/30">
+            <Card className="border-amber-500/30">
               <CardContent className="p-3">
                 <div className="flex flex-col items-center text-center gap-1">
-                  <Link2 className="w-5 h-5 text-primary" />
-                  <p className="text-xl font-bold">₹{(portalFiltered.filter(r => r.currentStage === 'settlement_adjusted').reduce((s, r) => s + r.refundAmount, 0) / 1000).toFixed(1)}K</p>
-                  <p className="text-[11px] text-muted-foreground leading-tight">Settled Amount</p>
+                  <Clock className="w-5 h-5 text-amber-600" />
+                  <p className="text-xl font-bold text-amber-600">{portalFiltered.filter(r => r.claimEligibility.status === 'pending_review').length}</p>
+                  <p className="text-[11px] text-muted-foreground leading-tight">Pending Review</p>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {renderTable(filteredClaims, false)}
+          {renderTable(filteredClaims, { claim: true, whRecon: true })}
+        </TabsContent>
+
+        {/* ========== TAB 3: SETTLEMENTS ========== */}
+        <TabsContent value="settlements" className="space-y-4 mt-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Card className="border-primary/30">
+              <CardContent className="p-3">
+                <div className="flex flex-col items-center text-center gap-1">
+                  <Link2 className="w-5 h-5 text-primary" />
+                  <p className="text-xl font-bold">{summary.linkedSettlements}</p>
+                  <p className="text-[11px] text-muted-foreground leading-tight">Linked Settlements</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-success/30">
+              <CardContent className="p-3">
+                <div className="flex flex-col items-center text-center gap-1">
+                  <IndianRupee className="w-5 h-5 text-success" />
+                  <p className="text-xl font-bold text-success">₹{(summary.settledAmount / 1000).toFixed(1)}K</p>
+                  <p className="text-[11px] text-muted-foreground leading-tight">Settled Amount</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-warning/30">
+              <CardContent className="p-3">
+                <div className="flex flex-col items-center text-center gap-1">
+                  <Clock className="w-5 h-5 text-warning" />
+                  <p className="text-xl font-bold text-warning">{portalFiltered.filter(r => r.currentStage === 'refund_approved' && !r.linkedSettlementId).length}</p>
+                  <p className="text-[11px] text-muted-foreground leading-tight">Pending Settlement</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3">
+                <div className="flex flex-col items-center text-center gap-1">
+                  <CheckCircle className="w-5 h-5 text-info" />
+                  <p className="text-xl font-bold">{portalFiltered.filter(r => r.refundApproved).length}</p>
+                  <p className="text-[11px] text-muted-foreground leading-tight">Refunds Approved</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {renderTable(filteredSettlements, { settlement: true })}
         </TabsContent>
       </Tabs>
 
@@ -637,7 +678,6 @@ export default function Returns() {
           </DialogHeader>
           {selectedReturn && (
             <div className="space-y-5">
-              {/* Info Grid */}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div><span className="text-muted-foreground">Order:</span> <span className="font-medium">{selectedReturn.orderId}</span></div>
                 <div><span className="text-muted-foreground">Portal:</span> <span className="font-medium">{portalConfigs.find(p => p.id === selectedReturn.portal)?.name}</span></div>
@@ -647,7 +687,6 @@ export default function Returns() {
                 <div><span className="text-muted-foreground">Responsible:</span> <Badge variant="secondary" className="text-xs ml-1">{selectedReturn.responsibleUser}</Badge></div>
               </div>
 
-              {/* Customer Return Note */}
               {selectedReturn.customerReturnNote && (
                 <div className="p-4 rounded-lg border border-amber-500/20 bg-amber-500/5">
                   <h4 className="font-semibold text-sm mb-2 flex items-center gap-1.5">
@@ -691,7 +730,7 @@ export default function Returns() {
 
               {/* Claim Eligibility */}
               <div className="p-4 rounded-lg bg-muted/50">
-                <h4 className="font-semibold text-sm mb-3 flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" />Claim Eligibility (Portal Policy)</h4>
+                <h4 className="font-semibold text-sm mb-3 flex items-center gap-1.5"><ShieldCheck className="w-4 h-4" />Claim Eligibility</h4>
                 <div className="grid grid-cols-3 gap-3 text-sm">
                   <div className="flex items-center gap-1.5">
                     {selectedReturn.claimEligibility.withinWindow
@@ -727,7 +766,6 @@ export default function Returns() {
                 </div>
               </div>
 
-              {/* Settlement Linkage */}
               {selectedReturn.linkedSettlementId && (
                 <div className="p-3 rounded-lg border border-primary/20 bg-primary/5 flex items-center gap-2">
                   <Link2 className="w-4 h-4 text-primary" />
@@ -766,7 +804,6 @@ export default function Returns() {
         </DialogContent>
       </Dialog>
 
-      {/* Confirmation Dialog */}
       <ConfirmDialog
         open={!!confirmAdvance}
         onOpenChange={(open) => !open && setConfirmAdvance(null)}
