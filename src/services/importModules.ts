@@ -83,7 +83,7 @@ export const IMPORT_MODULES: ImportModule[] = [
       { key: 'tax', label: 'Tax (₹)', required: false, type: 'number', defaultValue: 0 },
       { key: 'net_amount', label: 'Net Amount (₹)', required: false, type: 'number', defaultValue: 0 },
       { key: 'settlement_date', label: 'Settlement Date', required: false, type: 'date' },
-      { key: 'status', label: 'Status', required: false, type: 'select', options: ['pending', 'processed', 'paid', 'disputed'] },
+      { key: 'status', label: 'Status', required: false, type: 'select', options: ['pending', 'processed', 'paid', 'disputed', 'Account Approved', 'Account Rejected', 'Settled'] },
     ],
     sampleData: [
       { settlement_id: 'STL-AMZ-2026-001', portal: 'Amazon', amount: 125000, commission: 18750, tax: 3375, net_amount: 102875, settlement_date: '2026-03-05', status: 'paid' },
