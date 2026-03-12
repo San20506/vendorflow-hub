@@ -10,20 +10,23 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { expensesDb } from '@/services/database';
+import { useDropdownOptions } from '@/hooks/useDropdownOptions';
 import {
   Plus, Download, Search, IndianRupee, TrendingUp, TrendingDown,
-  Building2, Warehouse, Coffee, Bus, Pencil, Receipt, Calendar, Trash2, Loader2
+  Building2, Warehouse, Coffee, Bus, Pencil, Receipt, Calendar, Trash2, Loader2, AlertCircle
 } from 'lucide-react';
 
-const expenseCategories = [
-  { id: 'office_misc', label: 'Office Miscellaneous', icon: Building2, color: 'bg-blue-100 text-blue-700' },
-  { id: 'warehouse_misc', label: 'Warehouse Miscellaneous', icon: Warehouse, color: 'bg-orange-100 text-orange-700' },
-  { id: 'daily', label: 'Day to Day Expense', icon: Receipt, color: 'bg-green-100 text-green-700' },
-  { id: 'food', label: 'Lunch, Tea & Coffee', icon: Coffee, color: 'bg-amber-100 text-amber-700' },
-  { id: 'stationery', label: 'Stationery', icon: Pencil, color: 'bg-purple-100 text-purple-700' },
-  { id: 'transport', label: 'Transport', icon: Bus, color: 'bg-cyan-100 text-cyan-700' },
-  { id: 'tips_wages', label: 'Tips & Wages', icon: IndianRupee, color: 'bg-pink-100 text-pink-700' },
-];
+const iconMap: Record<string, any> = {
+  office_misc: Building2, warehouse_misc: Warehouse, daily: Receipt,
+  food: Coffee, stationery: Pencil, transport: Bus, tips_wages: IndianRupee,
+};
+
+const colorMap: Record<string, string> = {
+  office_misc: 'bg-blue-100 text-blue-700', warehouse_misc: 'bg-orange-100 text-orange-700',
+  daily: 'bg-green-100 text-green-700', food: 'bg-amber-100 text-amber-700',
+  stationery: 'bg-purple-100 text-purple-700', transport: 'bg-cyan-100 text-cyan-700',
+  tips_wages: 'bg-pink-100 text-pink-700',
+};
 
 export default function ExpenseTracking() {
   const { toast } = useToast();
@@ -34,8 +37,13 @@ export default function ExpenseTracking() {
   const [filterPeriod, setFilterPeriod] = useState('this_month');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newExpense, setNewExpense] = useState({
-    category: '', description: '', amount: '', paid_by: '', payment_mode: 'Cash', receipt: false
+    category: '', description: '', amount: '', paid_by: '', payment_mode: '', receipt: false
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const { options: categoryOptions } = useDropdownOptions('expense_category');
+  const { options: paymentModeOptions } = useDropdownOptions('payment_mode');
+  const { options: paidByOptions } = useDropdownOptions('paid_by');
 
   const fetchExpenses = async () => {
     try {
@@ -51,16 +59,27 @@ export default function ExpenseTracking() {
 
   useEffect(() => { fetchExpenses(); }, [filterCategory, search]);
 
-  const filteredExpenses = expenses;
-  const totalExpense = filteredExpenses.reduce((s, e) => s + Number(e.amount), 0);
-  const categoryTotals = expenseCategories.map(cat => ({
+  const totalExpense = expenses.reduce((s, e) => s + Number(e.amount), 0);
+  const categoryTotals = categoryOptions.map(cat => ({
     ...cat,
-    total: expenses.filter(e => e.category === cat.id).reduce((s, e) => s + Number(e.amount), 0),
-    count: expenses.filter(e => e.category === cat.id).length,
+    icon: iconMap[cat.value] || Receipt,
+    color: colorMap[cat.value] || 'bg-gray-100 text-gray-700',
+    total: expenses.filter(e => e.category === cat.value).reduce((s, e) => s + Number(e.amount), 0),
+    count: expenses.filter(e => e.category === cat.value).length,
   }));
 
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!newExpense.category) e.category = 'Category is required';
+    if (!newExpense.description.trim()) e.description = 'Description is required';
+    if (!newExpense.amount || parseFloat(newExpense.amount) <= 0) e.amount = 'Valid amount is required';
+    if (!newExpense.payment_mode) e.payment_mode = 'Payment mode is required';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
   const handleAddExpense = async () => {
-    if (!newExpense.category || !newExpense.description || !newExpense.amount) return;
+    if (!validate()) return;
     try {
       await expensesDb.create({
         category: newExpense.category,
@@ -72,7 +91,8 @@ export default function ExpenseTracking() {
         expense_date: new Date().toISOString().split('T')[0],
       });
       setShowAddDialog(false);
-      setNewExpense({ category: '', description: '', amount: '', paid_by: '', payment_mode: 'Cash', receipt: false });
+      setNewExpense({ category: '', description: '', amount: '', paid_by: '', payment_mode: '', receipt: false });
+      setErrors({});
       toast({ title: 'Expense Added', description: `₹${newExpense.amount} recorded successfully` });
       fetchExpenses();
     } catch (err: any) {
@@ -90,7 +110,7 @@ export default function ExpenseTracking() {
     }
   };
 
-  const getCategoryInfo = (id: string) => expenseCategories.find(c => c.id === id);
+  const getCategoryLabel = (val: string) => categoryOptions.find(c => c.value === val)?.label || val;
 
   return (
     <div className="space-y-6">
@@ -101,7 +121,7 @@ export default function ExpenseTracking() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export</Button>
-          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <Dialog open={showAddDialog} onOpenChange={(open) => { setShowAddDialog(open); if (!open) setErrors({}); }}>
             <DialogTrigger asChild>
               <Button size="sm"><Plus className="w-4 h-4 mr-2" />Add Expense</Button>
             </DialogTrigger>
@@ -109,39 +129,63 @@ export default function ExpenseTracking() {
               <DialogHeader><DialogTitle>Record New Expense</DialogTitle></DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label>Category</Label>
-                  <Select value={newExpense.category} onValueChange={v => setNewExpense({ ...newExpense, category: v })}>
-                    <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                  <Label>Category <span className="text-destructive">*</span></Label>
+                  <Select value={newExpense.category} onValueChange={v => { setNewExpense({ ...newExpense, category: v }); setErrors(prev => ({ ...prev, category: '' })); }}>
+                    <SelectTrigger className={errors.category ? 'border-destructive' : ''}><SelectValue placeholder="Select category" /></SelectTrigger>
                     <SelectContent>
-                      {expenseCategories.map(c => (
-                        <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
+                      {categoryOptions.map(c => (
+                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors.category && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.category}</p>}
                 </div>
                 <div>
-                  <Label>Description</Label>
-                  <Textarea value={newExpense.description} onChange={e => setNewExpense({ ...newExpense, description: e.target.value })} placeholder="What was this expense for?" />
+                  <Label>Description <span className="text-destructive">*</span></Label>
+                  <Textarea
+                    value={newExpense.description}
+                    onChange={e => { setNewExpense({ ...newExpense, description: e.target.value }); setErrors(prev => ({ ...prev, description: '' })); }}
+                    placeholder="What was this expense for?"
+                    className={errors.description ? 'border-destructive' : ''}
+                  />
+                  {errors.description && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.description}</p>}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>Amount (₹)</Label>
-                    <Input type="number" value={newExpense.amount} onChange={e => setNewExpense({ ...newExpense, amount: e.target.value })} placeholder="0" />
+                    <Label>Amount (₹) <span className="text-destructive">*</span></Label>
+                    <Input
+                      type="number"
+                      value={newExpense.amount}
+                      onChange={e => { setNewExpense({ ...newExpense, amount: e.target.value }); setErrors(prev => ({ ...prev, amount: '' })); }}
+                      placeholder="0"
+                      className={errors.amount ? 'border-destructive' : ''}
+                    />
+                    {errors.amount && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.amount}</p>}
                   </div>
                   <div>
                     <Label>Paid By</Label>
-                    <Input value={newExpense.paid_by} onChange={e => setNewExpense({ ...newExpense, paid_by: e.target.value })} placeholder="Name" />
+                    <Select value={newExpense.paid_by} onValueChange={v => setNewExpense({ ...newExpense, paid_by: v })}>
+                      <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectContent>
+                        {paidByOptions.map(p => (
+                          <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>Payment Mode</Label>
-                    <Select value={newExpense.payment_mode} onValueChange={v => setNewExpense({ ...newExpense, payment_mode: v })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                    <Label>Payment Mode <span className="text-destructive">*</span></Label>
+                    <Select value={newExpense.payment_mode} onValueChange={v => { setNewExpense({ ...newExpense, payment_mode: v }); setErrors(prev => ({ ...prev, payment_mode: '' })); }}>
+                      <SelectTrigger className={errors.payment_mode ? 'border-destructive' : ''}><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent>
-                        {['Cash', 'UPI', 'Card', 'Online', 'Wallet'].map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+                        {paymentModeOptions.map(m => (
+                          <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
+                    {errors.payment_mode && <p className="text-xs text-destructive mt-1 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.payment_mode}</p>}
                   </div>
                   <div className="flex items-end">
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -157,6 +201,7 @@ export default function ExpenseTracking() {
         </div>
       </div>
 
+      {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="border-l-4 border-l-primary">
           <CardContent className="p-4">
@@ -185,9 +230,10 @@ export default function ExpenseTracking() {
         </Card>
       </div>
 
+      {/* Category Filter Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
         {categoryTotals.map(cat => (
-          <Card key={cat.id} className={`cursor-pointer transition-all hover:shadow-md ${filterCategory === cat.id ? 'ring-2 ring-primary' : ''}`} onClick={() => setFilterCategory(filterCategory === cat.id ? 'all' : cat.id)}>
+          <Card key={cat.value} className={`cursor-pointer transition-all hover:shadow-md ${filterCategory === cat.value ? 'ring-2 ring-primary' : ''}`} onClick={() => setFilterCategory(filterCategory === cat.value ? 'all' : cat.value)}>
             <CardContent className="p-3 text-center">
               <div className={`w-8 h-8 rounded-lg ${cat.color} flex items-center justify-center mx-auto mb-2`}><cat.icon className="w-4 h-4" /></div>
               <p className="text-xs font-medium truncate">{cat.label.split(' ')[0]}</p>
@@ -198,6 +244,7 @@ export default function ExpenseTracking() {
         ))}
       </div>
 
+      {/* Expense Table */}
       <Card>
         <CardHeader className="pb-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -237,29 +284,26 @@ export default function ExpenseTracking() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredExpenses.map(expense => {
-                  const cat = getCategoryInfo(expense.category);
-                  return (
-                    <TableRow key={expense.id}>
-                      <TableCell className="text-sm">{expense.expense_date}</TableCell>
-                      <TableCell><Badge variant="outline" className={cat?.color}>{cat?.label.split(' ')[0]}</Badge></TableCell>
-                      <TableCell className="font-medium">{expense.description}</TableCell>
-                      <TableCell className="text-sm">{expense.paid_by}</TableCell>
-                      <TableCell><Badge variant="secondary">{expense.payment_mode}</Badge></TableCell>
-                      <TableCell className="text-right font-semibold">₹{Number(expense.amount).toLocaleString('en-IN')}</TableCell>
-                      <TableCell>{expense.receipt ? <Badge variant="outline" className="text-green-600 border-green-300">Yes</Badge> : <span className="text-muted-foreground text-xs">No</span>}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(expense.id)}>
-                          <Trash2 className="w-3.5 h-3.5 text-destructive" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                {expenses.map(expense => (
+                  <TableRow key={expense.id}>
+                    <TableCell className="text-sm">{expense.expense_date}</TableCell>
+                    <TableCell><Badge variant="outline" className={colorMap[expense.category] || ''}>{getCategoryLabel(expense.category).split(' ')[0]}</Badge></TableCell>
+                    <TableCell className="font-medium">{expense.description}</TableCell>
+                    <TableCell className="text-sm">{expense.paid_by}</TableCell>
+                    <TableCell><Badge variant="secondary">{expense.payment_mode}</Badge></TableCell>
+                    <TableCell className="text-right font-semibold">₹{Number(expense.amount).toLocaleString('en-IN')}</TableCell>
+                    <TableCell>{expense.receipt ? <Badge variant="outline" className="text-green-600 border-green-300">Yes</Badge> : <span className="text-muted-foreground text-xs">No</span>}</TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(expense.id)}>
+                        <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           )}
-          {!loading && filteredExpenses.length === 0 && <p className="text-center text-muted-foreground py-8">No expenses found. Add your first expense above.</p>}
+          {!loading && expenses.length === 0 && <p className="text-center text-muted-foreground py-8">No expenses found. Add your first expense above.</p>}
         </CardContent>
       </Card>
     </div>
