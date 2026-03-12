@@ -6,6 +6,7 @@ export interface ModuleField {
   required: boolean;
   type: 'text' | 'number' | 'date' | 'email' | 'select';
   options?: string[];
+  defaultValue?: any;
   validate?: (value: any) => string | null; // returns error message or null
 }
 
@@ -57,8 +58,8 @@ export const IMPORT_MODULES: ImportModule[] = [
       { key: 'sku', label: 'SKU', required: true, type: 'text' },
       { key: 'brand', label: 'Brand', required: false, type: 'text' },
       { key: 'category', label: 'Category', required: false, type: 'text' },
-      { key: 'mrp', label: 'MRP (₹)', required: true, type: 'number', validate: v => v <= 0 ? 'MRP must be positive' : null },
-      { key: 'base_price', label: 'Base Price (₹)', required: true, type: 'number', validate: v => v <= 0 ? 'Price must be positive' : null },
+      { key: 'mrp', label: 'MRP (₹)', required: false, type: 'number', defaultValue: 0, validate: v => v !== undefined && v !== null && v !== '' && Number(v) < 0 ? 'MRP cannot be negative' : null },
+      { key: 'base_price', label: 'Base Price (₹)', required: false, type: 'number', defaultValue: 0, validate: v => v !== undefined && v !== null && v !== '' && Number(v) < 0 ? 'Price cannot be negative' : null },
       { key: 'hsn_code', label: 'HSN Code', required: false, type: 'text' },
       { key: 'gst_percent', label: 'GST %', required: false, type: 'number', validate: v => v && (v < 0 || v > 28) ? 'GST must be 0-28%' : null },
       { key: 'status', label: 'Status', required: false, type: 'select', options: ['active', 'inactive', 'draft'] },
@@ -198,8 +199,15 @@ export function validateRows(rows: Record<string, any>[], moduleId: string): {
     const warnings: { field: string; message: string }[] = [];
 
     mod.fields.forEach(field => {
-      const val = row[field.key];
+      let val = row[field.key];
       const isEmpty = val === undefined || val === null || val === '';
+
+      // Apply default value for missing fields
+      if (isEmpty && field.defaultValue !== undefined) {
+        row[field.key] = field.defaultValue;
+        val = field.defaultValue;
+        return; // skip required check — default applied
+      }
 
       if (field.required && isEmpty) {
         errors.push({ field: field.key, message: `${field.label} is required` });
