@@ -830,6 +830,11 @@ export default function SystemSettings() {
           </div>
         </TabsContent>
 
+        {/* TAB — DROPDOWN CONFIG */}
+        <TabsContent value="dropdowns">
+          <DropdownConfigManager />
+        </TabsContent>
+
         {/* TAB — ACTIVITY LOG */}
         <TabsContent value="audit">
           <Card>
