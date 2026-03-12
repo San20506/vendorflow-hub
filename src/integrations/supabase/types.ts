@@ -684,6 +684,78 @@ export type Database = {
           },
         ]
       }
+      inward_stock: {
+        Row: {
+          created_at: string
+          grn_number: string
+          id: string
+          items: Json
+          notes: string | null
+          po_id: string | null
+          purchase_invoice_id: string | null
+          quality_status: string | null
+          received_by: string | null
+          received_date: string
+          supplier_name: string
+          total_received: number | null
+          total_rejected: number | null
+          updated_at: string
+          vendor_id: string | null
+          warehouse: string | null
+        }
+        Insert: {
+          created_at?: string
+          grn_number: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          po_id?: string | null
+          purchase_invoice_id?: string | null
+          quality_status?: string | null
+          received_by?: string | null
+          received_date?: string
+          supplier_name: string
+          total_received?: number | null
+          total_rejected?: number | null
+          updated_at?: string
+          vendor_id?: string | null
+          warehouse?: string | null
+        }
+        Update: {
+          created_at?: string
+          grn_number?: string
+          id?: string
+          items?: Json
+          notes?: string | null
+          po_id?: string | null
+          purchase_invoice_id?: string | null
+          quality_status?: string | null
+          received_by?: string | null
+          received_date?: string
+          supplier_name?: string
+          total_received?: number | null
+          total_rejected?: number | null
+          updated_at?: string
+          vendor_id?: string | null
+          warehouse?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inward_stock_po_id_fkey"
+            columns: ["po_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inward_stock_purchase_invoice_id_fkey"
+            columns: ["purchase_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           address: string | null
@@ -1184,6 +1256,158 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      purchase_invoices: {
+        Row: {
+          bill_date: string
+          bill_number: string
+          cgst: number | null
+          created_at: string
+          due_date: string | null
+          id: string
+          igst: number | null
+          items: Json
+          notes: string | null
+          payment_mode: string | null
+          payment_status: string | null
+          po_id: string | null
+          sgst: number | null
+          subtotal: number
+          supplier_bill_number: string | null
+          supplier_gstin: string | null
+          supplier_name: string
+          total_amount: number
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          bill_date?: string
+          bill_number: string
+          cgst?: number | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          igst?: number | null
+          items?: Json
+          notes?: string | null
+          payment_mode?: string | null
+          payment_status?: string | null
+          po_id?: string | null
+          sgst?: number | null
+          subtotal?: number
+          supplier_bill_number?: string | null
+          supplier_gstin?: string | null
+          supplier_name: string
+          total_amount?: number
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          bill_date?: string
+          bill_number?: string
+          cgst?: number | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          igst?: number | null
+          items?: Json
+          notes?: string | null
+          payment_mode?: string | null
+          payment_status?: string | null
+          po_id?: string | null
+          sgst?: number | null
+          subtotal?: number
+          supplier_bill_number?: string | null
+          supplier_gstin?: string | null
+          supplier_name?: string
+          total_amount?: number
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_invoices_po_id_fkey"
+            columns: ["po_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_orders: {
+        Row: {
+          cgst: number | null
+          created_at: string
+          created_by: string | null
+          expected_delivery: string | null
+          id: string
+          igst: number | null
+          items: Json
+          notes: string | null
+          order_date: string
+          payment_terms: string | null
+          po_number: string
+          sgst: number | null
+          status: string
+          subtotal: number
+          supplier_address: string | null
+          supplier_email: string | null
+          supplier_gstin: string | null
+          supplier_name: string
+          supplier_phone: string | null
+          total_amount: number
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          cgst?: number | null
+          created_at?: string
+          created_by?: string | null
+          expected_delivery?: string | null
+          id?: string
+          igst?: number | null
+          items?: Json
+          notes?: string | null
+          order_date?: string
+          payment_terms?: string | null
+          po_number: string
+          sgst?: number | null
+          status?: string
+          subtotal?: number
+          supplier_address?: string | null
+          supplier_email?: string | null
+          supplier_gstin?: string | null
+          supplier_name: string
+          supplier_phone?: string | null
+          total_amount?: number
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          cgst?: number | null
+          created_at?: string
+          created_by?: string | null
+          expected_delivery?: string | null
+          id?: string
+          igst?: number | null
+          items?: Json
+          notes?: string | null
+          order_date?: string
+          payment_terms?: string | null
+          po_number?: string
+          sgst?: number | null
+          status?: string
+          subtotal?: number
+          supplier_address?: string | null
+          supplier_email?: string | null
+          supplier_gstin?: string | null
+          supplier_name?: string
+          supplier_phone?: string | null
+          total_amount?: number
+          updated_at?: string
+          vendor_id?: string | null
         }
         Relationships: []
       }
