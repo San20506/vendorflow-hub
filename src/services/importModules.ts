@@ -77,7 +77,7 @@ export const IMPORT_MODULES: ImportModule[] = [
     dbTable: 'settlements',
     fields: [
       { key: 'settlement_id', label: 'Settlement ID', required: true, type: 'text' },
-      { key: 'portal', label: 'Portal', required: true, type: 'select', options: ['Amazon', 'Flipkart', 'Meesho', 'Myntra'] },
+      { key: 'portal', label: 'Portal', required: true, type: 'select', options: ['Amazon', 'Flipkart', 'Meesho', 'Myntra', 'FirstCry', 'Blinkit'], defaultValue: 'FirstCry' },
       { key: 'amount', label: 'Gross Amount (₹)', required: true, type: 'number' },
       { key: 'commission', label: 'Commission (₹)', required: false, type: 'number' },
       { key: 'tax', label: 'Tax (₹)', required: false, type: 'number' },
