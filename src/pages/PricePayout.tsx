@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { IndianRupee, TrendingUp, Download, FileSpreadsheet, AlertTriangle, CheckCircle2, XCircle, Shield } from 'lucide-react';
+import { IndianRupee, TrendingUp, Download, FileSpreadsheet, AlertTriangle, CheckCircle2, XCircle, Shield, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import PriceAuditEngine from '@/components/settlements/PriceAuditEngine';
+import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
 import { useToast } from '@/hooks/use-toast';
 
 interface PriceBreakdown {
@@ -74,12 +75,22 @@ export default function PricePayout() {
   const [selectedChannel, setSelectedChannel] = useState('All Channels');
   const [reconChannel, setReconChannel] = useState('All Channels');
   const [activeTab, setActiveTab] = useState('payout');
+  const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
+  const [sortField, setSortField] = useState<string>('default');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   // Payout data
   const filteredData = useMemo(() => {
-    if (selectedChannel === 'All Channels') return mockPriceData;
-    return mockPriceData.filter(p => p.channel === selectedChannel);
-  }, [selectedChannel]);
+    let data = selectedChannel === 'All Channels' ? [...mockPriceData] : mockPriceData.filter(p => p.channel === selectedChannel);
+    if (sortField !== 'default') {
+      data.sort((a, b) => {
+        const aVal = sortField === 'margin' ? (a.netPayout / a.marketplacePrice) : sortField === 'commission' ? a.commissionPct : sortField === 'payout' ? a.netPayout : a.marketplacePrice;
+        const bVal = sortField === 'margin' ? (b.netPayout / b.marketplacePrice) : sortField === 'commission' ? b.commissionPct : sortField === 'payout' ? b.netPayout : b.marketplacePrice;
+        return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+      });
+    }
+    return data;
+  }, [selectedChannel, sortField, sortDir]);
 
   const avgMargin = filteredData.length > 0
     ? Math.round(filteredData.reduce((s, p) => s + (p.netPayout / p.marketplacePrice * 100), 0) / filteredData.length)
@@ -121,20 +132,36 @@ export default function PricePayout() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="payout">Payout Breakdown</TabsTrigger>
-          <TabsTrigger value="reconciliation">Reconciliation Engine</TabsTrigger>
-          <TabsTrigger value="price-audit">Price Audit</TabsTrigger>
+        <TabsList className="gap-1">
+          <TabsTrigger value="payout" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Payout Breakdown</TabsTrigger>
+          <TabsTrigger value="reconciliation" className="data-[state=active]:bg-warning data-[state=active]:text-warning-foreground">Reconciliation Engine</TabsTrigger>
+          <TabsTrigger value="price-audit" className="data-[state=active]:bg-info data-[state=active]:text-info-foreground">Price Audit</TabsTrigger>
         </TabsList>
 
         <TabsContent value="payout" className="space-y-6">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <Select value={selectedChannel} onValueChange={setSelectedChannel}>
               <SelectTrigger className="w-[180px]"><SelectValue placeholder="Sales Channel" /></SelectTrigger>
               <SelectContent>
                 {channels.map(ch => <SelectItem key={ch} value={ch}>{ch}</SelectItem>)}
               </SelectContent>
             </Select>
+            <GlobalDateFilter value={dateRange} onChange={setDateRange} />
+            <Select value={sortField} onValueChange={setSortField}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Sort By" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">Default Order</SelectItem>
+                <SelectItem value="mrp">Sort: MRP</SelectItem>
+                <SelectItem value="payout">Sort: Net Payout</SelectItem>
+                <SelectItem value="margin">Sort: Margin %</SelectItem>
+                <SelectItem value="commission">Sort: Commission %</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="icon" onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')} className="shrink-0">
+              {sortDir === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
+            </Button>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
