@@ -96,7 +96,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         <AppSidebar />
         <SidebarInset className="flex-1 flex flex-col">
           {/* Top Header */}
-          <header className="h-14 border-b border-border bg-card px-4 flex items-center justify-between sticky top-0 z-10">
+          <header className="h-14 border-b border-border/50 px-4 flex items-center justify-between sticky top-0 z-10 backdrop-blur-xl bg-[hsl(0_0%_100%/0.7)] dark:bg-[hsl(225_25%_6%/0.7)]">
             <div className="flex items-center gap-4 flex-1">
               <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
               

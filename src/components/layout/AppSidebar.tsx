@@ -203,7 +203,7 @@ export function AppSidebar() {
   })).filter(section => section.groups.length > 0);
 
   return (
-    <Sidebar className="border-r border-sidebar-border" collapsible="icon">
+    <Sidebar className="border-r border-sidebar-border backdrop-blur-xl bg-[hsl(0_0%_100%/0.75)] dark:bg-[hsl(225_25%_6%/0.75)]" collapsible="icon">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
           <button
