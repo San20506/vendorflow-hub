@@ -246,7 +246,7 @@ export function AppSidebar() {
           <div key={section.heading}>
             {!isCollapsed && (
               <div className={`px-3 py-2.5 ${sectionIndex > 0 ? 'mt-3 border-t border-sidebar-border pt-4' : ''}`}>
-                <span className="text-[11px] font-bold text-sidebar-primary uppercase tracking-widest">
+                <span className="text-[11px] font-bold text-primary uppercase tracking-widest">
                   {section.heading}
                 </span>
               </div>
