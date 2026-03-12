@@ -265,6 +265,7 @@ export type Database = {
           name: string
           phone: string | null
           pincode: string | null
+          source: string | null
           state: string | null
           total_orders: number | null
           total_returns: number | null
@@ -284,6 +285,7 @@ export type Database = {
           name: string
           phone?: string | null
           pincode?: string | null
+          source?: string | null
           state?: string | null
           total_orders?: number | null
           total_returns?: number | null
@@ -303,6 +305,7 @@ export type Database = {
           name?: string
           phone?: string | null
           pincode?: string | null
+          source?: string | null
           state?: string | null
           total_orders?: number | null
           total_returns?: number | null

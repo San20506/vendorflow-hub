@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { socialMessagesDb, alertsDb } from '@/services/database';
+import { socialMessagesDb, alertsDb, customersDb } from '@/services/database';
 import { supabase } from '@/integrations/supabase/client';
 
 type Channel = 'all' | 'instagram' | 'facebook' | 'whatsapp' | 'email' | 'marketplace';
@@ -202,6 +202,23 @@ export default function SocialInsights() {
         updates.conversation_history = newHistory;
         updates.status = 'replied';
         updates.auto_reply_triggered = true;
+
+        // Auto-save WhatsApp contacts as customers when classified as new leads
+        if (msg.channel === 'whatsapp' && msg.sender_phone && category === 'new_lead' && !msg.saved_to_contacts) {
+          try {
+            const existing = await customersDb.getAll({ search: msg.sender_phone });
+            const alreadyExists = (existing || []).some((c: any) => c.phone === msg.sender_phone);
+            if (!alreadyExists) {
+              await customersDb.create({
+                name: msg.sender || 'WhatsApp Contact',
+                phone: msg.sender_phone,
+                channels: ['whatsapp'],
+                source: 'whatsapp_inbox',
+              });
+            }
+            updates.saved_to_contacts = true;
+          } catch (saveErr) { console.error('Auto-save contact failed:', saveErr); }
+        }
 
         // If trigger also wants escalation (like returns)
         if (trigger?.escalate) {
@@ -592,7 +609,33 @@ export default function SocialInsights() {
                             <Bell className="w-3 h-3" />Escalate
                           </Button>
                         )}
-                        {selectedMessage.sender_phone && !selectedMessage.saved_to_contacts && (
+                        {selectedMessage.channel === 'whatsapp' && selectedMessage.sender_phone && !selectedMessage.saved_to_contacts && (
+                          <Button size="sm" variant="outline" className="gap-1" onClick={async () => {
+                            try {
+                              // Check if customer with this phone already exists
+                              const existing = await customersDb.getAll({ search: selectedMessage.sender_phone });
+                              const alreadyExists = (existing || []).some((c: any) => c.phone === selectedMessage.sender_phone);
+                              if (!alreadyExists) {
+                                await customersDb.create({
+                                  name: selectedMessage.sender || 'WhatsApp Contact',
+                                  phone: selectedMessage.sender_phone,
+                                  channels: ['whatsapp'],
+                                  source: 'whatsapp_inbox',
+                                });
+                              }
+                              await socialMessagesDb.update(selectedMessage.id, { saved_to_contacts: true });
+                              setSelectedMessage((prev: any) => prev ? { ...prev, saved_to_contacts: true } : prev);
+                              toast({ title: alreadyExists ? 'Contact already exists' : '✅ Saved to Customer List', description: `${selectedMessage.sender_phone} added as WhatsApp contact` });
+                              fetchMessages();
+                            } catch (err: any) {
+                              console.error('Save contact error:', err);
+                              toast({ title: 'Failed to save contact', description: err.message, variant: 'destructive' });
+                            }
+                          }}>
+                            <Phone className="w-3 h-3" />Save to Customers
+                          </Button>
+                        )}
+                        {selectedMessage.sender_phone && !selectedMessage.saved_to_contacts && selectedMessage.channel !== 'whatsapp' && (
                           <Button size="sm" variant="outline" className="gap-1" onClick={async () => {
                             await socialMessagesDb.update(selectedMessage.id, { saved_to_contacts: true });
                             toast({ title: 'Contact Saved' });
