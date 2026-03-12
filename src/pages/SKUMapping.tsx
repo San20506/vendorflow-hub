@@ -7,8 +7,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { skuMappingsDb } from '@/services/database';
-import { Plus, Edit2, Link, Unlink, Search, AlertCircle, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Plus, Edit2, Link, Unlink, Search, AlertCircle, Loader2, Globe, Activity, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 type MappingStatus = 'mapped' | 'partially_mapped' | 'unmapped';
@@ -25,6 +27,10 @@ function getMappedCount(m: any): number {
   return [m.amazon_sku, m.flipkart_sku, m.meesho_sku, m.firstcry_sku, m.blinkit_sku, m.own_website_sku].filter(Boolean).length;
 }
 
+function getUrlCount(m: any): number {
+  return [m.amazon_url, m.flipkart_url, m.meesho_url, m.firstcry_url, m.blinkit_url, m.own_website_url].filter(Boolean).length;
+}
+
 const statusBadge = (status: MappingStatus) => {
   switch (status) {
     case 'mapped':
@@ -36,6 +42,15 @@ const statusBadge = (status: MappingStatus) => {
   }
 };
 
+const PORTAL_URL_FIELDS = [
+  { key: 'amazon_url', label: 'Amazon URL', icon: '🛒', placeholder: 'https://www.amazon.in/dp/...' },
+  { key: 'flipkart_url', label: 'Flipkart URL', icon: '🛍️', placeholder: 'https://www.flipkart.com/...' },
+  { key: 'meesho_url', label: 'Meesho URL', icon: '📦', placeholder: 'https://www.meesho.com/...' },
+  { key: 'firstcry_url', label: 'FirstCry URL', icon: '👶', placeholder: 'https://www.firstcry.com/...' },
+  { key: 'blinkit_url', label: 'Blinkit URL', icon: '⚡', placeholder: 'https://blinkit.com/...' },
+  { key: 'own_website_url', label: 'Own Website URL', icon: '🌐', placeholder: 'https://yoursite.com/product/...' },
+];
+
 export default function SKUMapping() {
   const [mappings, setMappings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +58,12 @@ export default function SKUMapping() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingMapping, setEditingMapping] = useState<any | null>(null);
-  const [formData, setFormData] = useState({ master_sku_id: '', product_name: '', brand: '', amazon_sku: '', flipkart_sku: '', meesho_sku: '', firstcry_sku: '', blinkit_sku: '', own_website_sku: '' });
+  const [formData, setFormData] = useState({
+    master_sku_id: '', product_name: '', brand: '',
+    amazon_sku: '', flipkart_sku: '', meesho_sku: '', firstcry_sku: '', blinkit_sku: '', own_website_sku: '',
+    amazon_url: '', flipkart_url: '', meesho_url: '', firstcry_url: '', blinkit_url: '', own_website_url: '',
+  });
+  const [checkingHealth, setCheckingHealth] = useState<string | null>(null);
   const { toast } = useToast();
 
   const fetchMappings = async () => {
@@ -66,12 +86,18 @@ export default function SKUMapping() {
     return true;
   }), [mappings, filterStatus]);
 
+  const resetForm = () => setFormData({
+    master_sku_id: '', product_name: '', brand: '',
+    amazon_sku: '', flipkart_sku: '', meesho_sku: '', firstcry_sku: '', blinkit_sku: '', own_website_sku: '',
+    amazon_url: '', flipkart_url: '', meesho_url: '', firstcry_url: '', blinkit_url: '', own_website_url: '',
+  });
+
   const handleAddMapping = async () => {
     try {
       await skuMappingsDb.create(formData);
       toast({ title: 'Mapping Added', description: 'New SKU mapping has been created successfully.' });
       setIsAddDialogOpen(false);
-      setFormData({ master_sku_id: '', product_name: '', brand: '', amazon_sku: '', flipkart_sku: '', meesho_sku: '', firstcry_sku: '', blinkit_sku: '', own_website_sku: '' });
+      resetForm();
       fetchMappings();
     } catch (e: any) {
       toast({ title: 'Error', description: e.message, variant: 'destructive' });
@@ -90,9 +116,28 @@ export default function SKUMapping() {
     }
   };
 
+  const triggerHealthCheck = async (mappingId?: string) => {
+    setCheckingHealth(mappingId || 'all');
+    try {
+      const { data, error } = await supabase.functions.invoke('product-health-check', {
+        body: mappingId ? { mapping_id: mappingId } : {},
+      });
+      if (error) throw error;
+      toast({
+        title: '✅ Health Check Complete',
+        description: `Checked ${data.checked} products. ${data.statusChanges} status changes detected.`,
+      });
+    } catch (err: any) {
+      toast({ title: 'Health Check Failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setCheckingHealth(null);
+    }
+  };
+
   const mappedCount = mappings.filter(m => getMappingStatus(m) === 'mapped').length;
   const partialCount = mappings.filter(m => getMappingStatus(m) === 'partially_mapped').length;
   const unmappedCount = mappings.filter(m => getMappingStatus(m) === 'unmapped').length;
+  const urlConfiguredCount = mappings.filter(m => getUrlCount(m) > 0).length;
   const coveragePercent = mappings.length > 0 ? Math.round(((mappedCount * 6 + partialCount * 3) / (mappings.length * 6)) * 100) : 0;
 
   const skuField = (label: string, icon: string, placeholder: string, field: string, disabled?: boolean) => (
@@ -100,6 +145,58 @@ export default function SKUMapping() {
       <Label>{icon} {label}</Label>
       <Input value={(formData as any)[field] || ''} onChange={e => setFormData(prev => ({ ...prev, [field]: e.target.value }))} placeholder={placeholder} disabled={disabled} />
     </div>
+  );
+
+  const urlField = (label: string, icon: string, placeholder: string, field: string) => (
+    <div className="space-y-2">
+      <Label className="flex items-center gap-1.5"><Globe className="w-3 h-3 text-muted-foreground" />{icon} {label}</Label>
+      <Input value={(formData as any)[field] || ''} onChange={e => setFormData(prev => ({ ...prev, [field]: e.target.value }))} placeholder={placeholder} type="url" />
+    </div>
+  );
+
+  const MappingFormContent = ({ isEdit }: { isEdit: boolean }) => (
+    <Tabs defaultValue="skus">
+      <TabsList className="mb-4">
+        <TabsTrigger value="skus" className="gap-1.5"><Link className="w-3.5 h-3.5" />SKU Mapping</TabsTrigger>
+        <TabsTrigger value="urls" className="gap-1.5"><Globe className="w-3.5 h-3.5" />Health Check URLs</TabsTrigger>
+      </TabsList>
+      <TabsContent value="skus">
+        <div className="grid gap-4">
+          <div className="grid grid-cols-2 gap-4">
+            {skuField('Master SKU ID', '🔑', 'MSK-XXX', 'master_sku_id', isEdit)}
+            {skuField('Product Name', '📋', 'Product name', 'product_name')}
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {skuField('Brand', '🏷️', 'Brand name', 'brand')}
+            <div />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {skuField('Amazon SKU', '🛒', 'SKU-AMZ-XXX', 'amazon_sku')}
+            {skuField('Flipkart SKU', '🛍️', 'SKU-FLK-XXX', 'flipkart_sku')}
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {skuField('Meesho SKU', '📦', 'SKU-MSH-XXX', 'meesho_sku')}
+            {skuField('FirstCry SKU', '👶', 'SKU-FCY-XXX', 'firstcry_sku')}
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {skuField('Blinkit SKU', '⚡', 'SKU-BLK-XXX', 'blinkit_sku')}
+            {skuField('Own Website SKU', '🌐', 'SKU-OWN-XXX', 'own_website_sku')}
+          </div>
+        </div>
+      </TabsContent>
+      <TabsContent value="urls">
+        <div className="space-y-4">
+          <p className="text-xs text-muted-foreground">Enter product page URLs for automated health checking. The system will check these URLs every 8 hours to determine if products are active on each portal.</p>
+          <div className="grid gap-4">
+            {PORTAL_URL_FIELDS.map(f => (
+              <div key={f.key}>
+                {urlField(f.label, f.icon, f.placeholder, f.key)}
+              </div>
+            ))}
+          </div>
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 
   return (
@@ -123,33 +220,20 @@ export default function SKUMapping() {
               <SelectItem value="unmapped">Unmapped</SelectItem>
             </SelectContent>
           </Select>
+          <Button variant="outline" className="gap-1.5" onClick={() => triggerHealthCheck()} disabled={!!checkingHealth}>
+            {checkingHealth === 'all' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
+            Run Health Check
+          </Button>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild><Button className="gap-2"><Plus className="w-4 h-4" />Add Mapping</Button></DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add SKU Mapping</DialogTitle>
-                <DialogDescription>Map portal-specific SKUs to a master internal SKU</DialogDescription>
+                <DialogDescription>Map portal-specific SKUs and configure health check URLs</DialogDescription>
               </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  {skuField('Master SKU ID', '🔑', 'MSK-XXX', 'master_sku_id')}
-                  {skuField('Product Name', '📋', 'Product name', 'product_name')}
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  {skuField('Amazon SKU', '🛒', 'SKU-AMZ-XXX', 'amazon_sku')}
-                  {skuField('Flipkart SKU', '🛍️', 'SKU-FLK-XXX', 'flipkart_sku')}
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  {skuField('Meesho SKU', '📦', 'SKU-MSH-XXX', 'meesho_sku')}
-                  {skuField('FirstCry SKU', '👶', 'SKU-FCY-XXX', 'firstcry_sku')}
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  {skuField('Blinkit SKU', '⚡', 'SKU-BLK-XXX', 'blinkit_sku')}
-                  {skuField('Own Website SKU', '🌐', 'SKU-OWN-XXX', 'own_website_sku')}
-                </div>
-              </div>
+              <MappingFormContent isEdit={false} />
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+                <Button variant="outline" onClick={() => { setIsAddDialogOpen(false); resetForm(); }}>Cancel</Button>
                 <Button onClick={handleAddMapping}>Create Mapping</Button>
               </DialogFooter>
             </DialogContent>
@@ -157,11 +241,12 @@ export default function SKUMapping() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-primary/10"><Link className="w-5 h-5 text-primary" /></div><div><p className="text-2xl font-bold">{mappings.length}</p><p className="text-sm text-muted-foreground">Total SKUs</p></div></div></CardContent></Card>
         <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-emerald-500/10"><Link className="w-5 h-5 text-emerald-600" /></div><div><p className="text-2xl font-bold">{mappedCount}</p><p className="text-sm text-muted-foreground">Fully Mapped</p></div></div></CardContent></Card>
         <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-amber-500/10"><AlertCircle className="w-5 h-5 text-amber-600" /></div><div><p className="text-2xl font-bold">{partialCount}</p><p className="text-sm text-muted-foreground">Partial</p></div></div></CardContent></Card>
         <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-rose-500/10"><Unlink className="w-5 h-5 text-rose-600" /></div><div><p className="text-2xl font-bold">{unmappedCount}</p><p className="text-sm text-muted-foreground">Unmapped</p></div></div></CardContent></Card>
+        <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><div className="p-2 rounded-lg bg-blue-500/10"><Globe className="w-5 h-5 text-blue-600" /></div><div><p className="text-2xl font-bold">{urlConfiguredCount}</p><p className="text-sm text-muted-foreground">URLs Set</p></div></div></CardContent></Card>
         <Card className="bg-primary/5 border-primary/20"><CardContent className="pt-6"><div className="text-center"><p className="text-3xl font-bold text-primary">{coveragePercent}%</p><p className="text-sm text-muted-foreground">Coverage</p></div></CardContent></Card>
       </div>
 
@@ -188,6 +273,7 @@ export default function SKUMapping() {
                     <TableHead className="text-center font-semibold">⚡ Blinkit</TableHead>
                     <TableHead className="text-center font-semibold">🌐 Own Web</TableHead>
                     <TableHead className="font-semibold">Coverage</TableHead>
+                    <TableHead className="font-semibold">URLs</TableHead>
                     <TableHead className="font-semibold">Status</TableHead>
                     <TableHead className="font-semibold">Actions</TableHead>
                   </TableRow>
@@ -195,6 +281,7 @@ export default function SKUMapping() {
                 <TableBody>
                   {filteredMappings.map((mapping) => {
                     const count = getMappedCount(mapping);
+                    const urls = getUrlCount(mapping);
                     const status = getMappingStatus(mapping);
                     const skuCell = (sku?: string) => (
                       <TableCell className="text-center">
@@ -213,31 +300,57 @@ export default function SKUMapping() {
                         {skuCell(mapping.blinkit_sku)}
                         {skuCell(mapping.own_website_sku)}
                         <TableCell><span className="text-sm font-medium">{count}/6</span></TableCell>
+                        <TableCell>
+                          {urls > 0 ? (
+                            <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/30 gap-1 text-xs">
+                              <Globe className="w-3 h-3" />{urls}
+                            </Badge>
+                          ) : <span className="text-muted-foreground text-xs">—</span>}
+                        </TableCell>
                         <TableCell>{statusBadge(status)}</TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="icon" onClick={() => {
-                            setEditingMapping(mapping);
-                            setFormData({
-                              master_sku_id: mapping.master_sku_id,
-                              product_name: mapping.product_name,
-                              brand: mapping.brand || '',
-                              amazon_sku: mapping.amazon_sku || '',
-                              flipkart_sku: mapping.flipkart_sku || '',
-                              meesho_sku: mapping.meesho_sku || '',
-                              firstcry_sku: mapping.firstcry_sku || '',
-                              blinkit_sku: mapping.blinkit_sku || '',
-                              own_website_sku: mapping.own_website_sku || '',
-                            });
-                          }}>
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
+                          <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => {
+                              setEditingMapping(mapping);
+                              setFormData({
+                                master_sku_id: mapping.master_sku_id,
+                                product_name: mapping.product_name,
+                                brand: mapping.brand || '',
+                                amazon_sku: mapping.amazon_sku || '',
+                                flipkart_sku: mapping.flipkart_sku || '',
+                                meesho_sku: mapping.meesho_sku || '',
+                                firstcry_sku: mapping.firstcry_sku || '',
+                                blinkit_sku: mapping.blinkit_sku || '',
+                                own_website_sku: mapping.own_website_sku || '',
+                                amazon_url: mapping.amazon_url || '',
+                                flipkart_url: mapping.flipkart_url || '',
+                                meesho_url: mapping.meesho_url || '',
+                                firstcry_url: mapping.firstcry_url || '',
+                                blinkit_url: mapping.blinkit_url || '',
+                                own_website_url: mapping.own_website_url || '',
+                              });
+                            }}>
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                            {urls > 0 && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => triggerHealthCheck(mapping.id)}
+                                disabled={!!checkingHealth}
+                                title="Check health now"
+                              >
+                                {checkingHealth === mapping.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4 text-primary" />}
+                              </Button>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
                   })}
                   {filteredMappings.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={12} className="text-center py-12 text-muted-foreground">
+                      <TableCell colSpan={13} className="text-center py-12 text-muted-foreground">
                         <Unlink className="w-10 h-10 mx-auto mb-3 opacity-30" />
                         <p className="font-medium">No mappings found</p>
                         <p className="text-sm">Try adjusting your filters or add a new mapping</p>
@@ -252,32 +365,15 @@ export default function SKUMapping() {
       </Card>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editingMapping} onOpenChange={(open) => !open && setEditingMapping(null)}>
-        <DialogContent className="max-w-2xl">
+      <Dialog open={!!editingMapping} onOpenChange={(open) => { if (!open) { setEditingMapping(null); resetForm(); } }}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit SKU Mapping</DialogTitle>
-            <DialogDescription>Update portal-specific SKUs for {editingMapping?.product_name}</DialogDescription>
+            <DialogDescription>Update portal SKUs and health check URLs for {editingMapping?.product_name}</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              {skuField('Master SKU ID', '🔑', '', 'master_sku_id', true)}
-              {skuField('Product Name', '📋', '', 'product_name')}
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              {skuField('Amazon SKU', '🛒', 'SKU-AMZ-XXX', 'amazon_sku')}
-              {skuField('Flipkart SKU', '🛍️', 'SKU-FLK-XXX', 'flipkart_sku')}
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              {skuField('Meesho SKU', '📦', 'SKU-MSH-XXX', 'meesho_sku')}
-              {skuField('FirstCry SKU', '👶', 'SKU-FCY-XXX', 'firstcry_sku')}
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              {skuField('Blinkit SKU', '⚡', 'SKU-BLK-XXX', 'blinkit_sku')}
-              {skuField('Own Website SKU', '🌐', 'SKU-OWN-XXX', 'own_website_sku')}
-            </div>
-          </div>
+          <MappingFormContent isEdit={true} />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingMapping(null)}>Cancel</Button>
+            <Button variant="outline" onClick={() => { setEditingMapping(null); resetForm(); }}>Cancel</Button>
             <Button onClick={handleEditMapping}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
