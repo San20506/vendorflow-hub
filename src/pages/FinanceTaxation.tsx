@@ -155,28 +155,19 @@ export default function FinanceTaxation() {
 
   // Quotation state
   const [quotationDialog, setQuotationDialog] = useState(false);
-  const [quotationItems, setQuotationItems] = useState([{ product: '', qty: '1', rate: '', gstRate: '18' }]);
+  const [quotationGstin, setQuotationGstin] = useState('');
+  const [quotationCustomer, setQuotationCustomer] = useState('');
+  const [quotationItems, setQuotationItems] = useState<LineItem[]>([createEmptyLineItem()]);
 
-  // GSTR-1 guide
-  const [gstr1GuideOpen, setGstr1GuideOpen] = useState(false);
-
-  const mockQuotations = [
-    { id: 'QTN-2026-001', customer: 'RetailMart India', date: '2026-02-12', items: 3, total: 67500, status: 'Sent' as const, validTill: '2026-03-12' },
-    { id: 'QTN-2026-002', customer: 'TechZone Solutions', date: '2026-02-10', items: 5, total: 142000, status: 'Accepted' as const, validTill: '2026-03-10' },
-    { id: 'QTN-2026-003', customer: 'GreenLeaf Organics', date: '2026-02-08', items: 2, total: 28000, status: 'Draft' as const, validTill: '2026-03-08' },
-    { id: 'QTN-2026-004', customer: 'HomeStyle Decor', date: '2026-02-05', items: 4, total: 95000, status: 'Expired' as const, validTill: '2026-02-20' },
-  ];
-
-  const addQuotationItem = () => setQuotationItems(prev => [...prev, { product: '', qty: '1', rate: '', gstRate: '18' }]);
-  const removeQuotationItem = (idx: number) => setQuotationItems(prev => prev.filter((_, i) => i !== idx));
-  const updateQuotationItem = (idx: number, field: string, value: string) => setQuotationItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item));
-
-  const quotationTotal = quotationItems.reduce((sum, item) => {
-    const qty = parseFloat(item.qty) || 0;
-    const rate = parseFloat(item.rate) || 0;
-    const gst = parseFloat(item.gstRate) || 0;
-    return sum + qty * rate * (1 + gst / 100);
-  }, 0);
+  const quotationSameState = isSameState(quotationGstin);
+  const quotationTotals = useMemo(() => {
+    let taxable = 0, cgst = 0, sgst = 0, igst = 0, total = 0;
+    quotationItems.forEach(item => {
+      const calc = calcLineGst(item, quotationSameState);
+      taxable += calc.taxable; cgst += calc.cgst; sgst += calc.sgst; igst += calc.igst; total += calc.total;
+    });
+    return { taxable, cgst, sgst, igst, total };
+  }, [quotationItems, quotationSameState]);
 
   // Determine if same state based on GSTIN
   const isSameState = (gstin: string) => {
