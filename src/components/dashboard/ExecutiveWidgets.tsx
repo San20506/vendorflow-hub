@@ -7,7 +7,8 @@ import {
   Users, UserPlus, UserCheck, Percent, Store, StoreIcon,
   CheckCircle2, XCircle, AlertCircle, Link2, Unlink,
   Package, CalendarDays, ListTodo, Clock, BarChart3,
-  ShoppingBag, Globe, Layers,
+  ShoppingBag, Globe, Layers, MapPin, Target, Phone,
+  Mail, TrendingUp, Handshake,
 } from 'lucide-react';
 import { portalConfigs } from '@/services/mockData';
 import {
@@ -54,6 +55,7 @@ export function ExecutiveWidgets({ orders, formatCurrency }: ExecutiveWidgetsPro
   const [products, setProducts] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
+  const [leads, setLeads] = useState<any[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -63,9 +65,10 @@ export function ExecutiveWidgets({ orders, formatCurrency }: ExecutiveWidgetsPro
       supabase.from('products').select('id, name, sku, status, portals_enabled, category, brand').then(r => r.data || []),
       supabase.from('tasks').select('*').then(r => r.data || []),
       supabase.from('customers').select('*').then(r => r.data || []),
-    ]).then(([v, ph, sm, pr, t, c]) => {
+      supabase.from('leads').select('*').then(r => r.data || []),
+    ]).then(([v, ph, sm, pr, t, c, l]) => {
       setVendors(v); setProductHealth(ph); setSkuMappings(sm);
-      setProducts(pr); setTasks(t); setCustomers(c);
+      setProducts(pr); setTasks(t); setCustomers(c); setLeads(l);
     });
   }, []);
 
@@ -175,6 +178,47 @@ export function ExecutiveWidgets({ orders, formatCurrency }: ExecutiveWidgetsPro
     const completionRate = total > 0 ? Math.round((done / total) * 100) : 0;
     return { total, done, inProgress, pending, overdue, highPriority, completionRate };
   }, [tasks]);
+
+  // ─── CUSTOMER STATE-WISE ───
+  const customerByState = useMemo(() => {
+    const map: Record<string, { state: string; count: number; revenue: number }> = {};
+    customers.forEach(c => {
+      const state = c.state || 'Unknown';
+      if (!map[state]) map[state] = { state, count: 0, revenue: 0 };
+      map[state].count += 1;
+      map[state].revenue += c.total_spent || 0;
+    });
+    return Object.values(map).sort((a, b) => b.count - a.count).slice(0, 8);
+  }, [customers]);
+
+  // ─── VENDOR STATE-WISE ───
+  const vendorByState = useMemo(() => {
+    const map: Record<string, { state: string; count: number; active: number }> = {};
+    vendors.forEach(v => {
+      // Extract state from address if available
+      const addr = v.gst_address || v.address || '';
+      const parts = addr.split(',').map((s: string) => s.trim());
+      const state = parts.length > 1 ? parts[parts.length - 1] : (addr || 'Unknown');
+      if (!map[state]) map[state] = { state, count: 0, active: 0 };
+      map[state].count += 1;
+      if (v.status === 'active') map[state].active += 1;
+    });
+    return Object.values(map).sort((a, b) => b.count - a.count).slice(0, 8);
+  }, [vendors]);
+
+  // ─── LEADS STATUS ───
+  const leadsStatus = useMemo(() => {
+    const total = leads.length;
+    const newLeads = leads.filter(l => l.status === 'new').length;
+    const contacted = leads.filter(l => l.status === 'contacted').length;
+    const qualified = leads.filter(l => l.status === 'qualified').length;
+    const negotiation = leads.filter(l => l.status === 'negotiation').length;
+    const won = leads.filter(l => l.status === 'won' || l.status === 'converted').length;
+    const lost = leads.filter(l => l.status === 'lost').length;
+    const totalValue = leads.reduce((s, l) => s + (l.value || 0), 0);
+    const conversionRate = total > 0 ? Math.round((won / total) * 100) : 0;
+    return { total, newLeads, contacted, qualified, negotiation, won, lost, totalValue, conversionRate };
+  }, [leads]);
 
   return (
     <div className="space-y-6">
@@ -426,93 +470,139 @@ export function ExecutiveWidgets({ orders, formatCurrency }: ExecutiveWidgetsPro
         </Card>
       </div>
 
-      {/* Row 4: Upcoming Holidays + Tasks Progress */}
+      {/* Row 5: Customer State-wise + Vendor State-wise */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Upcoming Holidays */}
+        {/* Customer State-wise */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-primary" />
-              Upcoming Holidays
+              <MapPin className="w-4 h-4 text-primary" />
+              Customer Insights – State Wise
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {upcomingHolidays.map(h => (
-                <div key={h.name} className="flex items-center justify-between p-2.5 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <CalendarDays className="w-4 h-4 text-primary" />
+            {customerByState.length > 0 ? (
+              <div className="space-y-2">
+                {customerByState.map((s, i) => (
+                  <div key={s.state} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">{i + 1}</span>
+                      <span className="text-sm font-medium">{s.state}</span>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium">{h.name}</p>
-                      <p className="text-xs text-muted-foreground">{new Date(h.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                    <div className="flex items-center gap-3 text-sm">
+                      <span className="text-muted-foreground">{s.count} customers</span>
+                      <span className="font-semibold">{formatCurrency(s.revenue)}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-[10px]">{h.type}</Badge>
-                    <Badge
-                      variant="outline"
-                      className={`text-[10px] ${h.daysAway <= 7 ? 'bg-rose-500/10 text-rose-600 border-rose-500/20' : h.daysAway <= 30 ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'}`}
-                    >
-                      {h.daysAway}d away
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-              {upcomingHolidays.length === 0 && <p className="text-sm text-muted-foreground">No upcoming holidays.</p>}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No customer state data available.</p>
+            )}
           </CardContent>
         </Card>
 
-        {/* Tasks Progress */}
+        {/* Vendor State-wise */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <ListTodo className="w-4 h-4 text-primary" />
-              Tasks Progress
+              <MapPin className="w-4 h-4 text-primary" />
+              Vendor Insights – State Wise
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Overall Completion</span>
-                <span className="font-semibold">{taskProgress.completionRate}%</span>
+          <CardContent>
+            {vendorByState.length > 0 ? (
+              <div className="space-y-2">
+                {vendorByState.map((s, i) => (
+                  <div key={s.state} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">{i + 1}</span>
+                      <span className="text-sm font-medium">{s.state}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <span className="text-muted-foreground">{s.count} vendors</span>
+                      <Badge variant="outline" className="text-[10px]">{s.active} active</Badge>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <Progress value={taskProgress.completionRate} className="h-3" />
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="text-center p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
-                <p className="text-lg font-bold text-emerald-600">{taskProgress.done}</p>
-                <p className="text-[10px] text-muted-foreground">Completed</p>
-              </div>
-              <div className="text-center p-2.5 rounded-lg bg-blue-500/5 border border-blue-500/10">
-                <p className="text-lg font-bold text-blue-600">{taskProgress.inProgress}</p>
-                <p className="text-[10px] text-muted-foreground">In Progress</p>
-              </div>
-              <div className="text-center p-2.5 rounded-lg bg-muted/50 border">
-                <p className="text-lg font-bold">{taskProgress.pending}</p>
-                <p className="text-[10px] text-muted-foreground">Pending</p>
-              </div>
-            </div>
-            <div className="flex gap-4 text-xs">
-              {taskProgress.overdue > 0 && (
-                <div className="flex items-center gap-1 text-rose-600">
-                  <Clock className="w-3 h-3" />
-                  {taskProgress.overdue} overdue
-                </div>
-              )}
-              {taskProgress.highPriority > 0 && (
-                <div className="flex items-center gap-1 text-amber-600">
-                  <AlertCircle className="w-3 h-3" />
-                  {taskProgress.highPriority} high priority
-                </div>
-              )}
-              <div className="text-muted-foreground">Total: {taskProgress.total} tasks</div>
-            </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No vendor state data available.</p>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Row 6: Leads Status */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-semibold flex items-center gap-2">
+            <Target className="w-4 h-4 text-primary" />
+            Leads Status Pipeline
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="text-center p-3 rounded-lg bg-blue-500/5 border border-blue-500/10">
+              <p className="text-xl font-bold text-blue-600">{leadsStatus.newLeads}</p>
+              <p className="text-xs text-muted-foreground">New</p>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-amber-500/5 border border-amber-500/10">
+              <p className="text-xl font-bold text-amber-600">{leadsStatus.contacted}</p>
+              <p className="text-xs text-muted-foreground">Contacted</p>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-purple-500/5 border border-purple-500/10">
+              <p className="text-xl font-bold text-purple-600">{leadsStatus.qualified}</p>
+              <p className="text-xs text-muted-foreground">Qualified</p>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+              <p className="text-xl font-bold text-emerald-600">{leadsStatus.won}</p>
+              <p className="text-xs text-muted-foreground">Won / Converted</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-1.5">
+                <Handshake className="w-3.5 h-3.5 text-primary" />
+                <span className="text-muted-foreground">Negotiation:</span>
+                <span className="font-semibold">{leadsStatus.negotiation}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <XCircle className="w-3.5 h-3.5 text-rose-500" />
+                <span className="text-muted-foreground">Lost:</span>
+                <span className="font-semibold text-rose-600">{leadsStatus.lost}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-1.5">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
+                <span className="text-muted-foreground">Conversion:</span>
+                <span className="font-semibold text-emerald-600">{leadsStatus.conversionRate}%</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Pipeline Value:</span>
+                <span className="font-semibold">{formatCurrency(leadsStatus.totalValue)}</span>
+              </div>
+            </div>
+          </div>
+          {leadsStatus.total > 0 && (
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Pipeline Progress</span>
+                <span>{leadsStatus.total} total leads</span>
+              </div>
+              <div className="flex h-3 rounded-full overflow-hidden bg-muted">
+                {leadsStatus.won > 0 && <div className="bg-emerald-500" style={{ width: `${(leadsStatus.won / leadsStatus.total) * 100}%` }} />}
+                {leadsStatus.qualified > 0 && <div className="bg-purple-500" style={{ width: `${(leadsStatus.qualified / leadsStatus.total) * 100}%` }} />}
+                {leadsStatus.negotiation > 0 && <div className="bg-amber-500" style={{ width: `${(leadsStatus.negotiation / leadsStatus.total) * 100}%` }} />}
+                {leadsStatus.contacted > 0 && <div className="bg-blue-400" style={{ width: `${(leadsStatus.contacted / leadsStatus.total) * 100}%` }} />}
+                {leadsStatus.newLeads > 0 && <div className="bg-blue-200" style={{ width: `${(leadsStatus.newLeads / leadsStatus.total) * 100}%` }} />}
+                {leadsStatus.lost > 0 && <div className="bg-rose-400" style={{ width: `${(leadsStatus.lost / leadsStatus.total) * 100}%` }} />}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
