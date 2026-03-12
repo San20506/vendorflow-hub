@@ -418,46 +418,55 @@ export type Database = {
       }
       employees: {
         Row: {
+          biometric_id: string | null
           created_at: string
           department: string | null
           id: string
           join_date: string | null
+          leaves_used: number | null
           monthly_salary: number | null
           name: string
           per_piece_rate: number | null
           phone: string | null
           role: string
           status: string | null
+          total_leaves: number | null
           type: string
           updated_at: string
           vendor_id: string | null
         }
         Insert: {
+          biometric_id?: string | null
           created_at?: string
           department?: string | null
           id?: string
           join_date?: string | null
+          leaves_used?: number | null
           monthly_salary?: number | null
           name: string
           per_piece_rate?: number | null
           phone?: string | null
           role: string
           status?: string | null
+          total_leaves?: number | null
           type?: string
           updated_at?: string
           vendor_id?: string | null
         }
         Update: {
+          biometric_id?: string | null
           created_at?: string
           department?: string | null
           id?: string
           join_date?: string | null
+          leaves_used?: number | null
           monthly_salary?: number | null
           name?: string
           per_piece_rate?: number | null
           phone?: string | null
           role?: string
           status?: string | null
+          total_leaves?: number | null
           type?: string
           updated_at?: string
           vendor_id?: string | null
@@ -749,6 +758,68 @@ export type Database = {
           whatsapp?: string | null
         }
         Relationships: []
+      }
+      leave_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          employee_id: string
+          end_date: string
+          id: string
+          leave_type: string | null
+          permission_from: string | null
+          permission_to: string | null
+          reason: string | null
+          start_date: string
+          status: string
+          type: string
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          employee_id: string
+          end_date: string
+          id?: string
+          leave_type?: string | null
+          permission_from?: string | null
+          permission_to?: string | null
+          reason?: string | null
+          start_date: string
+          status?: string
+          type?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          employee_id?: string
+          end_date?: string
+          id?: string
+          leave_type?: string | null
+          permission_from?: string | null
+          permission_to?: string | null
+          reason?: string | null
+          start_date?: string
+          status?: string
+          type?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       marketing_config: {
         Row: {
