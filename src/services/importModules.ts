@@ -39,7 +39,7 @@ export const IMPORT_MODULES: ImportModule[] = [
       { key: 'total_amount', label: 'Total Amount (₹)', required: false, type: 'number', defaultValue: 0 },
       { key: 'commission', label: 'Commission (₹)', required: false, type: 'number' },
       { key: 'shipping_fee', label: 'Shipping Fee (₹)', required: false, type: 'number' },
-      { key: 'status', label: 'Status', required: false, type: 'select', options: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'rto', 'returned'] },
+      { key: 'status', label: 'Status', required: false, type: 'select', options: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'rto', 'returned', 'Account Approved', 'Account Rejected'] },
       { key: 'order_date', label: 'Order Date', required: false, type: 'date' },
     ],
     sampleData: [
