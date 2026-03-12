@@ -159,16 +159,6 @@ export default function FinanceTaxation() {
   const [quotationCustomer, setQuotationCustomer] = useState('');
   const [quotationItems, setQuotationItems] = useState<LineItem[]>([createEmptyLineItem()]);
 
-  const quotationSameState = isSameState(quotationGstin);
-  const quotationTotals = useMemo(() => {
-    let taxable = 0, cgst = 0, sgst = 0, igst = 0, total = 0;
-    quotationItems.forEach(item => {
-      const calc = calcLineGst(item, quotationSameState);
-      taxable += calc.taxable; cgst += calc.cgst; sgst += calc.sgst; igst += calc.igst; total += calc.total;
-    });
-    return { taxable, cgst, sgst, igst, total };
-  }, [quotationItems, quotationSameState]);
-
   // Determine if same state based on GSTIN
   const isSameState = (gstin: string) => {
     if (gstin.length >= 2) {
