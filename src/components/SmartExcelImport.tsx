@@ -53,15 +53,76 @@ export function SmartExcelImport() {
         const data = e.target?.result;
         const wb = XLSX.read(data, { type: 'array', cellDates: true });
         const ws = wb.Sheets[wb.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: '' });
-        if (json.length === 0) {
+        
+        // Auto-detect the real header row by finding the row with the most non-empty cells
+        // This handles FirstCry-style files with metadata/title rows at the top
+        const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+        let bestRow = 0;
+        let bestCount = 0;
+        const maxScan = Math.min(range.e.r, 15); // scan first 15 rows
+        
+        for (let r = 0; r <= maxScan; r++) {
+          let count = 0;
+          let hasEmpty = false;
+          for (let c = range.s.c; c <= range.e.c; c++) {
+            const cell = ws[XLSX.utils.encode_cell({ r, c })];
+            const val = cell?.v;
+            if (val !== undefined && val !== null && String(val).trim() !== '') {
+              count++;
+            } else {
+              hasEmpty = true;
+            }
+          }
+          // Prefer rows with many filled cells and string-like values (headers)
+          if (count > bestCount) {
+            // Check if most values are strings (header-like)
+            let stringCount = 0;
+            for (let c = range.s.c; c <= range.e.c; c++) {
+              const cell = ws[XLSX.utils.encode_cell({ r, c })];
+              if (cell && typeof cell.v === 'string') stringCount++;
+            }
+            if (stringCount >= count * 0.5 || count > bestCount + 3) {
+              bestCount = count;
+              bestRow = r;
+            }
+          }
+        }
+        
+        // Re-parse with detected header row
+        const json = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { 
+          defval: '', 
+          range: bestRow,
+        });
+        
+        // Filter out rows where all values are empty
+        const filtered = json.filter(row => 
+          Object.values(row).some(v => v !== undefined && v !== null && String(v).trim() !== '')
+        );
+        
+        // Filter out columns that are all empty or named __EMPTY*
+        const cleanHeaders = Object.keys(filtered[0] || {}).filter(h => {
+          if (h.startsWith('__EMPTY')) {
+            // Check if any row has data in this column
+            return filtered.some(row => row[h] !== undefined && row[h] !== null && String(row[h]).trim() !== '');
+          }
+          return true;
+        });
+        
+        // Rebuild data with only clean headers
+        const cleanData = filtered.map(row => {
+          const clean: Record<string, any> = {};
+          cleanHeaders.forEach(h => { clean[h] = row[h]; });
+          return clean;
+        });
+        
+        if (cleanData.length === 0) {
           toast({ title: 'Empty File', description: 'No data found in the uploaded file.', variant: 'destructive' });
           return;
         }
-        const hdrs = Object.keys(json[0]);
-        setHeaders(hdrs);
-        setRawData(json);
-        requestAIMapping(hdrs, json);
+        
+        setHeaders(cleanHeaders);
+        setRawData(cleanData);
+        requestAIMapping(cleanHeaders, cleanData);
       } catch {
         toast({ title: 'Parse Error', description: 'Could not read the file. Please check format.', variant: 'destructive' });
       }
