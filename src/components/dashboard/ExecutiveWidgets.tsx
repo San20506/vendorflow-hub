@@ -7,7 +7,8 @@ import {
   Users, UserPlus, UserCheck, Percent, Store, StoreIcon,
   CheckCircle2, XCircle, AlertCircle, Link2, Unlink,
   Package, CalendarDays, ListTodo, Clock, BarChart3,
-  ShoppingBag, Globe, Layers,
+  ShoppingBag, Globe, Layers, MapPin, Target, Phone,
+  Mail, TrendingUp, Handshake,
 } from 'lucide-react';
 import { portalConfigs } from '@/services/mockData';
 import {
