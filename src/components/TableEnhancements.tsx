@@ -34,15 +34,53 @@ export function DateFilter({ value, onChange }: { value: string; onChange: (v: s
   );
 }
 
-// Export Button
-export function ExportButton({ label, selectedCount }: { label?: string; selectedCount?: number }) {
+// Export Button - actual CSV download
+export function ExportButton({ label, selectedCount, data, filename }: { label?: string; selectedCount?: number; data?: any[]; filename?: string }) {
   const { toast } = useToast();
   const dynamicLabel = selectedCount && selectedCount > 0
     ? `Export – ${selectedCount} Selected`
     : label || 'Export to Excel';
 
+  const handleExport = () => {
+    if (!data || data.length === 0) {
+      toast({ title: 'No Data', description: 'No data available to export.', variant: 'destructive' });
+      return;
+    }
+
+    try {
+      // Get headers from first row
+      const headers = Object.keys(data[0]);
+      const csvRows = [
+        headers.join(','),
+        ...data.map(row =>
+          headers.map(h => {
+            const val = row[h];
+            const str = val === null || val === undefined ? '' : String(val);
+            // Escape commas and quotes
+            return str.includes(',') || str.includes('"') || str.includes('\n')
+              ? `"${str.replace(/"/g, '""')}"`
+              : str;
+          }).join(',')
+        )
+      ];
+      const csvContent = csvRows.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${filename || 'export'}_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast({ title: 'Export Complete', description: `${data.length} rows exported successfully.` });
+    } catch (e) {
+      toast({ title: 'Export Failed', description: 'Could not generate export file.', variant: 'destructive' });
+    }
+  };
+
   return (
-    <Button variant="outline" className="gap-2" onClick={() => toast({ title: 'Export Started', description: `Preparing: ${dynamicLabel}` })}>
+    <Button variant="outline" className="gap-2" onClick={handleExport}>
       <Download className="w-4 h-4" />
       {dynamicLabel}
     </Button>
