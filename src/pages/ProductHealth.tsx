@@ -137,7 +137,7 @@ export default function ProductHealth() {
               <SelectItem value="out_of_stock">🔴 Out of Stock</SelectItem>
             </SelectContent>
           </Select>
-          <ExportButton label={rowSelection.count > 0 ? undefined : 'Export'} selectedCount={rowSelection.count} />
+          <ExportButton label={rowSelection.count > 0 ? undefined : 'Export'} selectedCount={rowSelection.count} data={filtered} filename="product-health" />
         </div>
       </div>
 

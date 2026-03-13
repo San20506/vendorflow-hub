@@ -396,7 +396,7 @@ export default function Orders() {
           </div>
           <div className="flex items-center gap-2">
             <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
-            <ExportButton label={rowSelection.count > 0 ? undefined : exportLabel} selectedCount={rowSelection.count} />
+            <ExportButton label={rowSelection.count > 0 ? undefined : exportLabel} selectedCount={rowSelection.count} data={filteredOrders} filename="orders" />
           </div>
         </div>
 

@@ -126,7 +126,7 @@ export default function Reconciliation() {
               {portalConfigs.map(p => (<SelectItem key={p.id} value={p.id}>{p.icon} {p.name}</SelectItem>))}
             </SelectContent>
           </Select>
-          <ExportButton label={rowSelection.count > 0 ? undefined : `Export – ${dateLabel}`} selectedCount={rowSelection.count} />
+          <ExportButton label={rowSelection.count > 0 ? undefined : `Export – ${dateLabel}`} selectedCount={rowSelection.count} data={filteredLogs} filename="reconciliation" />
         </div>
       </div>
 

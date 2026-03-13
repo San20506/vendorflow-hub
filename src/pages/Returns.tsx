@@ -477,7 +477,7 @@ export default function Returns() {
             <FileDown className="w-4 h-4" />PDF
           </Button>
           <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
-          <ExportButton selectedCount={rowSelection.count} />
+          <ExportButton selectedCount={rowSelection.count} data={filteredReturns} filename="returns" />
         </div>
       </div>
 
