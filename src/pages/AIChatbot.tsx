@@ -444,6 +444,144 @@ export default function AIChatbot() {
           </div>
         </TabsContent>
 
+        {/* Auto Response Tab */}
+        <TabsContent value="auto-response" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Zap className="w-5 h-5 text-amber-500" />AI Auto-Response Configuration</CardTitle>
+              <CardDescription>Configure automatic AI replies for different channels and message types</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { channel: 'WhatsApp', enabled: true, responseTime: '< 30 seconds', rules: 12, accuracy: 94 },
+                  { channel: 'Instagram DM', enabled: true, responseTime: '< 1 minute', rules: 8, accuracy: 89 },
+                  { channel: 'Facebook Messenger', enabled: false, responseTime: 'N/A', rules: 5, accuracy: 0 },
+                  { channel: 'Email', enabled: true, responseTime: '< 5 minutes', rules: 15, accuracy: 92 },
+                ].map(ch => (
+                  <Card key={ch.channel} className={ch.enabled ? 'border-primary/30 bg-primary/5' : 'opacity-60'}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold text-sm">{ch.channel}</h4>
+                        <Switch defaultChecked={ch.enabled} />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div><p className="text-lg font-bold">{ch.rules}</p><p className="text-[10px] text-muted-foreground">Rules</p></div>
+                        <div><p className="text-lg font-bold">{ch.responseTime}</p><p className="text-[10px] text-muted-foreground">Response Time</p></div>
+                        <div><p className="text-lg font-bold">{ch.accuracy ? `${ch.accuracy}%` : '—'}</p><p className="text-[10px] text-muted-foreground">Accuracy</p></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <Card>
+                <CardHeader><CardTitle className="text-base">Auto-Response Rules</CardTitle></CardHeader>
+                <CardContent className="space-y-2">
+                  {[
+                    { trigger: 'Order status inquiry', response: 'Fetch order status from DB and respond with tracking info', priority: 'high', active: true },
+                    { trigger: 'Return/refund request', response: 'Provide return policy and initiate return process', priority: 'high', active: true },
+                    { trigger: 'Product inquiry', response: 'Share product details, pricing, and availability', priority: 'medium', active: true },
+                    { trigger: 'Bulk order request', response: 'Escalate to sales team with customer details', priority: 'high', active: true },
+                    { trigger: 'Payment issue', response: 'Verify payment status and provide resolution steps', priority: 'high', active: true },
+                    { trigger: 'General greeting', response: 'Friendly welcome message with quick action buttons', priority: 'low', active: true },
+                    { trigger: 'Complaint/negative feedback', response: 'Acknowledge, apologize, and escalate to human agent', priority: 'critical', active: true },
+                    { trigger: 'Out of stock query', response: 'Suggest alternatives and offer restock notification', priority: 'medium', active: false },
+                  ].map((rule, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-sm">{rule.trigger}</p>
+                          <Badge variant="outline" className={`text-[10px] ${rule.priority === 'critical' ? 'text-rose-600 border-rose-500/30' : rule.priority === 'high' ? 'text-orange-600 border-orange-500/30' : rule.priority === 'medium' ? 'text-amber-600 border-amber-500/30' : 'text-blue-600 border-blue-500/30'}`}>{rule.priority}</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{rule.response}</p>
+                      </div>
+                      <Switch defaultChecked={rule.active} />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Knowledge Base Tab */}
+        <TabsContent value="knowledge" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><FolderOpen className="w-5 h-5 text-primary" />AI Knowledge Base</CardTitle>
+              <CardDescription>Manage what your AI knows. Add missing topics so it can handle more queries automatically.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="bg-muted/30"><CardContent className="pt-4 pb-3 text-center"><p className="text-2xl font-bold">24</p><p className="text-xs text-muted-foreground">Topics Covered</p></CardContent></Card>
+                <Card className="bg-muted/30"><CardContent className="pt-4 pb-3 text-center"><p className="text-2xl font-bold text-rose-600">7</p><p className="text-xs text-muted-foreground">Missing Topics</p></CardContent></Card>
+                <Card className="bg-muted/30"><CardContent className="pt-4 pb-3 text-center"><p className="text-2xl font-bold text-emerald-600">89%</p><p className="text-xs text-muted-foreground">Coverage Rate</p></CardContent></Card>
+                <Card className="bg-muted/30"><CardContent className="pt-4 pb-3 text-center"><p className="text-2xl font-bold text-amber-600">156</p><p className="text-xs text-muted-foreground">Unanswered Queries</p></CardContent></Card>
+              </div>
+
+              <Card className="border-rose-500/20 bg-rose-500/5">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-rose-500" />Missing Knowledge Topics</CardTitle>
+                  <CardDescription>These topics were asked by customers but AI couldn't answer. Add knowledge to improve coverage.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {[
+                    { topic: 'COD availability per pincode', queries: 34, lastAsked: '2 hours ago', suggested: 'Add pincode-wise COD rules from shipping partner data' },
+                    { topic: 'GST invoice download process', queries: 28, lastAsked: '5 hours ago', suggested: 'Document invoice generation workflow with download links' },
+                    { topic: 'Bulk discount pricing tiers', queries: 23, lastAsked: '1 day ago', suggested: 'Create tiered pricing rules (10+ units: 5%, 50+: 10%, 100+: 15%)' },
+                    { topic: 'International shipping availability', queries: 19, lastAsked: '1 day ago', suggested: 'Define supported countries and shipping costs' },
+                    { topic: 'Product customization options', queries: 15, lastAsked: '2 days ago', suggested: 'List customizable products with options and pricing' },
+                    { topic: 'Warranty claim process', queries: 12, lastAsked: '3 days ago', suggested: 'Document warranty periods by category and claim procedure' },
+                    { topic: 'Franchise/reseller program', queries: 8, lastAsked: '1 week ago', suggested: 'Create FAQ about partnership opportunities' },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-start justify-between p-3 rounded-lg bg-background border border-border/50">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-sm">{item.topic}</p>
+                          <Badge variant="secondary" className="text-xs">{item.queries} queries</Badge>
+                          <span className="text-xs text-muted-foreground">{item.lastAsked}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">💡 Suggestion: {item.suggested}</p>
+                      </div>
+                      <Button variant="outline" size="sm" className="shrink-0 ml-2 gap-1"><Plus className="w-3 h-3" />Add</Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader><CardTitle className="text-base">Existing Knowledge Base</CardTitle></CardHeader>
+                <CardContent className="space-y-2">
+                  {[
+                    { topic: 'Order tracking & status', docs: 5, lastUpdated: '1 day ago', confidence: 96 },
+                    { topic: 'Return & refund policy', docs: 3, lastUpdated: '3 days ago', confidence: 94 },
+                    { topic: 'Product specifications', docs: 12, lastUpdated: '1 week ago', confidence: 91 },
+                    { topic: 'Payment methods & issues', docs: 4, lastUpdated: '2 days ago', confidence: 93 },
+                    { topic: 'Shipping timelines & partners', docs: 6, lastUpdated: '5 days ago', confidence: 88 },
+                    { topic: 'Account management', docs: 3, lastUpdated: '1 week ago', confidence: 85 },
+                    { topic: 'Promotional offers & coupons', docs: 4, lastUpdated: '2 days ago', confidence: 90 },
+                    { topic: 'Size guide & measurements', docs: 2, lastUpdated: '1 week ago', confidence: 82 },
+                  ].map((kb, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                      <div className="flex items-center gap-3">
+                        <FolderOpen className="w-4 h-4 text-primary" />
+                        <div>
+                          <p className="font-medium text-sm">{kb.topic}</p>
+                          <p className="text-xs text-muted-foreground">{kb.docs} documents · Updated {kb.lastUpdated}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Progress value={kb.confidence} className="w-16 h-2" />
+                        <span className="text-xs font-medium w-8">{kb.confidence}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
           <Card>
