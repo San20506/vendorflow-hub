@@ -67,11 +67,11 @@ export default function TechnicalDocs() {
 
       <Tabs defaultValue="architecture" className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="architecture">Architecture</TabsTrigger>
-          <TabsTrigger value="modules">Modules</TabsTrigger>
-          <TabsTrigger value="database">Database</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="api">API Reference</TabsTrigger>
+          <TabsTrigger value="architecture" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Architecture</TabsTrigger>
+          <TabsTrigger value="modules" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Modules</TabsTrigger>
+          <TabsTrigger value="database" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Database</TabsTrigger>
+          <TabsTrigger value="security" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Security</TabsTrigger>
+          <TabsTrigger value="api" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">API Reference</TabsTrigger>
         </TabsList>
 
         {/* Architecture */}
