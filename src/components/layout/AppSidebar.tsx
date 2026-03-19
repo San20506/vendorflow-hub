@@ -163,6 +163,7 @@ const navigationSections: NavSection[] = [
         items: [
           { title: 'Data Import', url: '/data-import', icon: Upload, roles: ['admin', 'operations'] },
           { title: 'Integrations', url: '/integrations', icon: Link2, roles: ['admin', 'vendor'] },
+          { title: 'Storage & Drive', url: '/storage', icon: HardDrive, roles: ['admin', 'vendor', 'operations'] },
           { title: 'Video Management', url: '/video-management', icon: Camera, roles: ['admin', 'operations'] },
         ],
       },
