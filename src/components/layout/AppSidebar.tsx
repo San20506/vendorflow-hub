@@ -59,6 +59,8 @@ import {
   Scissors,
   Calculator,
   ArrowUpDown,
+  MapPin,
+  StarIcon,
 } from 'lucide-react';
 
 interface NavItem {
