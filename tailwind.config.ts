@@ -73,13 +73,11 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Portal Brand Colors
         amazon: "hsl(var(--amazon))",
         flipkart: "hsl(var(--flipkart))",
         meesho: "hsl(var(--meesho))",
         firstcry: "hsl(var(--firstcry))",
         blinkit: "hsl(var(--blinkit))",
-        // Chart Colors
         chart: {
           1: "hsl(var(--chart-1))",
           2: "hsl(var(--chart-2))",
@@ -92,12 +90,17 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "calc(var(--radius) + 4px)",
+        "2xl": "calc(var(--radius) + 8px)",
       },
       boxShadow: {
         'sm': 'var(--shadow-sm)',
         'md': 'var(--shadow-md)',
         'lg': 'var(--shadow-lg)',
         'xl': 'var(--shadow-xl)',
+        'glow': 'var(--shadow-glow)',
+        'glow-strong': 'var(--shadow-glow-strong)',
+        'inner-glass': 'var(--shadow-inner-glass)',
       },
       keyframes: {
         "accordion-down": {
@@ -109,11 +112,11 @@ export default {
           to: { height: "0" },
         },
         "fade-in": {
-          from: { opacity: "0" },
-          to: { opacity: "1" },
+          from: { opacity: "0", transform: "scale(0.97)" },
+          to: { opacity: "1", transform: "scale(1)" },
         },
         "slide-up": {
-          from: { opacity: "0", transform: "translateY(10px)" },
+          from: { opacity: "0", transform: "translateY(16px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
         "slide-in-right": {
@@ -124,14 +127,19 @@ export default {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.7" },
         },
+        "glow-pulse": {
+          "0%, 100%": { boxShadow: "0 0 12px rgba(197,157,217,0.2)" },
+          "50%": { boxShadow: "0 0 24px rgba(197,157,217,0.5)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.3s ease-out",
-        "slide-up": "slide-up 0.3s ease-out",
-        "slide-in-right": "slide-in-right 0.3s ease-out",
+        "fade-in": "fade-in 0.4s cubic-bezier(0.22,1,0.36,1)",
+        "slide-up": "slide-up 0.5s cubic-bezier(0.22,1,0.36,1)",
+        "slide-in-right": "slide-in-right 0.4s cubic-bezier(0.22,1,0.36,1)",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
+        "glow-pulse": "glow-pulse 3s ease-in-out infinite",
       },
     },
   },
