@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { GlobalDateFilter, DateRange } from '@/components/GlobalDateFilter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
   Building2, Plus, FileText, CheckCircle2, Clock, XCircle, Upload, Eye,
   AlertCircle, Shield, Users, ClipboardList, Download, FileSpreadsheet,
-  Search, Bell, History, ToggleLeft,
+  Search, Bell, History, ToggleLeft, ArrowUpDown, ArrowUp, ArrowDown,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, differenceInDays } from 'date-fns';
@@ -100,15 +101,45 @@ export default function BusinessOnboarding() {
   const [subFilter, setSubFilter] = useState('all');
   const [showChangeLog, setShowChangeLog] = useState<OnboardingRequest | null>(null);
   const [confirmAction, setConfirmAction] = useState<{ id: string; action: 'approved' | 'rejected' } | null>(null);
+  const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
+  const [sortKey, setSortKey] = useState<string>('submittedAt');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
-  const filtered = useMemo(() => requests.filter(r => {
-    const matchSearch = r.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.contactPerson.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.id.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchStatus = statusFilter === 'all' || r.status === statusFilter;
-    const matchSub = subFilter === 'all' || r.subscriptionStatus === subFilter;
-    return matchSearch && matchStatus && matchSub;
-  }), [requests, searchQuery, statusFilter, subFilter]);
+  const toggleSort = (key: string) => {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  };
+
+  const SortIcon = ({ col }: { col: string }) => {
+    if (sortKey !== col) return <ArrowUpDown className="w-3 h-3 ml-1 inline opacity-40" />;
+    return sortDir === 'asc' ? <ArrowUp className="w-3 h-3 ml-1 inline text-primary" /> : <ArrowDown className="w-3 h-3 ml-1 inline text-primary" />;
+  };
+
+  const filtered = useMemo(() => {
+    let data = requests.filter(r => {
+      const matchSearch = r.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.contactPerson.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.id.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchStatus = statusFilter === 'all' || r.status === statusFilter;
+      const matchSub = subFilter === 'all' || r.subscriptionStatus === subFilter;
+      let matchDate = true;
+      if (dateRange.from && dateRange.to) {
+        const d = new Date(r.submittedAt);
+        matchDate = d >= dateRange.from && d <= dateRange.to;
+      }
+      return matchSearch && matchStatus && matchSub && matchDate;
+    });
+    data.sort((a, b) => {
+      const va = (a as any)[sortKey];
+      const vb = (b as any)[sortKey];
+      if (va == null && vb == null) return 0;
+      if (va == null) return 1;
+      if (vb == null) return -1;
+      const cmp = typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb));
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return data;
+  }, [requests, searchQuery, statusFilter, subFilter, dateRange, sortKey, sortDir]);
 
   const stats = {
     total: requests.length,
@@ -195,15 +226,7 @@ export default function BusinessOnboarding() {
                 {Object.entries(subStatusConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Select defaultValue="date_desc">
-              <SelectTrigger className="w-[150px]"><SelectValue placeholder="Sort By" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="date_desc">Newest First</SelectItem>
-                <SelectItem value="date_asc">Oldest First</SelectItem>
-                <SelectItem value="company_asc">Company A-Z</SelectItem>
-                <SelectItem value="expiry_asc">Expiry Soonest</SelectItem>
-              </SelectContent>
-            </Select>
+            <GlobalDateFilter value={dateRange} onChange={setDateRange} />
           </div>
 
           <Card>
@@ -211,12 +234,12 @@ export default function BusinessOnboarding() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/50">
-                    <TableHead className="font-semibold">ID</TableHead>
-                    <TableHead className="font-semibold">Company</TableHead>
-                    <TableHead className="font-semibold">Contact</TableHead>
-                    <TableHead className="font-semibold">Status</TableHead>
-                    <TableHead className="font-semibold">Subscription</TableHead>
-                    <TableHead className="font-semibold">Expiry</TableHead>
+                    <TableHead className="font-semibold cursor-pointer select-none" onClick={() => toggleSort('id')}>ID<SortIcon col="id" /></TableHead>
+                    <TableHead className="font-semibold cursor-pointer select-none" onClick={() => toggleSort('companyName')}>Company<SortIcon col="companyName" /></TableHead>
+                    <TableHead className="font-semibold cursor-pointer select-none" onClick={() => toggleSort('contactPerson')}>Contact<SortIcon col="contactPerson" /></TableHead>
+                    <TableHead className="font-semibold cursor-pointer select-none" onClick={() => toggleSort('status')}>Status<SortIcon col="status" /></TableHead>
+                    <TableHead className="font-semibold cursor-pointer select-none" onClick={() => toggleSort('subscriptionStatus')}>Subscription<SortIcon col="subscriptionStatus" /></TableHead>
+                    <TableHead className="font-semibold cursor-pointer select-none" onClick={() => toggleSort('subscriptionExpiry')}>Expiry<SortIcon col="subscriptionExpiry" /></TableHead>
                     <TableHead className="font-semibold">Access</TableHead>
                     <TableHead className="font-semibold">Actions</TableHead>
                   </TableRow>
