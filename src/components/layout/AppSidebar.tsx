@@ -63,6 +63,8 @@ import {
   StarIcon,
   Mail,
   Video,
+  HardDrive,
+  GraduationCap,
 } from 'lucide-react';
 
 interface NavItem {
