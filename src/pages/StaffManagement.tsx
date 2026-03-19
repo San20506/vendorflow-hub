@@ -40,6 +40,39 @@ export default function StaffManagement() {
   const [newLeave, setNewLeave] = useState({ employee_id: '', type: 'leave', leave_type: 'casual', start_date: '', end_date: '', reason: '', permission_from: '', permission_to: '' });
   const [manualAttendance, setManualAttendance] = useState({ employee_id: '', check_in: '', check_out: '', method: 'manual', status: 'present' });
   const [attendanceDateFilter, setAttendanceDateFilter] = useState('');
+  const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
+  const [sortConfig, setSortConfig] = useState<{ key: string; dir: 'asc' | 'desc' } | null>(null);
+
+  const toggleSort = (key: string) => {
+    setSortConfig(prev => {
+      if (prev?.key === key) return prev.dir === 'asc' ? { key, dir: 'desc' } : null;
+      return { key, dir: 'asc' };
+    });
+  };
+
+  const SortIcon = ({ col }: { col: string }) => {
+    if (sortConfig?.key !== col) return <ArrowUpDown className="w-3 h-3 ml-1 inline opacity-40" />;
+    return sortConfig.dir === 'asc' ? <ArrowUp className="w-3 h-3 ml-1 inline text-primary" /> : <ArrowDown className="w-3 h-3 ml-1 inline text-primary" />;
+  };
+
+  const sortData = <T extends Record<string, any>>(data: T[], key?: string): T[] => {
+    if (!sortConfig || (key && sortConfig.key.split('.')[0] !== key)) return data;
+    const k = sortConfig.key.includes('.') ? sortConfig.key.split('.').pop()! : sortConfig.key;
+    return [...data].sort((a, b) => {
+      const va = a[k], vb = b[k];
+      if (va == null && vb == null) return 0;
+      if (va == null) return 1;
+      if (vb == null) return -1;
+      const cmp = typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb));
+      return sortConfig.dir === 'asc' ? cmp : -cmp;
+    });
+  };
+
+  const inRange = (dateStr: string) => {
+    if (!dateRange.from || !dateRange.to) return true;
+    const d = new Date(dateStr);
+    return d >= dateRange.from && d <= dateRange.to;
+  };
 
   const fetchData = async () => {
     try {
