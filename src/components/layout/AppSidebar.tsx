@@ -209,14 +209,39 @@ export function AppSidebar() {
   const [isEditingBrand, setIsEditingBrand] = useState(false);
   const [brandName, setBrandName] = useState('VendorFlow');
   const [brandSubtitle, setBrandSubtitle] = useState('v1.0 • VMS Platform');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  const filteredSections = navigationSections.map(section => ({
+  const roleFilteredSections = navigationSections.map(section => ({
     ...section,
     groups: section.groups.map(group => ({
       ...group,
       items: group.items.filter(item => user && item.roles.includes(user.role)),
     })).filter(group => group.items.length > 0),
   })).filter(section => section.groups.length > 0);
+
+  const allItems = useMemo(() =>
+    roleFilteredSections.flatMap(s => s.groups.flatMap(g => g.items)),
+    [roleFilteredSections]
+  );
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return allItems.filter(item => item.title.toLowerCase().includes(q));
+  }, [searchQuery, allItems]);
+
+  const filteredSections = searchQuery.trim()
+    ? roleFilteredSections.map(section => ({
+        ...section,
+        groups: section.groups.map(group => ({
+          ...group,
+          items: group.items.filter(item =>
+            item.title.toLowerCase().includes(searchQuery.toLowerCase())
+          ),
+        })).filter(group => group.items.length > 0),
+      })).filter(section => section.groups.length > 0)
+    : roleFilteredSections;
 
   return (
     <Sidebar className="border-r border-sidebar-border backdrop-blur-xl bg-[hsl(0_0%_100%/0.75)] dark:bg-[hsl(225_25%_6%/0.75)]" collapsible="icon">
