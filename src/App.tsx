@@ -58,6 +58,8 @@ import ReviewRatingAnalytics from "./pages/ReviewRatingAnalytics";
 import GoogleMapsScraper from "./pages/GoogleMapsScraper";
 import EmailSocialMarketing from "./pages/EmailSocialMarketing";
 import GoogleMeetIntegration from "./pages/GoogleMeetIntegration";
+import StorageDashboard from "./pages/StorageDashboard";
+import AILearningUpgrade from "./pages/AILearningUpgrade";
 import DemoLayout from "./pages/demo/DemoLayout";
 import DemoDashboard from "./pages/demo/DemoDashboard";
 import DemoSalesAnalysis from "./pages/demo/DemoSalesAnalysis";
@@ -133,6 +135,8 @@ const App = () => (
             <Route path="/data-intelligence" element={<AppLayout><GoogleMapsScraper /></AppLayout>} />
             <Route path="/email-marketing" element={<AppLayout><EmailSocialMarketing /></AppLayout>} />
             <Route path="/google-meet" element={<AppLayout><GoogleMeetIntegration /></AppLayout>} />
+            <Route path="/storage" element={<AppLayout><StorageDashboard /></AppLayout>} />
+            <Route path="/ai-learning" element={<AppLayout><AILearningUpgrade /></AppLayout>} />
             {/* Demo Routes */}
             <Route path="/demo" element={<DemoLayout><DemoDashboard /></DemoLayout>} />
             <Route path="/demo/sales" element={<DemoLayout><DemoSalesAnalysis /></DemoLayout>} />

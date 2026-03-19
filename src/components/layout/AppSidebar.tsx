@@ -63,6 +63,8 @@ import {
   StarIcon,
   Mail,
   Video,
+  HardDrive,
+  GraduationCap,
 } from 'lucide-react';
 
 interface NavItem {
@@ -161,6 +163,7 @@ const navigationSections: NavSection[] = [
         items: [
           { title: 'Data Import', url: '/data-import', icon: Upload, roles: ['admin', 'operations'] },
           { title: 'Integrations', url: '/integrations', icon: Link2, roles: ['admin', 'vendor'] },
+          { title: 'Storage & Drive', url: '/storage', icon: HardDrive, roles: ['admin', 'vendor', 'operations'] },
           { title: 'Video Management', url: '/video-management', icon: Camera, roles: ['admin', 'operations'] },
         ],
       },
@@ -185,6 +188,7 @@ const navigationSections: NavSection[] = [
           { title: 'Legal & Compliance', url: '/legal-compliance', icon: Gavel, roles: ['admin'] },
           { title: 'Subscription', url: '/subscription', icon: Crown, roles: ['admin'] },
           { title: 'AI Hub', url: '/chatbot', icon: MessageSquare, roles: ['admin'] },
+          { title: 'AI Learning', url: '/ai-learning', icon: GraduationCap, roles: ['admin', 'vendor'] },
           { title: 'Support', url: '/support', icon: LifeBuoy, roles: ['admin', 'vendor', 'operations'] },
           { title: 'Technical Docs', url: '/technical-docs', icon: FileText, roles: ['admin'] },
         ],
