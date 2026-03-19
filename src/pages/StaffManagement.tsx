@@ -198,7 +198,7 @@ export default function StaffManagement() {
     return map[status] || '';
   };
 
-  const filteredAttendance = networkOnly ? attendance.filter(a => a.network === 'office_wifi') : attendance;
+  const filteredAttendance = (networkOnly ? attendance.filter(a => a.network === 'office_wifi') : attendance).filter(a => inRange(a.attendance_date));
 
   if (loading) return <div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>;
 
