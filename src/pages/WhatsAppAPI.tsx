@@ -124,10 +124,10 @@ export default function WhatsAppAPI() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card><CardContent className="pt-5 pb-4"><p className="text-xl font-bold">5</p><p className="text-xs text-muted-foreground">Messages Sent</p></CardContent></Card>
-        <Card><CardContent className="pt-5 pb-4"><p className="text-xl font-bold text-amber-600">3</p><p className="text-xs text-muted-foreground">Delivered</p></CardContent></Card>
-        <Card><CardContent className="pt-5 pb-4"><p className="text-xl font-bold text-emerald-600">2</p><p className="text-xs text-muted-foreground">Read</p></CardContent></Card>
-        <Card><CardContent className="pt-5 pb-4"><p className="text-xl font-bold text-rose-600">1</p><p className="text-xs text-muted-foreground">Failed</p></CardContent></Card>
+        <Card><CardContent className="pt-5 pb-4"><p className="text-xl font-bold">{current.messagesSent}</p><p className="text-xs text-muted-foreground">Messages Sent</p></CardContent></Card>
+        <Card><CardContent className="pt-5 pb-4"><p className="text-xl font-bold text-amber-600">{current.delivered}</p><p className="text-xs text-muted-foreground">Delivered</p></CardContent></Card>
+        <Card><CardContent className="pt-5 pb-4"><p className="text-xl font-bold text-emerald-600">{current.read}</p><p className="text-xs text-muted-foreground">Read</p></CardContent></Card>
+        <Card><CardContent className="pt-5 pb-4"><p className="text-xl font-bold text-rose-600">{current.failed}</p><p className="text-xs text-muted-foreground">Failed</p></CardContent></Card>
         <Card><CardContent className="pt-5 pb-4"><p className="text-xl font-bold text-primary">8</p><p className="text-xs text-muted-foreground">Active Templates</p></CardContent></Card>
       </div>
 
