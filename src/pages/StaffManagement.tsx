@@ -513,7 +513,14 @@ export default function StaffManagement() {
             <CardHeader><CardTitle className="flex items-center gap-2"><IndianRupee className="w-5 h-5" />Salary Summary</CardTitle></CardHeader>
             <CardContent className="p-0">
               <Table>
-                <TableHeader><TableRow className="bg-muted/50"><TableHead>Employee</TableHead><TableHead>Type</TableHead><TableHead>Working Days</TableHead><TableHead>Base</TableHead><TableHead>Deductions</TableHead><TableHead>Calculated</TableHead></TableRow></TableHeader>
+                <TableHeader><TableRow className="bg-muted/50">
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('sal.name')}>Employee<SortIcon col="sal.name" /></TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('sal.type')}>Type<SortIcon col="sal.type" /></TableHead>
+                  <TableHead>Working Days</TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('sal.monthly_salary')}>Base<SortIcon col="sal.monthly_salary" /></TableHead>
+                  <TableHead>Deductions</TableHead>
+                  <TableHead>Calculated</TableHead>
+                </TableRow></TableHeader>
                 <TableBody>
                   {employees.filter(e => e.status === 'active').map(emp => {
                     const piecesEarned = tailorWork.filter(t => t.employee_id === emp.id).reduce((s, t) => s + (t.total_earned || 0), 0);
