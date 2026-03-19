@@ -56,6 +56,8 @@ import Broadcast from "./pages/Broadcast";
 import PurchaseManagement from "./pages/PurchaseManagement";
 import ReviewRatingAnalytics from "./pages/ReviewRatingAnalytics";
 import GoogleMapsScraper from "./pages/GoogleMapsScraper";
+import EmailSocialMarketing from "./pages/EmailSocialMarketing";
+import GoogleMeetIntegration from "./pages/GoogleMeetIntegration";
 import DemoLayout from "./pages/demo/DemoLayout";
 import DemoDashboard from "./pages/demo/DemoDashboard";
 import DemoSalesAnalysis from "./pages/demo/DemoSalesAnalysis";
@@ -129,6 +131,8 @@ const App = () => (
             <Route path="/purchase" element={<AppLayout><PurchaseManagement /></AppLayout>} />
             <Route path="/review-analytics" element={<AppLayout><ReviewRatingAnalytics /></AppLayout>} />
             <Route path="/data-intelligence" element={<AppLayout><GoogleMapsScraper /></AppLayout>} />
+            <Route path="/email-marketing" element={<AppLayout><EmailSocialMarketing /></AppLayout>} />
+            <Route path="/google-meet" element={<AppLayout><GoogleMeetIntegration /></AppLayout>} />
             {/* Demo Routes */}
             <Route path="/demo" element={<DemoLayout><DemoDashboard /></DemoLayout>} />
             <Route path="/demo/sales" element={<DemoLayout><DemoSalesAnalysis /></DemoLayout>} />
