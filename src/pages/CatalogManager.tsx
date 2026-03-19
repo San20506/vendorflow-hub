@@ -119,7 +119,42 @@ export default function CatalogManager() {
   };
 
   const handleExport = (format: 'excel' | 'pdf') => {
-    toast({ title: `Exporting ${format.toUpperCase()}`, description: `Catalog export initiated for ${filteredProducts.length} products.` });
+    const dataToExport = selectedIds.length > 0
+      ? filteredProducts.filter(p => selectedIds.includes(p.id))
+      : filteredProducts;
+
+    if (dataToExport.length === 0) {
+      toast({ title: 'No Data', description: 'No products to export.', variant: 'destructive' });
+      return;
+    }
+
+    const headers = ['Product Name', 'SKU', 'Brand', 'Category', 'HSN Code', 'MRP', 'Base Price', 'GST %', 'Status', 'Portals Enabled'];
+    const rows = dataToExport.map(p => [
+      p.name || '',
+      p.sku || '',
+      p.brand || '',
+      p.category || '',
+      p.hsn_code || '',
+      p.mrp || 0,
+      p.base_price || 0,
+      p.gst_percent || 0,
+      p.status || '',
+      (p.portals_enabled || []).join(', '),
+    ]);
+
+    const csvContent = [headers, ...rows].map(row =>
+      row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+    ).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `product-catalog-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    toast({ title: 'Export Complete', description: `${dataToExport.length} products exported as CSV.` });
   };
 
   const handleGenerateShareLink = () => {
