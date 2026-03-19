@@ -22,7 +22,6 @@ interface AppLayoutProps {
   children: ReactNode;
 }
 
-// Route permission map — which roles can access which routes
 const routePermissions: Record<string, UserRole[]> = {
   '/dashboard': ['admin', 'vendor', 'operations'],
   '/insights': ['admin', 'vendor', 'operations'],
@@ -69,7 +68,11 @@ export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center bg-background"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(160deg, #F2EAF7 0%, #e8d8f0 30%, #f0e6f5 60%, #F2EAF7 100%)' }}>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" />
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
@@ -81,7 +84,6 @@ export function AppLayout({ children }: AppLayoutProps) {
     navigate('/login');
   };
 
-  // Role-based route protection
   const currentPath = location.pathname;
   const allowedRoles = routePermissions[currentPath];
   const hasAccess = !allowedRoles || (user && allowedRoles.includes(user.role));
@@ -95,39 +97,52 @@ export function AppLayout({ children }: AppLayoutProps) {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <SidebarInset className="flex-1 flex flex-col">
-          {/* Top Header */}
-          <header className="h-14 border-b border-border/50 px-4 flex items-center justify-between sticky top-0 z-10 backdrop-blur-xl bg-[hsl(0_0%_100%/0.7)] dark:bg-[hsl(225_25%_6%/0.7)]">
+          {/* Top Header – Liquid Glass */}
+          <header
+            className="h-14 px-4 flex items-center justify-between sticky top-0 z-10 rounded-none"
+            style={{
+              background: 'var(--glass-bg-strong)',
+              backdropFilter: 'blur(40px)',
+              WebkitBackdropFilter: 'blur(40px)',
+              borderBottom: '1px solid var(--glass-border)',
+              boxShadow: 'var(--shadow-sm)',
+            }}
+          >
             <div className="flex items-center gap-4 flex-1">
-              <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+              <SidebarTrigger className="text-muted-foreground hover:text-foreground transition-colors" />
               
-              {/* Search — centered */}
               <div className="hidden md:flex items-center flex-1 justify-center">
                 <div className="relative w-full max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input 
                     placeholder="Search orders, products, vendors..." 
-                    className="w-full pl-9 bg-background"
+                    className="w-full pl-10 rounded-full"
                   />
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Last Synced */}
               <span className="text-xs text-muted-foreground hidden lg:block">
                 {syncLabel}
               </span>
 
-              {/* Mobile Ready Badge */}
-              <Badge variant="outline" className="gap-1 text-xs bg-primary/10 text-primary border-primary/30 hidden lg:flex">
+              <Badge
+                variant="outline"
+                className="gap-1 text-xs hidden lg:flex rounded-full px-3"
+                style={{
+                  background: 'var(--glass-bg-medium)',
+                  backdropFilter: 'blur(16px)',
+                  border: '1px solid var(--glass-border)',
+                  color: 'hsl(var(--accent))',
+                }}
+              >
                 <Smartphone className="w-3 h-3" />
-                Mobile Ready – Responsive & PWA
+                Mobile Ready – PWA
               </Badge>
 
-              {/* AI Access Control */}
               <AIAccessControl />
 
-              {/* Notifications */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative">
@@ -137,32 +152,41 @@ export function AppLayout({ children }: AppLayoutProps) {
                     </Badge>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-80">
-                  <div className="px-3 py-2 border-b border-border">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-80 rounded-2xl p-0 overflow-hidden"
+                  style={{
+                    background: 'var(--glass-bg-strong)',
+                    backdropFilter: 'blur(40px)',
+                    border: '1px solid var(--glass-border-strong)',
+                    boxShadow: 'var(--shadow-xl), var(--shadow-glow)',
+                  }}
+                >
+                  <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--glass-border)' }}>
                     <h4 className="font-semibold text-sm">Notifications</h4>
                   </div>
-                  <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
+                  <DropdownMenuItem className="flex flex-col items-start gap-1 p-4">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-destructive" />
                       <span className="font-medium text-sm">Critical Low Stock</span>
                     </div>
                     <span className="text-xs text-muted-foreground">Bluetooth Speaker - 5 units left</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
+                  <DropdownMenuItem className="flex flex-col items-start gap-1 p-4">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-warning" />
                       <span className="font-medium text-sm">Settlement Delayed</span>
                     </div>
                     <span className="text-xs text-muted-foreground">FirstCry payment overdue by 7 days</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
+                  <DropdownMenuItem className="flex flex-col items-start gap-1 p-4">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-info" />
                       <span className="font-medium text-sm">New Return Request</span>
                     </div>
                     <span className="text-xs text-muted-foreground">Order ORD-2024-002 return initiated</span>
                   </DropdownMenuItem>
-                  <div className="p-2 border-t border-border">
+                  <div className="p-2" style={{ borderTop: '1px solid var(--glass-border)' }}>
                     <Button variant="ghost" className="w-full text-sm">
                       View all notifications
                     </Button>
@@ -170,13 +194,21 @@ export function AppLayout({ children }: AppLayoutProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* User Profile Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-accent transition-colors">
+                  <button
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-xl transition-all duration-200 hover:scale-[1.02]"
+                    style={{
+                      background: 'var(--glass-bg)',
+                      border: '1px solid var(--glass-border)',
+                    }}
+                  >
                     <Avatar className="w-8 h-8">
                       <AvatarImage src={user?.avatar} alt={user?.name} />
-                      <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                      <AvatarFallback
+                        className="text-xs font-semibold text-white"
+                        style={{ background: 'linear-gradient(135deg, #C59DD9, #7A3F91)' }}
+                      >
                         {user?.name?.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
@@ -186,7 +218,16 @@ export function AppLayout({ children }: AppLayoutProps) {
                     </div>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 rounded-2xl"
+                  style={{
+                    background: 'var(--glass-bg-strong)',
+                    backdropFilter: 'blur(40px)',
+                    border: '1px solid var(--glass-border-strong)',
+                    boxShadow: 'var(--shadow-xl), var(--shadow-glow)',
+                  }}
+                >
                   <div className="px-2 py-1.5">
                     <p className="text-sm font-medium">{user?.name}</p>
                     <p className="text-xs text-muted-foreground">{user?.email}</p>
@@ -210,14 +251,12 @@ export function AppLayout({ children }: AppLayoutProps) {
             </div>
           </header>
 
-          {/* AI Banner */}
           <AIAccessBanner />
 
-          {/* Main Content */}
-          <main className="flex-1 p-6 overflow-auto bg-background">
+          <main className="flex-1 p-6 overflow-auto">
             {!hasAccess ? (
               <div className="flex items-center justify-center min-h-[60vh]">
-                <Alert variant="destructive" className="max-w-md">
+                <Alert variant="destructive" className="max-w-md rounded-2xl">
                   <ShieldAlert className="h-5 w-5" />
                   <AlertTitle>Access Restricted</AlertTitle>
                   <AlertDescription>

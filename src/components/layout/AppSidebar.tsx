@@ -20,53 +20,12 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import {
-  LayoutDashboard,
-  Package,
-  ShoppingCart,
-  BoxIcon,
-  RotateCcw,
-  CreditCard,
-  Users,
-  Bell,
-  BarChart3,
-  ListTodo,
-  Globe,
-  MessageSquare,
-  ChevronDown,
-  Search,
-  X,
-  Warehouse,
-  Settings,
-  Activity,
-  FileSpreadsheet,
-  Link2,
-  Scale,
-  Upload,
-  Share2,
-  Crown,
-  LifeBuoy,
-  Shield,
-  FileText,
-  IndianRupee,
-  Receipt,
-  Code,
-  Camera,
-  Gavel,
-  UserPlus,
-  MessageCircle,
-  Building2,
-  Contact,
-  PieChart,
-  Megaphone,
-  Wallet,
-  Scissors,
-  Calculator,
-  ArrowUpDown,
-  MapPin,
-  StarIcon,
-  Mail,
-  Video,
-  HardDrive,
+  LayoutDashboard, Package, ShoppingCart, BoxIcon, RotateCcw, CreditCard, Users,
+  Bell, BarChart3, ListTodo, Globe, MessageSquare, ChevronDown, Search, X,
+  Warehouse, Settings, Activity, FileSpreadsheet, Link2, Scale, Upload, Share2,
+  Crown, LifeBuoy, Shield, FileText, IndianRupee, Receipt, Code, Camera, Gavel,
+  UserPlus, MessageCircle, Building2, Contact, PieChart, Megaphone, Wallet,
+  Scissors, Calculator, ArrowUpDown, MapPin, StarIcon, Mail, Video, HardDrive,
   GraduationCap,
 } from 'lucide-react';
 
@@ -244,21 +203,35 @@ export function AppSidebar() {
     : roleFilteredSections;
 
   return (
-    <Sidebar className="border-r border-sidebar-border backdrop-blur-xl bg-[hsl(0_0%_100%/0.75)] dark:bg-[hsl(225_25%_6%/0.75)]" collapsible="icon">
-      <SidebarHeader className="p-4 border-b border-sidebar-border">
+    <Sidebar
+      className="border-r"
+      style={{
+        background: 'linear-gradient(180deg, rgba(43,13,62,0.95) 0%, rgba(43,13,62,0.98) 100%)',
+        backdropFilter: 'blur(40px)',
+        WebkitBackdropFilter: 'blur(40px)',
+        borderColor: 'rgba(197, 157, 217, 0.12)',
+      }}
+      collapsible="icon"
+    >
+      <SidebarHeader className="p-4" style={{ borderBottom: '1px solid rgba(197, 157, 217, 0.12)' }}>
         <div className="flex items-center gap-3">
           <button
             onClick={() => !isCollapsed && setIsEditingBrand(!isEditingBrand)}
-            className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
+            className="flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 hover:scale-105 cursor-pointer"
             title="Click to edit branding"
+            style={{
+              background: 'linear-gradient(135deg, #C59DD9 0%, #7A3F91 100%)',
+              boxShadow: '0 0 16px rgba(197, 157, 217, 0.4)',
+            }}
           >
-            <Package className="w-5 h-5 text-primary-foreground" />
+            <Package className="w-5 h-5 text-white" />
           </button>
           {!isCollapsed && (
             isEditingBrand ? (
               <div className="flex flex-col gap-1">
                 <input
-                  className="bg-accent text-foreground text-sm font-semibold rounded-lg px-1.5 py-0.5 border border-border w-[120px]"
+                  className="text-sm font-semibold rounded-lg px-1.5 py-0.5 w-[120px]"
+                  style={{ background: 'rgba(197,157,217,0.15)', color: 'white', border: '1px solid rgba(197,157,217,0.3)' }}
                   value={brandName}
                   onChange={(e) => setBrandName(e.target.value)}
                   onBlur={() => setIsEditingBrand(false)}
@@ -266,7 +239,8 @@ export function AppSidebar() {
                   autoFocus
                 />
                 <input
-                  className="bg-accent text-muted-foreground text-[10px] rounded-lg px-1.5 py-0.5 border border-border w-[120px]"
+                  className="text-[10px] rounded-lg px-1.5 py-0.5 w-[120px]"
+                  style={{ background: 'rgba(197,157,217,0.1)', color: 'rgba(197,157,217,0.7)', border: '1px solid rgba(197,157,217,0.2)' }}
                   value={brandSubtitle}
                   onChange={(e) => setBrandSubtitle(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && setIsEditingBrand(false)}
@@ -274,8 +248,8 @@ export function AppSidebar() {
               </div>
             ) : (
               <div className="flex flex-col cursor-pointer" onClick={() => setIsEditingBrand(true)} title="Click to edit">
-                <span className="font-bold text-sidebar-foreground">{brandName}</span>
-                <span className="text-xs text-muted-foreground">{brandSubtitle}</span>
+                <span className="font-bold text-white">{brandName}</span>
+                <span className="text-xs" style={{ color: 'rgba(197, 157, 217, 0.7)' }}>{brandSubtitle}</span>
               </div>
             )
           )}
@@ -284,36 +258,53 @@ export function AppSidebar() {
 
       {/* Search Bar */}
       {!isCollapsed && (
-        <div className="px-3 pb-2 pt-1 border-b border-sidebar-border">
+        <div className="px-3 pb-2 pt-2" style={{ borderBottom: '1px solid rgba(197, 157, 217, 0.08)' }}>
           <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'rgba(197, 157, 217, 0.5)' }} />
+            <input
               placeholder="Search tabs..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="h-8 pl-8 pr-8 text-xs bg-accent/50 border-border/50 focus:bg-background"
               onFocus={() => setIsSearchOpen(true)}
+              className="w-full h-8 pl-8 pr-8 text-xs rounded-xl outline-none transition-all duration-200 focus:ring-1"
+              style={{
+                background: 'rgba(197, 157, 217, 0.08)',
+                border: '1px solid rgba(197, 157, 217, 0.12)',
+                color: 'white',
+                caretColor: '#C59DD9',
+              }}
             />
             {searchQuery && (
               <button
                 onClick={() => { setSearchQuery(''); setIsSearchOpen(false); }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors"
+                style={{ color: 'rgba(197, 157, 217, 0.5)' }}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
           {searchQuery.trim() && searchResults.length > 0 && (
-            <div className="mt-1.5 bg-popover border border-border rounded-lg shadow-lg py-1 max-h-[240px] overflow-y-auto z-50">
+            <div
+              className="mt-1.5 rounded-xl py-1 max-h-[240px] overflow-y-auto z-50"
+              style={{
+                background: 'rgba(43, 13, 62, 0.95)',
+                border: '1px solid rgba(197, 157, 217, 0.15)',
+                boxShadow: 'var(--shadow-lg)',
+              }}
+            >
               {searchResults.map(item => {
                 const isActive = location.pathname === item.url;
                 return (
                   <button
                     key={item.url}
                     onClick={() => { navigate(item.url); setSearchQuery(''); setIsSearchOpen(false); }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-colors ${
-                      isActive ? 'bg-primary/10 text-primary font-medium' : 'text-foreground hover:bg-accent'
-                    }`}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-all duration-200"
+                    style={{
+                      color: isActive ? '#C59DD9' : 'rgba(255,255,255,0.7)',
+                      background: isActive ? 'rgba(197,157,217,0.12)' : 'transparent',
+                      fontWeight: isActive ? 500 : 400,
+                    }}
                   >
                     <item.icon className="w-4 h-4 shrink-0" />
                     <span>{item.title}</span>
@@ -323,7 +314,7 @@ export function AppSidebar() {
             </div>
           )}
           {searchQuery.trim() && searchResults.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center py-2">No tabs found</p>
+            <p className="text-xs text-center py-2" style={{ color: 'rgba(197, 157, 217, 0.4)' }}>No tabs found</p>
           )}
         </div>
       )}
@@ -332,20 +323,25 @@ export function AppSidebar() {
         {filteredSections.map((section, sectionIndex) => (
           <div key={section.heading}>
             {!isCollapsed && (
-              <div className={`px-3 py-2.5 ${sectionIndex > 0 ? 'mt-3 border-t border-sidebar-border pt-4' : ''}`}>
-                <span className="text-[11px] font-bold text-sidebar-foreground uppercase tracking-widest">
+              <div className={`px-3 py-2.5 ${sectionIndex > 0 ? 'mt-3 pt-4' : ''}`}
+                style={sectionIndex > 0 ? { borderTop: '1px solid rgba(197, 157, 217, 0.08)' } : {}}
+              >
+                <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: 'rgba(197, 157, 217, 0.5)' }}>
                   {section.heading}
                 </span>
               </div>
             )}
             {isCollapsed && sectionIndex > 0 && (
-              <div className="my-2 mx-2 border-t border-sidebar-border" />
+              <div className="my-2 mx-2" style={{ borderTop: '1px solid rgba(197, 157, 217, 0.08)' }} />
             )}
             {section.groups.map((group, index) => (
               <Collapsible key={group.label} defaultOpen={sectionIndex === 0 && index < 2} className="group/collapsible">
                 <SidebarGroup className="p-0">
                   {!isCollapsed ? (
-                    <CollapsibleTrigger className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold text-sidebar-foreground/70 uppercase tracking-wider hover:text-sidebar-foreground transition-colors">
+                    <CollapsibleTrigger
+                      className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors"
+                      style={{ color: 'rgba(197, 157, 217, 0.45)' }}
+                    >
                       {group.label}
                       <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-data-[state=closed]/collapsible:rotate-[-90deg]" />
                     </CollapsibleTrigger>
@@ -368,13 +364,15 @@ export function AppSidebar() {
                                     e.preventDefault();
                                     navigate(item.url);
                                   }}
-                                  className={`
-                                    flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
-                                    ${isActive 
-                                      ? 'bg-primary text-primary-foreground font-medium shadow-sm' 
-                                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                                    }
-                                  `}
+                                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200"
+                                  style={isActive ? {
+                                    background: 'linear-gradient(135deg, #C59DD9 0%, #7A3F91 100%)',
+                                    color: 'white',
+                                    fontWeight: 500,
+                                    boxShadow: '0 0 20px rgba(197, 157, 217, 0.3), 0 4px 12px rgba(122, 63, 145, 0.2)',
+                                  } : {
+                                    color: 'rgba(255, 255, 255, 0.55)',
+                                  }}
                                 >
                                   <item.icon className="w-4 h-4 shrink-0" />
                                   {!isCollapsed && <span>{item.title}</span>}

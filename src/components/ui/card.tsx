@@ -6,10 +6,16 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border border-white/50 dark:border-white/10 text-card-foreground shadow-sm backdrop-blur-xl",
+      "rounded-2xl text-card-foreground transition-all duration-300 hover:scale-[1.005]",
       className
     )}
-    style={{ background: 'var(--glass-bg)' }}
+    style={{
+      background: 'var(--glass-bg-card)',
+      backdropFilter: 'blur(40px)',
+      WebkitBackdropFilter: 'blur(40px)',
+      border: '1px solid var(--glass-border-strong)',
+      boxShadow: 'var(--shadow-md), var(--shadow-inner-glass)',
+    }}
     {...props}
   />
 ));
