@@ -434,7 +434,7 @@ export default function StaffManagement() {
                   <TableHead>Actions</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
-                  {leaveRequests.map(lr => (
+                  {sortData(leaveRequests.filter(lr => inRange(lr.start_date)), 'lr').map(lr => (
                     <TableRow key={lr.id}>
                       <TableCell className="font-medium">{empMap[lr.employee_id] || lr.employee_id}</TableCell>
                       <TableCell>
