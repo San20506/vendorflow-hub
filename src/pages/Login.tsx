@@ -135,8 +135,6 @@ export default function Login() {
             animationDelay: '0.15s',
           }}
         >
-          {/* Top gradient bar */}
-          <div style={{ height: '3px', background: 'linear-gradient(135deg, #C59DD9 0%, #7A3F91 50%, #2B0D3E 100%)' }} />
 
           <Tabs defaultValue="login">
             <div className="px-6 pt-6 pb-4">
