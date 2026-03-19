@@ -522,7 +522,7 @@ export default function StaffManagement() {
                   <TableHead>Calculated</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
-                  {employees.filter(e => e.status === 'active').map(emp => {
+                  {sortData(employees.filter(e => e.status === 'active'), 'sal').map(emp => {
                     const piecesEarned = tailorWork.filter(t => t.employee_id === emp.id).reduce((s, t) => s + (t.total_earned || 0), 0);
                     const wd = workingDaysMap[emp.id] || { present: 0, absent: 0, halfDay: 0, late: 0, totalHours: 0 };
                     const baseSalary = emp.type === 'fixed' ? (emp.monthly_salary || 0) : piecesEarned;
