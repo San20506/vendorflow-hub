@@ -288,7 +288,16 @@ export default function StaffManagement() {
             </CardHeader>
             <CardContent className="p-0">
               <Table>
-                <TableHeader><TableRow className="bg-muted/50"><TableHead>Name</TableHead><TableHead>Role</TableHead><TableHead>Department</TableHead><TableHead>Type</TableHead><TableHead>Rate / Salary</TableHead><TableHead>Biometric ID</TableHead><TableHead>Leaves</TableHead><TableHead>Status</TableHead></TableRow></TableHeader>
+                <TableHeader><TableRow className="bg-muted/50">
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('name')}>Name<SortIcon col="name" /></TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('role')}>Role<SortIcon col="role" /></TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('department')}>Department<SortIcon col="department" /></TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('type')}>Type<SortIcon col="type" /></TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('monthly_salary')}>Rate / Salary<SortIcon col="monthly_salary" /></TableHead>
+                  <TableHead>Biometric ID</TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('leaves_used')}>Leaves<SortIcon col="leaves_used" /></TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('status')}>Status<SortIcon col="status" /></TableHead>
+                </TableRow></TableHeader>
                 <TableBody>
                   {employees.map(emp => (
                     <TableRow key={emp.id}>
