@@ -350,7 +350,7 @@ export default function StaffManagement() {
                   <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('att.status')}>Status<SortIcon col="att.status" /></TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
-                  {filteredAttendance.map(att => (
+                  {sortData(filteredAttendance, 'att').map(att => (
                     <TableRow key={att.id}>
                       <TableCell className="font-medium">{empMap[att.employee_id] || att.employee_id}</TableCell>
                       <TableCell>{att.attendance_date}</TableCell>
