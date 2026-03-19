@@ -487,7 +487,7 @@ export default function StaffManagement() {
                   <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('tw.work_date')}>Date<SortIcon col="tw.work_date" /></TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
-                  {tailorWork.map(tw => (
+                  {sortData(tailorWork.filter(tw => inRange(tw.work_date)), 'tw').map(tw => (
                     <TableRow key={tw.id}>
                       <TableCell className="font-medium">{empMap[tw.employee_id] || tw.employee_id}</TableCell>
                       <TableCell>{tw.product_name}</TableCell>
