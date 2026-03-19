@@ -422,7 +422,17 @@ export default function StaffManagement() {
             </CardHeader>
             <CardContent className="p-0">
               <Table>
-                <TableHeader><TableRow className="bg-muted/50"><TableHead>Employee</TableHead><TableHead>Type</TableHead><TableHead>Leave Type</TableHead><TableHead>From</TableHead><TableHead>To</TableHead><TableHead>Time (Permission)</TableHead><TableHead>Reason</TableHead><TableHead>Status</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
+                <TableHeader><TableRow className="bg-muted/50">
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('lr.employee_id')}>Employee<SortIcon col="lr.employee_id" /></TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('lr.type')}>Type<SortIcon col="lr.type" /></TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('lr.leave_type')}>Leave Type<SortIcon col="lr.leave_type" /></TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('lr.start_date')}>From<SortIcon col="lr.start_date" /></TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('lr.end_date')}>To<SortIcon col="lr.end_date" /></TableHead>
+                  <TableHead>Time (Permission)</TableHead>
+                  <TableHead>Reason</TableHead>
+                  <TableHead className="cursor-pointer select-none" onClick={() => toggleSort('lr.status')}>Status<SortIcon col="lr.status" /></TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow></TableHeader>
                 <TableBody>
                   {leaveRequests.map(lr => (
                     <TableRow key={lr.id}>
