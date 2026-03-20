@@ -145,7 +145,7 @@ export default function Analytics() {
       const chSettlements = settlements.filter(s => s.portal === ch);
       const net = chSettlements.reduce((s, st) => s + (Number(st.net_amount) || 0), 0);
       const roi = revenue > 0 ? ((net / revenue) * 100).toFixed(1) : '0';
-      return { name: config?.name || ch, icon: config?.icon || '📦', orders: chOrders.length, revenue, returns: chReturns.length, returnAmt, net, roi };
+      return { id: ch, name: config?.name || ch, icon: config?.icon || '📦', orders: chOrders.length, revenue, returns: chReturns.length, returnAmt, net, roi };
     });
   }, [orders, returns, settlements]);
 
