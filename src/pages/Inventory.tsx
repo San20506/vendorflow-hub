@@ -15,7 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, AlertTriangle, Package, Upload, History, Minus, Plus, RotateCcw, Zap } from 'lucide-react';
+import { Search, AlertTriangle, Package, Upload, History, Minus, Plus, RotateCcw, Zap, Filter, X } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { DateFilter, ExportButton, useRowSelection, SelectAllCheckbox, RowCheckbox, ImportModal } from '@/components/TableEnhancements';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
