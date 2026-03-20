@@ -21,6 +21,15 @@ const DEFAULTS: Record<string, { label: string; value: string }[]> = {
   paid_by: [
     { label: 'Self', value: 'Self' },
   ],
+  brand: [
+    { label: 'Boat', value: 'Boat' },
+    { label: 'Samsung', value: 'Samsung' },
+    { label: 'Nike', value: 'Nike' },
+    { label: 'Puma', value: 'Puma' },
+    { label: 'Mamaearth', value: 'Mamaearth' },
+    { label: 'Sony', value: 'Sony' },
+    { label: 'Apple', value: 'Apple' },
+  ],
 };
 
 export function useDropdownOptions(fieldType: string) {
