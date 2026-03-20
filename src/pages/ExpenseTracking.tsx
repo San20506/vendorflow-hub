@@ -13,7 +13,7 @@ import { expensesDb } from '@/services/database';
 import { useDropdownOptions } from '@/hooks/useDropdownOptions';
 import {
   Plus, Download, Search, IndianRupee, TrendingUp, TrendingDown,
-  Building2, Warehouse, Coffee, Bus, Pencil, Receipt, Calendar, Trash2, Loader2, AlertCircle
+  Building2, Warehouse, Coffee, Bus, Pencil, Receipt, Calendar, Trash2, Loader2, AlertCircle, FileSpreadsheet, FileDown, FileText
 } from 'lucide-react';
 
 const iconMap: Record<string, any> = {
