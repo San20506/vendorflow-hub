@@ -148,7 +148,6 @@ const navigationSections: NavSection[] = [
           { title: 'Legal & Compliance', url: '/legal-compliance', icon: Gavel, roles: ['admin'] },
           { title: 'Subscription', url: '/subscription', icon: Crown, roles: ['admin'] },
           { title: 'AI Hub', url: '/chatbot', icon: MessageSquare, roles: ['admin'] },
-          { title: 'AI Learning', url: '/ai-learning', icon: GraduationCap, roles: ['admin', 'vendor'] },
           { title: 'Support', url: '/support', icon: LifeBuoy, roles: ['admin', 'vendor', 'operations'] },
           { title: 'Technical Docs', url: '/technical-docs', icon: FileText, roles: ['admin'] },
         ],
