@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAIAccess } from '@/contexts/AIAccessContext';
 import { Portal } from '@/types';
@@ -31,6 +32,7 @@ import {
 } from 'recharts';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { criticalDecisionToggle } = useAIAccess();
   const [selectedPortal, setSelectedPortal] = useState<Portal | 'all'>('all');
@@ -395,7 +397,7 @@ export default function Dashboard() {
             <SelectItem value="returns">Sort: Returns</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="outline" size="sm" className="gap-1.5 text-muted-foreground">
+        <Button variant="outline" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => navigate('/system-settings')}>
           <Plus className="w-3.5 h-3.5" />
           Add Channel
         </Button>
