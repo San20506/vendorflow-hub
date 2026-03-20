@@ -397,7 +397,7 @@ export default function Dashboard() {
             <SelectItem value="returns">Sort: Returns</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="outline" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => navigate('/system-settings')}>
+        <Button variant="outline" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => navigate('/channels')}>
           <Plus className="w-3.5 h-3.5" />
           Add Channel
         </Button>
