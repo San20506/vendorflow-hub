@@ -212,15 +212,13 @@ export default function SystemSettings() {
       </div>
 
       <Tabs defaultValue="fields" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="fields" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Field Config</TabsTrigger>
           <TabsTrigger value="dropdowns" className="text-xs sm:text-sm data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">Dropdowns</TabsTrigger>
           <TabsTrigger value="features" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Features</TabsTrigger>
           <TabsTrigger value="financial" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Financial</TabsTrigger>
           <TabsTrigger value="services" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Services</TabsTrigger>
           <TabsTrigger value="import-export" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Import / Export</TabsTrigger>
-          <TabsTrigger value="permissions" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Permissions</TabsTrigger>
-          <TabsTrigger value="integrations" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Integrations</TabsTrigger>
           <TabsTrigger value="audit" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Activity Log</TabsTrigger>
         </TabsList>
 
