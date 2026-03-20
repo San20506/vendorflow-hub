@@ -276,9 +276,9 @@ export default function Products() {
                                     value={newBrandName}
                                     onChange={e => setNewBrandName(e.target.value)}
                                     className="h-8 text-sm"
-                                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); handleAddBrand(); } }}
+                                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); handleAddDropdownItem('brand', newBrandName, setLocalBrands, setNewBrandName, setAddingBrand, 'brand'); } }}
                                   />
-                                  <Button size="sm" className="h-8 text-xs gap-1 shrink-0" onClick={handleAddBrand} disabled={addingBrand || !newBrandName.trim()}>
+                                  <Button size="sm" className="h-8 text-xs gap-1 shrink-0" onClick={() => handleAddDropdownItem('brand', newBrandName, setLocalBrands, setNewBrandName, setAddingBrand, 'brand')} disabled={addingBrand || !newBrandName.trim()}>
                                     <Plus className="w-3 h-3" /> Add
                                   </Button>
                                 </div>
