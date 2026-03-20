@@ -94,8 +94,8 @@ export default function PricePayout() {
     return { totalExpected, totalReceived, totalDiff, mismatches, totalPenalty };
   }, [filteredRecon]);
 
-  const handleExport = () => {
-    toast({ title: 'Export Initiated', description: `Exporting ${activeTab === 'payout' ? 'payout' : 'reconciliation'} data` });
+  const handleExport = (format: 'excel' | 'pdf' | 'txt' = 'excel') => {
+    toast({ title: `${format.toUpperCase()} Export Initiated`, description: `Exporting ${activeTab === 'payout' ? 'payout' : 'reconciliation'} data` });
   };
 
   return (
