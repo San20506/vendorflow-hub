@@ -9,7 +9,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
-import CatalogManager from "./pages/CatalogManager";
+
 import Inventory from "./pages/Inventory";
 import Orders from "./pages/Orders";
 import Returns from "./pages/Returns";
