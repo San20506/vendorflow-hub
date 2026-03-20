@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAIAccess } from '@/contexts/AIAccessContext';
 import { Portal } from '@/types';
 import { portalConfigs } from '@/services/mockData';
 import { ordersDb, inventoryDb, returnsDb, settlementsDb, expensesDb } from '@/services/database';
