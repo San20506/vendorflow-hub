@@ -345,12 +345,22 @@ export default function Products() {
                         </div>
                         <div className="space-y-2">
                           <Label>Size</Label>
-                          <Select defaultValue="free">
+                          <Select defaultValue="free_size">
                             <SelectTrigger><SelectValue placeholder="Select Size" /></SelectTrigger>
                             <SelectContent>
-                              {['M', 'L', 'XL', 'XXL', 'XXXL', '4XL', '5XL', 'Free Size'].map(s => (
-                                <SelectItem key={s} value={s.toLowerCase().replace(' ', '_')}>{s}</SelectItem>
+                              {localSizes.map(s => (
+                                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
                               ))}
+                              <div className="border-t border-border mt-1 pt-1 px-2 pb-1">
+                                <div className="flex items-center gap-2">
+                                  <Input placeholder="New size" value={newSizeName} onChange={e => setNewSizeName(e.target.value)} className="h-8 text-sm"
+                                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); handleAddDropdownItem('size', newSizeName, setLocalSizes, setNewSizeName, setAddingSize); } }}
+                                  />
+                                  <Button size="sm" className="h-8 text-xs gap-1 shrink-0" onClick={() => handleAddDropdownItem('size', newSizeName, setLocalSizes, setNewSizeName, setAddingSize)} disabled={addingSize || !newSizeName.trim()}>
+                                    <Plus className="w-3 h-3" /> Add
+                                  </Button>
+                                </div>
+                              </div>
                             </SelectContent>
                           </Select>
                         </div>
