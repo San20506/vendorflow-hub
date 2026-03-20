@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { portalConfigs } from '@/services/mockData';
 import { ChannelIcon } from '@/components/ChannelIcon';
 import { ProductHealthStatus, Portal } from '@/types';
-import { Activity, CheckCircle2, XCircle, Package, Search, AlertCircle, Loader2, RefreshCw, Clock, Star, MessageSquare, ExternalLink, Link2, Globe } from 'lucide-react';
+import { Activity, CheckCircle2, XCircle, Package, Search, AlertCircle, Loader2, RefreshCw, Clock, Star, MessageSquare, ExternalLink, Link2, Globe, IndianRupee, TrendingUp, TrendingDown, ArrowUpDown } from 'lucide-react';
 import { DateFilter, ExportButton, useRowSelection, SelectAllCheckbox, RowCheckbox } from '@/components/TableEnhancements';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
