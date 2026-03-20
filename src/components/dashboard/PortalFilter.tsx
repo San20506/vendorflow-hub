@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { Portal } from '@/types';
 import { getChannels, subscribeChannels } from '@/services/channelManager';
-import { getChannelLogo } from '@/utils/channelLogos';
+import { ChannelIcon } from '@/components/ChannelIcon';
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
 
@@ -30,30 +30,23 @@ export function PortalFilter({ selectedPortal, onPortalChange, className }: Port
         <span>All Channels</span>
       </button>
       
-      {channels.map((portal) => {
-        const logo = getChannelLogo(portal.id);
-        return (
-          <button
-            key={portal.id}
-            onClick={() => onPortalChange(portal.id)}
-            className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left',
-              selectedPortal === portal.id
-                ? 'bg-primary/10 text-primary'
-                : 'text-muted-foreground hover:bg-muted'
-            )}
-          >
-            {selectedPortal === portal.id && <Check className="w-4 h-4 text-primary" />}
-            {selectedPortal !== portal.id && <span className="w-4" />}
-            {logo ? (
-              <img src={logo} alt={portal.name} className="w-5 h-5 object-contain" />
-            ) : (
-              <span className="text-base">{portal.icon}</span>
-            )}
-            <span>{portal.name}</span>
-          </button>
-        );
-      })}
+      {channels.map((portal) => (
+        <button
+          key={portal.id}
+          onClick={() => onPortalChange(portal.id)}
+          className={cn(
+            'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left',
+            selectedPortal === portal.id
+              ? 'bg-primary/10 text-primary'
+              : 'text-muted-foreground hover:bg-muted'
+          )}
+        >
+          {selectedPortal === portal.id && <Check className="w-4 h-4 text-primary" />}
+          {selectedPortal !== portal.id && <span className="w-4" />}
+          <ChannelIcon channelId={portal.id} fallbackIcon={portal.icon} logoUrl={portal.logoUrl} size={20} />
+          <span>{portal.name}</span>
+        </button>
+      ))}
     </div>
   );
 }

@@ -67,6 +67,7 @@ export interface PortalConfig {
   name: string;
   color: string;
   icon: string;
+  logoUrl?: string;
 }
 
 // Product Types
