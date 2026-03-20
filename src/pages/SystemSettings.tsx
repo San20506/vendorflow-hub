@@ -529,7 +529,12 @@ export default function SystemSettings() {
           </Card>
         </TabsContent>
 
-                  <CardDescription>Security-driven access control — configure feature access per role</CardDescription>
+        {/* TAB — DROPDOWN CONFIG */}
+        <TabsContent value="dropdowns">
+          <DropdownConfigManager />
+        </TabsContent>
+
+        {/* TAB — ACTIVITY LOG */}
                 </div>
                 <div className="flex gap-2">
                   {[
