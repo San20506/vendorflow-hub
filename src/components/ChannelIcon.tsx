@@ -1,4 +1,5 @@
 import { getChannelLogo } from '@/utils/channelLogos';
+import { getChannels } from '@/services/channelManager';
 
 interface ChannelIconProps {
   channelId: string;
@@ -9,9 +10,11 @@ interface ChannelIconProps {
 }
 
 export function ChannelIcon({ channelId, fallbackIcon, logoUrl, className, size = 20 }: ChannelIconProps) {
-  // Priority: 1) explicit logoUrl prop, 2) built-in logo asset, 3) fallback emoji
+  // Priority: 1) explicit logoUrl prop, 2) channel config logoUrl, 3) built-in logo asset, 4) fallback emoji
+  const channelConfig = getChannels().find(c => c.id === channelId);
+  const configLogoUrl = channelConfig?.logoUrl;
   const builtInLogo = getChannelLogo(channelId);
-  const src = logoUrl || builtInLogo;
+  const src = logoUrl || configLogoUrl || builtInLogo;
   
   if (src) {
     return (
