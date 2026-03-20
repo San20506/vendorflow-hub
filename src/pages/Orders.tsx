@@ -402,7 +402,7 @@ export default function Orders() {
         </div>
 
         {/* Processing Dashboard */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-10 gap-3">
           <Card className="bg-card">
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center gap-1">
