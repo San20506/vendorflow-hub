@@ -40,13 +40,7 @@ export interface ClientCategory {
   count: number;
 }
 
-export const CLIENT_CATEGORIES: ClientCategory[] = [
-  { id: 'vip', name: 'VIP Clients', color: 'bg-amber-500', count: 12 },
-  { id: 'wholesale', name: 'Wholesale Buyers', color: 'bg-blue-500', count: 28 },
-  { id: 'retail', name: 'Retail Customers', color: 'bg-emerald-500', count: 145 },
-  { id: 'new', name: 'New Leads', color: 'bg-purple-500', count: 34 },
-  { id: 'inactive', name: 'Inactive', color: 'bg-gray-400', count: 18 },
-];
+export const CLIENT_CATEGORIES: ClientCategory[] = [];
 
 export const SAMPLE_CONTACTS: ClientContact[] = [
   { id: 'C-001', name: 'Vikram Patel', phone: '+91 98765 43210', category: 'vip', tags: ['frequent', 'bulk'], lastMessage: 'Order confirmed' },
