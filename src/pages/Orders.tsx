@@ -470,8 +470,17 @@ export default function Orders() {
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center gap-1">
                 <ArrowDownToLine className="w-5 h-5 text-rose-500" />
-                <p className="text-xl font-bold text-rose-500">{processingStats.customerReturns + processingStats.courierReturns}</p>
-                <p className="text-[11px] text-muted-foreground leading-tight">Returns</p>
+                <p className="text-xl font-bold text-rose-500">{processingStats.customerReturns}</p>
+                <p className="text-[11px] text-muted-foreground leading-tight">Customer Return</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-card border-amber-600/30">
+            <CardContent className="p-3">
+              <div className="flex flex-col items-center text-center gap-1">
+                <Truck className="w-5 h-5 text-amber-600" />
+                <p className="text-xl font-bold text-amber-600">{processingStats.courierReturns}</p>
+                <p className="text-[11px] text-muted-foreground leading-tight">Courier Return</p>
               </div>
             </CardContent>
           </Card>
