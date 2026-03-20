@@ -355,11 +355,11 @@ export default function Dashboard() {
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-blue-500/30 bg-blue-500/5">
               <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
-              <span className="text-xs font-medium text-blue-600">AI Suggestion</span>
+              <span className="text-xs font-medium text-blue-600">AI Access Control</span>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/5">
-              <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
-              <span className="text-xs font-medium text-amber-600">Human Approval</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/5">
+              <ShieldAlert className="w-3.5 h-3.5 text-emerald-500" />
+              <span className="text-xs font-medium text-emerald-600">Human Approval</span>
             </div>
           </div>
           <Badge variant="outline" className="text-xs font-mono">VendorFlow v1.2</Badge>
