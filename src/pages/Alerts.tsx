@@ -244,7 +244,7 @@ export default function Alerts() {
                         <span className="text-xs text-muted-foreground">{formatTime(alert.timestamp)}</span>
                         {portal && (
                           <Badge variant="outline" className="text-xs">
-                            {portal.icon} {portal.name}
+                            <ChannelIcon channelId={portal.id} fallbackIcon={portal.icon} size={16} /> {portal.name}
                           </Badge>
                         )}
                       </div>

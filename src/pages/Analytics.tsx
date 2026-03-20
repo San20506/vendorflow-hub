@@ -228,7 +228,7 @@ export default function Analytics() {
             <SelectContent>
               <SelectItem value="all">All Channels</SelectItem>
               {portalConfigs.map(p => (
-                <SelectItem key={p.id} value={p.id}>{p.icon} {p.name}</SelectItem>
+                <SelectItem key={p.id} value={p.id}><ChannelIcon channelId={p.id} fallbackIcon={p.icon} size={16} /> {p.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -302,7 +302,7 @@ export default function Analytics() {
               <TableBody>
                 {channelPerformance.map(ch => (
                   <TableRow key={ch.name}>
-                    <TableCell className="font-medium">{ch.icon} {ch.name}</TableCell>
+                    <TableCell className="font-medium"><ChannelIcon channelId={ch.id} fallbackIcon={ch.icon} size={16} /> {ch.name}</TableCell>
                     <TableCell className="text-right">{ch.orders}</TableCell>
                     <TableCell className="text-right">₹{(ch.revenue / 1000).toFixed(1)}K</TableCell>
                     <TableCell className="text-right">{ch.returns}</TableCell>
@@ -382,7 +382,7 @@ export default function Analytics() {
               {channelProfitability.map(ch => (
                 <div key={ch.name} className="p-4 rounded-lg border bg-card">
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xl">{ch.icon}</span>
+                    <ChannelIcon channelId={ch.id} fallbackIcon={ch.icon} size={24} />
                     <span className="font-semibold">{ch.name}</span>
                   </div>
                   <div className="space-y-2 text-sm">

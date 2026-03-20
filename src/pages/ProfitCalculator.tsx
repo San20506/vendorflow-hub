@@ -279,7 +279,7 @@ export default function ProfitCalculator() {
                     <SelectContent>
                       {channels.map(ch => (
                         <SelectItem key={ch.id} value={ch.id as string}>
-                          {ch.icon} {ch.name}
+                          <ChannelIcon channelId={ch.id} fallbackIcon={ch.icon} size={16} /> {ch.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -338,7 +338,7 @@ export default function ProfitCalculator() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-lg flex items-center gap-2">
-                      {selectedChannel?.icon} {selectedChannel?.name} Breakdown
+                      <ChannelIcon channelId={selectedChannel?.id || ""} fallbackIcon={selectedChannel?.icon} size={20} /> {selectedChannel?.name} Breakdown
                     </CardTitle>
                     <CardDescription>Per unit profitability analysis</CardDescription>
                   </div>
@@ -508,7 +508,7 @@ export default function ProfitCalculator() {
                     .map(({ portal, result: r }) => (
                     <TableRow key={portal.id} className={r.netProfit >= 0 ? '' : 'bg-destructive/5'}>
                       <TableCell className="font-medium">
-                        <span className="mr-1.5">{portal.icon}</span>
+                        <ChannelIcon channelId={portal.id} fallbackIcon={portal.icon} size={16} />
                         {portal.name}
                       </TableCell>
                       <TableCell className="text-right text-sm">₹{r.commission.toFixed(0)}</TableCell>
@@ -542,7 +542,7 @@ export default function ProfitCalculator() {
                   <div className="mt-4 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                     <div className="flex items-center gap-2 text-sm font-medium text-emerald-600">
                       <CheckCircle2 className="w-4 h-4" />
-                      Best Platform: <span className="font-bold">{best.portal.icon} {best.portal.name}</span> — ₹{best.result.netProfit.toFixed(2)} profit ({best.result.margin.toFixed(1)}% margin)
+                      Best Platform: <span className="font-bold inline-flex items-center gap-1"><ChannelIcon channelId={best.portal.id} fallbackIcon={best.portal.icon} size={16} /> {best.portal.name}</span> — ₹{best.result.netProfit.toFixed(2)} profit ({best.result.margin.toFixed(1)}% margin)
                     </div>
                   </div>
                 );
@@ -592,7 +592,7 @@ export default function ProfitCalculator() {
                       };
                       return (
                         <TableRow key={ch.id}>
-                          <TableCell className="font-medium whitespace-nowrap">{ch.icon} {ch.name}</TableCell>
+                          <TableCell className="font-medium whitespace-nowrap"><ChannelIcon channelId={ch.id} fallbackIcon={ch.icon} size={16} /> {ch.name}</TableCell>
                           <TableCell><Input type="number" className="w-20 mx-auto text-center h-8 text-sm" value={fees.commissionPercent} onChange={e => updateFee('commissionPercent', e.target.value)} /></TableCell>
                           <TableCell><Input type="number" className="w-20 mx-auto text-center h-8 text-sm" value={fees.closingFee} onChange={e => updateFee('closingFee', e.target.value)} /></TableCell>
                           <TableCell><Input type="number" className="w-20 mx-auto text-center h-8 text-sm" value={fees.shippingFee} onChange={e => updateFee('shippingFee', e.target.value)} /></TableCell>

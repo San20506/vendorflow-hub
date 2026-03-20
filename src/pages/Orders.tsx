@@ -535,7 +535,7 @@ export default function Orders() {
             <div className="flex flex-wrap gap-3">
               {Object.entries(portalCutoffs).map(([key, config]) => (
                 <Badge key={key} variant="outline" className="gap-1.5 text-xs px-3 py-1">
-                  {portalConfigs.find(p => p.id === key)?.icon}
+                  <ChannelIcon channelId={key} size={16} />
                   <span className="font-medium">{config.label}:</span>
                   <span className={config.hour === null ? 'text-success' : 'text-foreground'}>{config.description}</span>
                 </Badge>
@@ -633,7 +633,7 @@ export default function Orders() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="gap-1">
-                            {portal?.icon} {portal?.name}
+                            <ChannelIcon channelId={portal?.id || ""} fallbackIcon={portal?.icon} size={16} /> {portal?.name}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -806,7 +806,7 @@ export default function Orders() {
                   <div>
                     <p className="text-sm text-muted-foreground">Portal</p>
                     <Badge variant="outline" className="gap-1 mt-1">
-                      {portalConfigs.find(p => p.id === selectedOrder.portal)?.icon}{' '}
+                      <ChannelIcon channelId={selectedOrder.portal} size={16} />
                       {portalConfigs.find(p => p.id === selectedOrder.portal)?.name}
                     </Badge>
                   </div>

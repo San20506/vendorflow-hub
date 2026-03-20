@@ -159,7 +159,7 @@ export default function PayoutComparison() {
           <CardContent className="pt-4 pb-4">
             <div className="text-xs text-muted-foreground">Best Payout Ratio</div>
             <div className="text-xl font-bold text-primary mt-1">
-              {bestPayout ? `${bestPayout.portal.icon} ${bestPayout.payoutRatio.toFixed(1)}%` : '—'}
+              {bestPayout ? <><ChannelIcon channelId={bestPayout.portal.id} fallbackIcon={bestPayout.portal.icon} size={20} /> {bestPayout.payoutRatio.toFixed(1)}%</> : "—"}
             </div>
           </CardContent>
         </Card>
@@ -201,7 +201,7 @@ export default function PayoutComparison() {
                       .map((d, idx) => (
                       <TableRow key={d.portal.id}>
                         <TableCell className="font-medium whitespace-nowrap">
-                          <span className="mr-1.5">{d.portal.icon}</span>
+                          <ChannelIcon channelId={d.portal.id} fallbackIcon={d.portal.icon} size={16} />
                           {d.portal.name}
                           {idx === 0 && <Badge className="ml-2 text-[10px]" variant="default">Best</Badge>}
                         </TableCell>

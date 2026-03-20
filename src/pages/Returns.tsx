@@ -271,7 +271,7 @@ export default function Returns() {
                         <p className="text-xs text-muted-foreground font-mono">{r.skuId}</p>
                       </div>
                     </TableCell>
-                    <TableCell><Badge variant="outline" className="gap-1">{portal?.icon} {portal?.name}</Badge></TableCell>
+                    <TableCell><Badge variant="outline" className="gap-1"><ChannelIcon channelId={portal?.id || ""} fallbackIcon={portal?.icon} size={16} /> {portal?.name}</Badge></TableCell>
                     {columns.returnType && (
                       <TableCell>
                         <Badge variant="secondary" className={`gap-1 text-xs ${rtConfig.color}`}>

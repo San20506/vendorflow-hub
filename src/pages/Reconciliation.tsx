@@ -114,7 +114,7 @@ export default function Reconciliation() {
             <SelectTrigger className="w-[180px]"><SelectValue placeholder="All Marketplaces" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Marketplaces</SelectItem>
-              {portalConfigs.map(p => (<SelectItem key={p.id} value={p.id}>{p.icon} {p.name}</SelectItem>))}
+              {portalConfigs.map(p => (<SelectItem key={p.id} value={p.id}><ChannelIcon channelId={p.id} fallbackIcon={p.icon} size={16} /> {p.name}</SelectItem>))}
             </SelectContent>
           </Select>
           <ExportButton label={rowSelection.count > 0 ? undefined : `Export – ${dateLabel}`} selectedCount={rowSelection.count} data={filtered} filename="reconciliation" />
@@ -181,7 +181,7 @@ export default function Reconciliation() {
                             <TableCell className="font-mono text-xs">{record.skuId}</TableCell>
                             <TableCell className="font-mono text-xs text-muted-foreground">{record.masterSku}</TableCell>
                             <TableCell className="font-mono text-xs">{record.batchId}</TableCell>
-                            <TableCell><span className="flex items-center gap-1.5 text-sm">{portal?.icon} {portal?.name}</span></TableCell>
+                            <TableCell><span className="flex items-center gap-1.5 text-sm"><ChannelIcon channelId={portal?.id || ""} fallbackIcon={portal?.icon} size={16} /> {portal?.name}</span></TableCell>
                             <TableCell className="text-right font-medium">₹{record.expectedAmount.toLocaleString()}</TableCell>
                             <TableCell className="text-right font-medium">₹{record.settledAmount.toLocaleString()}</TableCell>
                             <TableCell className="text-right">

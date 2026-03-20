@@ -379,7 +379,7 @@ export default function ConsolidatedOrders() {
             <Card key={portal.id}>
               <CardContent className="pt-4 pb-3">
                 <div className="text-center">
-                  <span className="text-2xl">{portal.icon}</span>
+                  <ChannelIcon channelId={portal.id} fallbackIcon={portal.icon} size={28} />
                   <p className="text-lg font-bold mt-1">{curr}</p>
                   <p className="text-xs text-muted-foreground">{portal.name}</p>
                   {activeView === 'comparison' && (
@@ -430,7 +430,7 @@ export default function ConsolidatedOrders() {
                 <div className="p-2 rounded-lg bg-emerald-500/10"><Trophy className="w-5 h-5 text-emerald-600" /></div>
                 <div>
                   <p className="text-sm text-muted-foreground">Best Performing Portal (YoY)</p>
-                  <p className="text-xl font-bold">{bestPortal.config?.icon} {bestPortal.config?.name}</p>
+                  <p className="text-xl font-bold"><ChannelIcon channelId={bestPortal.config?.id || ""} fallbackIcon={bestPortal.config?.icon} size={20} /> {bestPortal.config?.name}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-sm text-muted-foreground">{prevYear}: {bestPortal.prev} → {currentYear}: {bestPortal.curr}</span>
                     <GrowthBadge curr={bestPortal.curr} prev={bestPortal.prev} />
@@ -445,7 +445,7 @@ export default function ConsolidatedOrders() {
                 <div className="p-2 rounded-lg bg-rose-500/10"><AlertTriangle className="w-5 h-5 text-rose-600" /></div>
                 <div>
                   <p className="text-sm text-muted-foreground">Lowest Growth Portal</p>
-                  <p className="text-xl font-bold">{lowestPortal.config?.icon} {lowestPortal.config?.name}</p>
+                  <p className="text-xl font-bold"><ChannelIcon channelId={lowestPortal.config?.id || ""} fallbackIcon={lowestPortal.config?.icon} size={20} /> {lowestPortal.config?.name}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-sm text-muted-foreground">{prevYear}: {lowestPortal.prev} → {currentYear}: {lowestPortal.curr}</span>
                     <GrowthBadge curr={lowestPortal.curr} prev={lowestPortal.prev} />
@@ -509,7 +509,7 @@ export default function ConsolidatedOrders() {
                           <>
                             {portals.map(p => {
                               const config = portalConfigs.find(c => c.id === p);
-                              return <TableHead key={p} className="text-center font-semibold">{config?.icon} {config?.name}</TableHead>;
+                              return <TableHead key={p} className="text-center font-semibold"><ChannelIcon channelId={config?.id || ""} fallbackIcon={config?.icon} size={16} /> {config?.name}</TableHead>;
                             })}
                             <TableHead className="text-center font-semibold bg-blue-500/10">{currentYear} Qty</TableHead>
                             <TableHead className="text-center font-semibold bg-muted">{prevYear} Qty</TableHead>
@@ -519,7 +519,7 @@ export default function ConsolidatedOrders() {
                           <>
                             {portals.map(p => {
                               const config = portalConfigs.find(c => c.id === p);
-                              return <TableHead key={p} className="text-center font-semibold">{config?.icon} {config?.name}</TableHead>;
+                              return <TableHead key={p} className="text-center font-semibold"><ChannelIcon channelId={config?.id || ""} fallbackIcon={config?.icon} size={16} /> {config?.name}</TableHead>;
                             })}
                             <TableHead className="text-center font-semibold bg-primary/10 text-primary">Total</TableHead>
                           </>

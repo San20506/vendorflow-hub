@@ -276,7 +276,7 @@ export default function Inventory() {
                            <TableCell className="font-mono text-sm">{item.skuId}</TableCell>
                            <TableCell className="max-w-[180px] truncate">{item.productName}</TableCell>
                            <TableCell><Badge variant="secondary" className="text-xs">{item.brand}</Badge></TableCell>
-                           <TableCell><Badge variant="outline" className="gap-1">{portal?.icon} {portal?.name}</Badge></TableCell>
+                           <TableCell><Badge variant="outline" className="gap-1"><ChannelIcon channelId={portal?.id || ""} fallbackIcon={portal?.icon} size={16} /> {portal?.name}</Badge></TableCell>
                            <TableCell className="text-center font-medium">{item.masterQuantity}</TableCell>
                            <TableCell className="text-center"><span className={`font-semibold ${item.availableQuantity <= item.lowStockThreshold ? 'text-amber-600' : ''}`}>{item.availableQuantity}</span></TableCell>
                            <TableCell className="text-center text-muted-foreground">{String(Object.values(item.channelAllocations || {}).reduce((a: number, b: any) => a + (Number(b) || 0), 0))}</TableCell>

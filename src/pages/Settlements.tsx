@@ -540,7 +540,7 @@ export default function Settlements() {
                         <TableRow key={settlement.settlementId} className={`hover:bg-muted/30 ${batchRowSelection.isSelected(settlement.settlementId) ? 'bg-primary/5' : ''}`}>
                           <TableCell><RowCheckbox checked={batchRowSelection.isSelected(settlement.settlementId)} onCheckedChange={() => batchRowSelection.toggle(settlement.settlementId)} /></TableCell>
                           <TableCell className="font-medium">{settlement.settlementId}</TableCell>
-                          <TableCell><Badge variant="outline" className="gap-1">{portal?.icon} {portal?.name}</Badge></TableCell>
+                          <TableCell><Badge variant="outline" className="gap-1"><ChannelIcon channelId={portal?.id || ""} fallbackIcon={portal?.icon} size={16} /> {portal?.name}</Badge></TableCell>
                           <TableCell className="text-sm">{formatDate(settlement.cycleStart)} - {formatDate(settlement.cycleEnd)}</TableCell>
                           <TableCell className="text-right font-medium">₹{settlement.amount.toLocaleString()}</TableCell>
                           <TableCell className="text-right text-destructive">-₹{settlement.commission.toLocaleString()}</TableCell>
@@ -588,7 +588,7 @@ export default function Settlements() {
                         <TableRow key={s.orderId} className={`hover:bg-muted/30 ${orderRowSelection.isSelected(s.orderId) ? 'bg-primary/5' : ''}`}>
                           <TableCell><RowCheckbox checked={orderRowSelection.isSelected(s.orderId)} onCheckedChange={() => orderRowSelection.toggle(s.orderId)} /></TableCell>
                           <TableCell className="font-medium">{s.orderId}</TableCell>
-                          <TableCell><Badge variant="outline" className="gap-1">{portal?.icon} {portal?.name}</Badge></TableCell>
+                          <TableCell><Badge variant="outline" className="gap-1"><ChannelIcon channelId={portal?.id || ""} fallbackIcon={portal?.icon} size={16} /> {portal?.name}</Badge></TableCell>
                           <TableCell className="text-right font-medium">₹{s.amount.toLocaleString()}</TableCell>
                           <TableCell className="text-right text-muted-foreground">-₹{s.fees.toLocaleString()}</TableCell>
                           <TableCell className="text-right text-destructive">-₹{s.commission.toLocaleString()}</TableCell>
