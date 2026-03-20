@@ -320,7 +320,7 @@ export default function FinanceTaxation() {
     setPurchaseDialog(false);
   };
 
-  const handleExport = (what: string, format: 'excel' | 'pdf') => {
+  const handleExport = (what: string, format: 'excel' | 'pdf' | 'txt') => {
     toast({ title: `Export ${format.toUpperCase()}`, description: `Preparing ${what} export...` });
   };
 
