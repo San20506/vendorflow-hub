@@ -11,11 +11,9 @@ export type TimelinePreset = 'today' | 'yesterday' | '7days' | '30days' | 'this_
 
 const presetLabels: Record<TimelinePreset, string> = {
   today: 'Today',
-  yesterday: 'Yesterday',
   '7days': 'Last 7 Days',
   '30days': 'Last 30 Days',
   this_month: 'This Month',
-  last_month: 'Last Month',
   this_year: 'This Year',
   custom: 'Custom Range',
 };
