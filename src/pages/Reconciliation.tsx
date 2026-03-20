@@ -43,17 +43,7 @@ const daysAgo = (days: number) => {
   const d = new Date(); d.setDate(d.getDate() - days); return d.toISOString();
 };
 
-const mockReconData: ReconRecord[] = [
-  { id: 'R001', date: daysAgo(0), marketplace: 'amazon', orderId: 'ORD-2024-001', orderItem: 'Wireless Earbuds Pro', skuId: 'SKU-AMZ-001', masterSku: 'MSK-001', batchId: 'BATCH-AMZ-01', expectedAmount: 2999, settledAmount: 2999, difference: 0, expectedOrders: 67, processedOrders: 67, orderDifference: 0, status: 'matched' },
-  { id: 'R002', date: daysAgo(0), marketplace: 'flipkart', orderId: 'ORD-2024-002', orderItem: 'Cotton T-Shirt', skuId: 'SKU-FLK-003', masterSku: 'MSK-003', batchId: 'BATCH-FLK-01', expectedAmount: 4197, settledAmount: 4050, difference: 147, expectedOrders: 52, processedOrders: 51, orderDifference: 1, status: 'minor_difference' },
-  { id: 'R003', date: daysAgo(0), marketplace: 'meesho', orderId: 'ORD-2024-003', orderItem: 'Smart Fitness Watch', skuId: 'SKU-MSH-002', masterSku: 'MSK-002', batchId: 'BATCH-MSH-01', expectedAmount: 4999, settledAmount: 4999, difference: 0, expectedOrders: 28, processedOrders: 28, orderDifference: 0, status: 'matched' },
-  { id: 'R004', date: daysAgo(1), marketplace: 'amazon', orderId: 'ORD-2024-007', orderItem: 'Fitness Watch X2', skuId: 'SKU-AMZ-002', masterSku: 'MSK-002', batchId: 'BATCH-AMZ-02', expectedAmount: 8796, settledAmount: 8500, difference: 296, expectedOrders: 72, processedOrders: 70, orderDifference: 2, status: 'minor_difference' },
-  { id: 'R005', date: daysAgo(1), marketplace: 'blinkit', orderId: 'ORD-2024-005', orderItem: 'Water Bottle', skuId: 'SKU-BLK-004', masterSku: 'MSK-004', batchId: 'BATCH-BLK-01', expectedAmount: 2397, settledAmount: 1900, difference: 497, expectedOrders: 22, processedOrders: 18, orderDifference: 4, status: 'mismatch' },
-  { id: 'R006', date: daysAgo(2), marketplace: 'flipkart', orderId: 'ORD-2024-008', orderItem: 'Earbuds Pro', skuId: 'SKU-FLK-001', masterSku: 'MSK-001', batchId: 'BATCH-FLK-02', expectedAmount: 5998, settledAmount: 5998, difference: 0, expectedOrders: 55, processedOrders: 55, orderDifference: 0, status: 'matched' },
-  { id: 'R007', date: daysAgo(2), marketplace: 'meesho', orderId: 'ORD-2024-009', orderItem: 'Yoga Mat Premium', skuId: 'SKU-MSH-007', masterSku: 'MSK-007', batchId: 'BATCH-MSH-02', expectedAmount: 5898, settledAmount: 4800, difference: 1098, expectedOrders: 35, processedOrders: 30, orderDifference: 5, status: 'mismatch' },
-  { id: 'R008', date: daysAgo(3), marketplace: 'firstcry', orderId: 'ORD-2024-004', orderItem: 'Baby Care Set', skuId: 'SKU-FCY-005', masterSku: 'MSK-005', batchId: 'BATCH-FCY-01', expectedAmount: 2598, settledAmount: 2598, difference: 0, expectedOrders: 14, processedOrders: 14, orderDifference: 0, status: 'matched' },
-  { id: 'R009', date: daysAgo(4), marketplace: 'amazon', orderId: 'ORD-2024-006', orderItem: 'BT Speaker', skuId: 'SKU-AMZ-006', masterSku: 'MSK-006', batchId: 'BATCH-AMZ-03', expectedAmount: 2598, settledAmount: 1850, difference: 748, expectedOrders: 75, processedOrders: 68, orderDifference: 7, status: 'mismatch' },
-];
+const mockReconData: ReconRecord[] = [];
 
 const statusBadge = (status: ReconStatus) => {
   switch (status) {

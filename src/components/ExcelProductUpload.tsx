@@ -17,11 +17,7 @@ const sampleSKUTemplate = [
   { 'Master SKU': 'MSK-002', 'Product Name': 'Cotton T-Shirt', Brand: 'FashionHub', 'Amazon SKU': 'AMZ-CTS-002', 'Flipkart SKU': 'FLK-CTS-002', 'Meesho SKU': '', 'FirstCry SKU': 'FC-CTS-002', 'Own Website SKU': '' },
 ];
 
-const mockPreviewData = [
-  { skuId: 'SKU-NEW-001', name: 'Bamboo Water Bottle', category: 'Home & Kitchen', price: 699 },
-  { skuId: 'SKU-NEW-002', name: 'Wireless Mouse Pro', category: 'Electronics', price: 1299 },
-  { skuId: 'SKU-NEW-003', name: 'Cotton Polo Shirt', category: 'Apparel', price: 899 },
-];
+const mockPreviewData: any[] = [];
 
 export function ExcelProductUpload({ onClose }: { onClose: () => void }) {
   const [file, setFile] = useState<string | null>(null);
