@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Shield, Settings, Cog, Upload, Download, FileSpreadsheet, Eye, Pencil, ToggleLeft, Blocks, Clock, Zap, Users, Lock, IndianRupee, CheckCircle2, AlertTriangle, SlidersHorizontal, History, LogIn, Edit3, Globe, Mail, Image, Palette } from 'lucide-react';
+import { Shield, Settings, Cog, Upload, Download, FileSpreadsheet, Eye, Pencil, ToggleLeft, Blocks, Clock, Zap, Users, Lock, IndianRupee, CheckCircle2, AlertTriangle, SlidersHorizontal, History, LogIn, Edit3 } from 'lucide-react';
 import { getReconciliationSettings, setReconciliationSettings, subscribeReconciliationSettings } from '@/services/reconciliationSettings';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -104,64 +104,15 @@ const importExportItems: ImportExportItem[] = [
   { name: 'Export Analytics', type: 'export', description: 'Download analytics reports' },
 ];
 
-// TAB 5 — Permissions
-interface PermissionRow {
-  feature: string;
-  category: string;
-  admin: boolean;
-  vendor: boolean;
-  operations: boolean;
-}
-
-const permissionsData: PermissionRow[] = [
-  { feature: 'Dashboard Overview', category: 'Overview', admin: true, vendor: true, operations: true },
-  { feature: 'Product Catalog', category: 'Catalog', admin: true, vendor: true, operations: false },
-  { feature: 'Product Health', category: 'Catalog', admin: true, vendor: true, operations: true },
-  { feature: 'SKU Mapping', category: 'Catalog', admin: true, vendor: true, operations: false },
-  { feature: 'Inventory Management', category: 'Inventory', admin: true, vendor: true, operations: true },
-  { feature: 'Orders', category: 'Inventory', admin: true, vendor: true, operations: true },
-  { feature: 'Consolidated Orders', category: 'Inventory', admin: true, vendor: false, operations: true },
-  { feature: 'Returns & Claims', category: 'Inventory', admin: true, vendor: false, operations: true },
-  { feature: 'Settlements', category: 'Finance', admin: true, vendor: true, operations: false },
-  { feature: 'Reconciliation', category: 'Finance', admin: true, vendor: false, operations: true },
-  { feature: 'Price & Payout', category: 'Finance', admin: true, vendor: true, operations: false },
-  { feature: 'Landing Cost Analysis', category: 'Finance', admin: true, vendor: true, operations: false },
-  { feature: 'Vendor Management', category: 'Vendors', admin: true, vendor: false, operations: false },
-  { feature: 'Warehouse & Storage', category: 'Vendors', admin: true, vendor: false, operations: true },
-  { feature: 'Data Import', category: 'Operations', admin: true, vendor: false, operations: true },
-  { feature: 'Task Manager', category: 'Operations', admin: true, vendor: false, operations: true },
-  { feature: 'Analytics', category: 'Operations', admin: true, vendor: true, operations: false },
-  { feature: 'System Settings', category: 'Admin', admin: true, vendor: false, operations: false },
-  { feature: 'Support Center', category: 'System', admin: true, vendor: true, operations: true },
-  { feature: 'Subscription', category: 'System', admin: true, vendor: false, operations: false },
-  { feature: 'AI Hub', category: 'System', admin: true, vendor: false, operations: false },
-];
-
 export default function SystemSettings() {
   const { toast } = useToast();
   const [fields, setFields] = useState(initialFields);
   const [features, setFeatures] = useState(initialFeatures);
-  const [permissions, setPermissions] = useState(permissionsData);
   const [services, setServices] = useState(initialServices);
-
-
-
 
   // Editable service status
   const [editingService, setEditingService] = useState<number | null>(null);
   const [editLabel, setEditLabel] = useState('');
-
-  // Social Media & Email Config
-  const [socialKeys, setSocialKeys] = useState({
-    facebook: '', instagram: '', twitter: '', youtube: '',
-  });
-  const [emailConfig, setEmailConfig] = useState({
-    smtpHost: '', smtpPort: '587', smtpUser: '', smtpPass: '', senderEmail: '', senderName: '',
-  });
-
-  // Platform branding
-  const [platformName, setPlatformName] = useState('VendorFlow');
-  const [logoUrl, setLogoUrl] = useState('');
 
   // Financial Controls — tolerance threshold
   const reconSettings = useSyncExternalStore(
@@ -179,18 +130,11 @@ export default function SystemSettings() {
     setFeatures(prev => prev.map((f, i) => i === index ? { ...f, enabled: !f.enabled } : f));
   };
 
-  const togglePermission = (index: number, role: 'admin' | 'vendor' | 'operations') => {
-    if (role === 'admin') return;
-    setPermissions(prev => prev.map((p, i) => i === index ? { ...p, [role]: !p[role] } : p));
-  };
-
   const handleSaveServiceLabel = (index: number) => {
     setServices(prev => prev.map((s, i) => i === index ? { ...s, customLabel: editLabel || undefined } : s));
     setEditingService(null);
     toast({ title: 'Status Updated', description: 'Service status label has been updated.' });
   };
-
-  const categories = [...new Set(permissions.map(p => p.category))];
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -221,8 +165,6 @@ export default function SystemSettings() {
           <TabsTrigger value="import-export" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Import / Export</TabsTrigger>
           <TabsTrigger value="audit" className="text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Activity Log</TabsTrigger>
         </TabsList>
-
-
 
         <TabsContent value="fields">
           <Card>
@@ -268,6 +210,11 @@ export default function SystemSettings() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* TAB — DROPDOWN CONFIG */}
+        <TabsContent value="dropdowns">
+          <DropdownConfigManager />
         </TabsContent>
 
         {/* TAB 2 — FEATURE ENABLE / DISABLE */}
@@ -424,7 +371,7 @@ export default function SystemSettings() {
           </Card>
         </TabsContent>
 
-        {/* TAB 3 — SERVICES MANAGEMENT (Editable Status Badges) */}
+        {/* TAB 3 — SERVICES MANAGEMENT */}
         <TabsContent value="services">
           <Card>
             <CardHeader>
@@ -527,169 +474,6 @@ export default function SystemSettings() {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* TAB — DROPDOWN CONFIG */}
-        <TabsContent value="dropdowns">
-          <DropdownConfigManager />
-        </TabsContent>
-
-        {/* TAB — ACTIVITY LOG */}
-                </div>
-                <div className="flex gap-2">
-                  {[
-                    { role: 'Admin', count: permissions.filter(p => p.admin).length, color: 'text-primary' },
-                    { role: 'Vendor', count: permissions.filter(p => p.vendor).length, color: 'text-blue-600' },
-                    { role: 'Ops', count: permissions.filter(p => p.operations).length, color: 'text-emerald-600' },
-                  ].map(r => (
-                    <Badge key={r.role} variant="outline" className="text-xs gap-1">
-                      <span className={r.color}>{r.count}</span> {r.role}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead className="font-semibold">Category</TableHead>
-                    <TableHead className="font-semibold">Feature</TableHead>
-                    <TableHead className="text-center font-semibold">Admin</TableHead>
-                    <TableHead className="text-center font-semibold">Vendor</TableHead>
-                    <TableHead className="text-center font-semibold">Operations</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {categories.map(cat =>
-                    permissions.filter(p => p.category === cat).map((perm, idx) => {
-                      const globalIdx = permissions.indexOf(perm);
-                      return (
-                        <TableRow key={perm.feature}>
-                          {idx === 0 && (
-                            <TableCell rowSpan={permissions.filter(p => p.category === cat).length} className="font-medium align-top border-r">
-                              <Badge variant="secondary">{cat}</Badge>
-                            </TableCell>
-                          )}
-                          <TableCell className="font-medium">{perm.feature}</TableCell>
-                          <TableCell className="text-center"><Switch checked={perm.admin} disabled /></TableCell>
-                          <TableCell className="text-center"><Switch checked={perm.vendor} onCheckedChange={() => togglePermission(globalIdx, 'vendor')} /></TableCell>
-                          <TableCell className="text-center"><Switch checked={perm.operations} onCheckedChange={() => togglePermission(globalIdx, 'operations')} /></TableCell>
-                        </TableRow>
-                      );
-                    })
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* TAB — INTEGRATIONS (Social Media + Email + Branding) */}
-        <TabsContent value="integrations">
-          <div className="space-y-6">
-            {/* Platform Branding */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Palette className="w-5 h-5" />Platform Branding</CardTitle>
-                <CardDescription>Customize your platform name and logo</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Platform Name</Label>
-                    <Input value={platformName} onChange={e => setPlatformName(e.target.value)} placeholder="Enter platform name" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Logo URL</Label>
-                    <div className="flex gap-2">
-                      <Input value={logoUrl} onChange={e => setLogoUrl(e.target.value)} placeholder="https://... or upload" className="flex-1" />
-                      <Button variant="outline" size="icon" onClick={() => toast({ title: 'Upload', description: 'Logo upload initiated.' })}><Image className="w-4 h-4" /></Button>
-                    </div>
-                  </div>
-                </div>
-                <Button onClick={() => toast({ title: 'Branding Saved', description: `Platform name set to "${platformName}"` })} className="gap-1.5">
-                  <CheckCircle2 className="w-4 h-4" /> Save Branding
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Social Media Connections */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Globe className="w-5 h-5" />Social Media Connections</CardTitle>
-                <CardDescription>Connect social media accounts via API keys</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                    { key: 'facebook' as const, label: 'Facebook Page Token' },
-                    { key: 'instagram' as const, label: 'Instagram API Key' },
-                    { key: 'twitter' as const, label: 'Twitter / X API Key' },
-                    { key: 'youtube' as const, label: 'YouTube API Key' },
-                  ].map(item => (
-                    <div key={item.key} className="space-y-2">
-                      <Label className="text-sm">{item.label}</Label>
-                      <Input
-                        type="password"
-                        value={socialKeys[item.key]}
-                        onChange={e => setSocialKeys(prev => ({ ...prev, [item.key]: e.target.value }))}
-                        placeholder={`Enter ${item.label}`}
-                        className="font-mono text-sm"
-                      />
-                    </div>
-                  ))}
-                </div>
-                <Button className="mt-4 gap-1.5" onClick={() => toast({ title: 'Social Keys Saved', description: 'Social media API keys updated.' })}>
-                  <CheckCircle2 className="w-4 h-4" /> Save Social Keys
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Email / SMTP Configuration */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Mail className="w-5 h-5" />Email Configuration</CardTitle>
-                <CardDescription>Configure SMTP settings for transactional and notification emails</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>SMTP Host</Label>
-                    <Input value={emailConfig.smtpHost} onChange={e => setEmailConfig(p => ({ ...p, smtpHost: e.target.value }))} placeholder="smtp.example.com" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>SMTP Port</Label>
-                    <Input value={emailConfig.smtpPort} onChange={e => setEmailConfig(p => ({ ...p, smtpPort: e.target.value }))} placeholder="587" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>SMTP Username</Label>
-                    <Input value={emailConfig.smtpUser} onChange={e => setEmailConfig(p => ({ ...p, smtpUser: e.target.value }))} placeholder="user@example.com" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>SMTP Password</Label>
-                    <Input type="password" value={emailConfig.smtpPass} onChange={e => setEmailConfig(p => ({ ...p, smtpPass: e.target.value }))} placeholder="••••••••" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Sender Email</Label>
-                    <Input value={emailConfig.senderEmail} onChange={e => setEmailConfig(p => ({ ...p, senderEmail: e.target.value }))} placeholder="noreply@example.com" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Sender Name</Label>
-                    <Input value={emailConfig.senderName} onChange={e => setEmailConfig(p => ({ ...p, senderName: e.target.value }))} placeholder="VendorFlow" />
-                  </div>
-                </div>
-                <Button className="mt-4 gap-1.5" onClick={() => toast({ title: 'Email Config Saved', description: 'SMTP settings updated successfully.' })}>
-                  <CheckCircle2 className="w-4 h-4" /> Save Email Settings
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* TAB — DROPDOWN CONFIG */}
-        <TabsContent value="dropdowns">
-          <DropdownConfigManager />
         </TabsContent>
 
         {/* TAB — ACTIVITY LOG */}
