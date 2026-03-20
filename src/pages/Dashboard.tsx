@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAIAccess } from '@/contexts/AIAccessContext';
 import { Portal } from '@/types';
 import { portalConfigs } from '@/services/mockData';
+import { ChannelIcon } from '@/components/ChannelIcon';
 import { ordersDb, inventoryDb, returnsDb, settlementsDb, expensesDb } from '@/services/database';
 import { supabase } from '@/integrations/supabase/client';
 import { KPICard } from '@/components/dashboard/KPICard';

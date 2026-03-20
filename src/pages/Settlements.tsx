@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { portalConfigs } from '@/services/mockData';
+import { ChannelIcon } from '@/components/ChannelIcon';
 import { settlementsDb } from '@/services/database';
 import { Portal, SettlementStatus } from '@/types';
 import { PortalFilter } from '@/components/dashboard/PortalFilter';

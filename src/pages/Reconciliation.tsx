@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { portalConfigs } from '@/services/mockData';
+import { ChannelIcon } from '@/components/ChannelIcon';
 import { reconciliationDb } from '@/services/database';
 import { Portal } from '@/types';
 import { CheckCircle2, AlertTriangle, TrendingUp, TrendingDown, Activity, Target, XCircle, SlidersHorizontal } from 'lucide-react';

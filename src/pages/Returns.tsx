@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { portalConfigs } from '@/services/mockData';
+import { ChannelIcon } from '@/components/ChannelIcon';
 import { Portal, ReturnReason } from '@/types';
 import { PortalFilter } from '@/components/dashboard/PortalFilter';
 import { Card, CardContent } from '@/components/ui/card';

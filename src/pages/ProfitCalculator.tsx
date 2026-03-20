@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Calculator, IndianRupee, TrendingUp, TrendingDown, Percent, Truck, Tag, Megaphone, AlertTriangle, CheckCircle2, Info } from 'lucide-react';
 import { getChannels } from '@/services/channelManager';
+import { ChannelIcon } from '@/components/ChannelIcon';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Default marketplace fee structures

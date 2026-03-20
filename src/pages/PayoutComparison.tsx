@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowUpDown, IndianRupee, TrendingUp, TrendingDown, BarChart3, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
 import { getChannels } from '@/services/channelManager';
+import { ChannelIcon } from '@/components/ChannelIcon';
 import { settlementsDb, ordersDb } from '@/services/database';
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
