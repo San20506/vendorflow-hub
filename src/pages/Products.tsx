@@ -46,6 +46,27 @@ export default function Products() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({ name: '', masterSku: '', brand: '', category: '', hsn: '', mrp: '', basePrice: '', gst: '' });
 
+  const { options: brandOptions, loading: brandsLoading } = useDropdownOptions('brand');
+  const [newBrandName, setNewBrandName] = useState('');
+  const [addingBrand, setAddingBrand] = useState(false);
+  const [localBrands, setLocalBrands] = useState<{ label: string; value: string }[]>([]);
+
+  useEffect(() => { setLocalBrands(brandOptions); }, [brandOptions]);
+
+  const handleAddBrand = async () => {
+    const name = newBrandName.trim();
+    if (!name) return;
+    setAddingBrand(true);
+    try {
+      await dropdownOptionsDb.create({ field_type: 'brand', label: name, value: name });
+      setLocalBrands(prev => [...prev, { label: name, value: name }]);
+      setFormData(f => ({ ...f, brand: name }));
+      setNewBrandName('');
+      toast({ title: 'Brand Added', description: `"${name}" has been added to brands.` });
+    } catch { toast({ title: 'Error', description: 'Failed to add brand', variant: 'destructive' }); }
+    setAddingBrand(false);
+  };
+
   const [allProducts, setAllProducts] = useState<any[]>([]);
 
   useEffect(() => {
