@@ -265,7 +265,7 @@ export default function SystemSettings() {
                       <div className="text-xs text-muted-foreground font-mono">{ch.id}</div>
                     </div>
                     <div className="w-6 h-6 rounded-full border-2 border-background shadow-sm" style={{ backgroundColor: ch.color }} />
-                    <Button variant="ghost" size="icon" onClick={() => { setEditingChannel(ch); setChannelForm({ name: ch.name, icon: ch.icon, color: ch.color }); }}>
+                    <Button variant="ghost" size="icon" onClick={() => { setEditingChannel(ch); setChannelForm({ name: ch.name, icon: ch.icon, color: ch.color, logoUrl: ch.logoUrl || '' }); }}>
                       <Pencil className="w-4 h-4" />
                     </Button>
                     <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => {
