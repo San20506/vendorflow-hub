@@ -12,7 +12,7 @@ import { ChannelIcon } from '@/components/ChannelIcon';
 import { ordersDb } from '@/services/database';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  Download, FileSpreadsheet, TrendingUp, TrendingDown, Calendar,
+  Download, FileSpreadsheet, FileDown, TrendingUp, TrendingDown, Calendar,
   ArrowUpRight, ArrowDownRight, Trophy, AlertTriangle, BarChart3,
   Loader2, Barcode, Printer, Search, QrCode, Copy, Check
 } from 'lucide-react';
@@ -239,8 +239,8 @@ export default function ConsolidatedOrders() {
 
   const exportLabel = isYoY ? 'Export – Year Comparison' : dateRange === 'this_year' ? `Export – ${currentYear}` : dateRange === 'last_year' ? `Export – ${prevYear}` : 'Export to Excel';
 
-  const handleExport = () => {
-    toast({ title: 'Export Started', description: `Preparing: ${exportLabel}` });
+  const handleExport = (format: 'excel' | 'pdf' = 'excel') => {
+    toast({ title: `${format === 'pdf' ? 'PDF' : 'Excel'} Export Started`, description: `Preparing ${format.toUpperCase()}: ${exportLabel}` });
   };
 
   const handleCopySku = (sku: string) => {
@@ -363,9 +363,13 @@ export default function ConsolidatedOrders() {
           )}
 
           <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
-          <Button onClick={handleExport} className="gap-2">
-            <Download className="w-4 h-4" />
+          <Button onClick={() => handleExport('excel')} className="gap-2">
+            <FileSpreadsheet className="w-4 h-4" />
             {exportLabel}
+          </Button>
+          <Button onClick={() => handleExport('pdf')} variant="outline" className="gap-2">
+            <FileDown className="w-4 h-4" />
+            Export to PDF
           </Button>
         </div>
       </div>
