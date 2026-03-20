@@ -148,13 +148,8 @@ export default function SystemSettings() {
   const [permissions, setPermissions] = useState(permissionsData);
   const [services, setServices] = useState(initialServices);
 
-  // Channel management
-  const channels = useSyncExternalStore(subscribeChannels, getChannels);
-  const [editingChannel, setEditingChannel] = useState<PortalConfig | null>(null);
-  const [addingChannel, setAddingChannel] = useState(false);
-  const [channelForm, setChannelForm] = useState({ name: '', icon: '🏪', color: 'hsl(33, 100%, 50%)', logoUrl: '' });
-  const [uploadingLogo, setUploadingLogo] = useState(false);
-  const logoInputRef = useRef<HTMLInputElement>(null);
+
+
 
   // Editable service status
   const [editingService, setEditingService] = useState<number | null>(null);
