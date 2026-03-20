@@ -378,7 +378,7 @@ export default function Dashboard() {
             <SelectItem value="all">All Channels</SelectItem>
             {portalConfigs.map(p => (
               <SelectItem key={p.id} value={p.id}>
-                <span className="flex items-center gap-2">{p.icon} {p.name}</span>
+                <span className="flex items-center gap-2"><ChannelIcon channelId={p.id} fallbackIcon={p.icon} size={16} /> {p.name}</span>
               </SelectItem>
             ))}
           </SelectContent>
