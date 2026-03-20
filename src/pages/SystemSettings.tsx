@@ -288,7 +288,7 @@ export default function SystemSettings() {
 
           {/* Add / Edit Channel Dialog */}
           <Dialog open={addingChannel || !!editingChannel} onOpenChange={(open) => { if (!open) { setAddingChannel(false); setEditingChannel(null); } }}>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingChannel ? 'Edit Channel' : 'Add New Channel'}</DialogTitle>
               </DialogHeader>
@@ -298,9 +298,78 @@ export default function SystemSettings() {
                   <Input value={channelForm.name} onChange={e => setChannelForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Shopify, Snapdeal" />
                 </div>
 
+                {/* Logo Upload */}
                 <div>
-                  <Label>Icon</Label>
-                  <div className="grid grid-cols-9 gap-1.5 mt-2 p-3 rounded-lg border bg-muted/30 max-h-40 overflow-y-auto">
+                  <Label>Channel Logo</Label>
+                  <div className="mt-2 flex items-center gap-3">
+                    <div className="w-14 h-14 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center bg-muted/20 overflow-hidden">
+                      {channelForm.logoUrl ? (
+                        <img src={channelForm.logoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
+                      ) : (
+                        <Image className="w-5 h-5 text-muted-foreground/50" />
+                      )}
+                    </div>
+                    <div className="flex-1 space-y-1.5">
+                      <input
+                        ref={logoInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          if (file.size > 2 * 1024 * 1024) {
+                            toast({ title: 'File too large', description: 'Logo must be under 2MB.', variant: 'destructive' });
+                            return;
+                          }
+                          setUploadingLogo(true);
+                          try {
+                            const ext = file.name.split('.').pop() || 'png';
+                            const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+                            const { error } = await supabase.storage.from('channel-logos').upload(fileName, file, { upsert: true });
+                            if (error) throw error;
+                            const { data: urlData } = supabase.storage.from('channel-logos').getPublicUrl(fileName);
+                            setChannelForm(f => ({ ...f, logoUrl: urlData.publicUrl }));
+                            toast({ title: 'Logo uploaded', description: 'Channel logo has been uploaded.' });
+                          } catch (err: any) {
+                            toast({ title: 'Upload failed', description: err.message || 'Failed to upload logo.', variant: 'destructive' });
+                          } finally {
+                            setUploadingLogo(false);
+                            if (logoInputRef.current) logoInputRef.current.value = '';
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={uploadingLogo}
+                        onClick={() => logoInputRef.current?.click()}
+                        className="gap-1.5"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        {uploadingLogo ? 'Uploading...' : 'Upload Logo'}
+                      </Button>
+                      {channelForm.logoUrl && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive text-xs h-7"
+                          onClick={() => setChannelForm(f => ({ ...f, logoUrl: '' }))}
+                        >
+                          Remove
+                        </Button>
+                      )}
+                      <p className="text-[11px] text-muted-foreground">PNG, JPG up to 2MB. Used across the app.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Fallback Icon</Label>
+                  <p className="text-xs text-muted-foreground mb-2">Used when no logo is uploaded</p>
+                  <div className="grid grid-cols-9 gap-1.5 p-3 rounded-lg border bg-muted/30 max-h-40 overflow-y-auto">
                     {AVAILABLE_ICONS.map(icon => (
                       <button
                         key={icon}
@@ -339,7 +408,11 @@ export default function SystemSettings() {
                 <div className="p-3 rounded-lg border bg-muted/20">
                   <Label className="text-xs text-muted-foreground mb-2 block">Preview</Label>
                   <div className="flex items-center gap-2">
-                    <span className="text-xl">{channelForm.icon}</span>
+                    {channelForm.logoUrl ? (
+                      <img src={channelForm.logoUrl} alt="preview" className="w-6 h-6 object-contain rounded" />
+                    ) : (
+                      <span className="text-xl">{channelForm.icon}</span>
+                    )}
                     <span className="font-medium text-foreground">{channelForm.name || 'Channel Name'}</span>
                     <div className="w-4 h-4 rounded-full ml-auto" style={{ backgroundColor: channelForm.color }} />
                   </div>
@@ -347,9 +420,9 @@ export default function SystemSettings() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => { setAddingChannel(false); setEditingChannel(null); }}>Cancel</Button>
-                <Button disabled={!channelForm.name.trim()} onClick={() => {
+                <Button disabled={!channelForm.name.trim() || uploadingLogo} onClick={() => {
                   if (editingChannel) {
-                    updateChannel(editingChannel.id as string, { name: channelForm.name, icon: channelForm.icon, color: channelForm.color });
+                    updateChannel(editingChannel.id as string, { name: channelForm.name, icon: channelForm.icon, color: channelForm.color, logoUrl: channelForm.logoUrl || undefined });
                     toast({ title: 'Channel Updated', description: `${channelForm.name} has been updated.` });
                     setEditingChannel(null);
                   } else {
@@ -358,7 +431,7 @@ export default function SystemSettings() {
                       toast({ title: 'Duplicate ID', description: `A channel with ID "${id}" already exists.`, variant: 'destructive' });
                       return;
                     }
-                    addChannel({ id: id as any, name: channelForm.name, icon: channelForm.icon, color: channelForm.color });
+                    addChannel({ id: id as any, name: channelForm.name, icon: channelForm.icon, color: channelForm.color, logoUrl: channelForm.logoUrl || undefined });
                     toast({ title: 'Channel Added', description: `${channelForm.name} has been added.` });
                     setAddingChannel(false);
                   }
