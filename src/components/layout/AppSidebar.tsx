@@ -337,7 +337,7 @@ export function AppSidebar() {
                   {!isCollapsed ? (
                     <CollapsibleTrigger
                       className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors"
-                      style={{ color: 'rgba(197, 157, 217, 0.45)' }}
+                      style={{ color: 'rgba(220, 190, 240, 0.8)' }}
                     >
                       {group.label}
                       <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-data-[state=closed]/collapsible:rotate-[-90deg]" />
