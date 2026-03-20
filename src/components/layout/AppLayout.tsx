@@ -144,6 +144,8 @@ export function AppLayout({ children }: AppLayoutProps) {
                 Mobile Ready – PWA
               </Badge>
 
+              <ThemeCustomizer settings={settings} onUpdate={updateSetting} onReset={resetToDefaults} accentPresets={ACCENT_PRESETS} />
+
               <AIAccessControl />
 
               <DropdownMenu>
