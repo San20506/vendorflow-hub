@@ -53,12 +53,15 @@ export default function Analytics() {
     return [] as { month: string; sales: number; adSpend: number; orders: number; roas: string }[];
   }, [adPlatform]);
 
-  const adTotals = useMemo(() => ({
-    totalSales: adData.reduce((s, d) => s + d.sales, 0),
-    totalSpend: adData.reduce((s, d) => s + d.adSpend, 0),
-    totalOrders: adData.reduce((s, d) => s + d.orders, 0),
-    avgRoas: (adData.reduce((s, d) => s + d.sales, 0) / adData.reduce((s, d) => s + d.adSpend, 0)).toFixed(2),
-  }), [adData]);
+  const adTotals = useMemo(() => {
+    const totalSpend = adData.reduce((s, d) => s + d.adSpend, 0);
+    return {
+      totalSales: adData.reduce((s, d) => s + d.sales, 0),
+      totalSpend,
+      totalOrders: adData.reduce((s, d) => s + d.orders, 0),
+      avgRoas: totalSpend > 0 ? (adData.reduce((s, d) => s + d.sales, 0) / totalSpend).toFixed(2) : '0',
+    };
+  }, [adData]);
 
   // Revenue tracking from real orders
   const trendData = useMemo(() => {
