@@ -48,15 +48,9 @@ export default function Analytics() {
     load();
   }, []);
 
-  // Ad performance mock data (requires external API keys)
+  // Ad performance data (requires external API keys - shows empty until connected)
   const adData = useMemo(() => {
-    const months = ['Sept 2025', 'Oct 2025', 'Nov 2025', 'Dec 2025'];
-    return months.map(month => {
-      const fb = { sales: 180000 + Math.random() * 120000, adSpend: 25000 + Math.random() * 15000, orders: 120 + Math.floor(Math.random() * 80) };
-      const ggl = { sales: 150000 + Math.random() * 100000, adSpend: 20000 + Math.random() * 12000, orders: 90 + Math.floor(Math.random() * 70) };
-      const d = adPlatform === 'facebook' ? fb : ggl;
-      return { month, sales: Math.round(d.sales), adSpend: Math.round(d.adSpend), orders: d.orders, roas: (d.sales / d.adSpend).toFixed(2) };
-    });
+    return [] as { month: string; sales: number; adSpend: number; orders: number; roas: string }[];
   }, [adPlatform]);
 
   const adTotals = useMemo(() => ({

@@ -30,29 +30,13 @@ const settlementStatusConfig: Record<SettlementStatus, { label: string; color: s
   delayed: { label: 'Delayed', color: 'bg-destructive/10 text-destructive', icon: AlertTriangle },
 };
 
-const mockOrderSettlements = [
-  { orderId: 'ORD-2024-001', portal: 'amazon' as Portal, amount: 2999, fees: 150, commission: 450, net: 2399, status: 'completed' as SettlementStatus },
-  { orderId: 'ORD-2024-002', portal: 'flipkart' as Portal, amount: 4197, fees: 210, commission: 630, net: 3357, status: 'completed' as SettlementStatus },
-  { orderId: 'ORD-2024-003', portal: 'meesho' as Portal, amount: 4999, fees: 250, commission: 750, net: 3999, status: 'pending' as SettlementStatus },
-  { orderId: 'ORD-2024-004', portal: 'firstcry' as Portal, amount: 2598, fees: 130, commission: 390, net: 2078, status: 'pending' as SettlementStatus },
-  { orderId: 'ORD-2024-005', portal: 'blinkit' as Portal, amount: 2397, fees: 120, commission: 360, net: 1917, status: 'delayed' as SettlementStatus },
-  { orderId: 'ORD-2024-006', portal: 'amazon' as Portal, amount: 2598, fees: 130, commission: 390, net: 2078, status: 'pending' as SettlementStatus },
-  { orderId: 'ORD-2024-007', portal: 'amazon' as Portal, amount: 8796, fees: 440, commission: 1319, net: 7037, status: 'completed' as SettlementStatus },
-  { orderId: 'ORD-2024-008', portal: 'flipkart' as Portal, amount: 5998, fees: 300, commission: 900, net: 4798, status: 'pending' as SettlementStatus },
-];
+const mockOrderSettlements: any[] = [];
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
-// Mock expense data
-const expenseCategories = [
-  { name: 'Shipping', value: 45000, color: COLORS[0] },
-  { name: 'Commission', value: 38000, color: COLORS[1] },
-  { name: 'Returns', value: 12000, color: COLORS[2] },
-  { name: 'Packaging', value: 8500, color: COLORS[3] },
-  { name: 'Marketing', value: 15000, color: COLORS[4] },
-];
+const expenseCategories: any[] = [];
 
-const taxSplit = { cgst: 28500, sgst: 28500, igst: 14200 };
+const taxSplit = { cgst: 0, sgst: 0, igst: 0 };
 const totalTax = taxSplit.cgst + taxSplit.sgst + taxSplit.igst;
 
 // Mock revenue vs cost trend
