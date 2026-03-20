@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { portalConfigs } from '@/services/mockData';
 import { ChannelIcon } from '@/components/ChannelIcon';
 import { ProductHealthStatus, Portal } from '@/types';
-import { Activity, CheckCircle2, XCircle, Package, Search, AlertCircle, Loader2, RefreshCw, Clock, Star, MessageSquare, ExternalLink, Link2, Globe } from 'lucide-react';
+import { Activity, CheckCircle2, XCircle, Package, Search, AlertCircle, Loader2, RefreshCw, Clock, Star, MessageSquare, ExternalLink, Link2, Globe, IndianRupee, TrendingUp, TrendingDown, ArrowUpDown } from 'lucide-react';
 import { DateFilter, ExportButton, useRowSelection, SelectAllCheckbox, RowCheckbox } from '@/components/TableEnhancements';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -185,6 +185,7 @@ export default function ProductHealth() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="health" className="gap-1.5"><Activity className="w-4 h-4" />Health Status</TabsTrigger>
+          <TabsTrigger value="prices" className="gap-1.5"><IndianRupee className="w-4 h-4" />Price Comparison</TabsTrigger>
           <TabsTrigger value="urls" className="gap-1.5"><Link2 className="w-4 h-4" />Product URLs</TabsTrigger>
           <TabsTrigger value="channels" className="gap-1.5"><Globe className="w-4 h-4" />Channel Details</TabsTrigger>
         </TabsList>
@@ -269,7 +270,115 @@ export default function ProductHealth() {
           </Card>
         </TabsContent>
 
-        {/* Tab 2: Product URLs per Channel */}
+        {/* Tab: Price Comparison */}
+        <TabsContent value="prices">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><IndianRupee className="w-5 h-5 text-primary" />Channel Price Comparison</CardTitle>
+              <CardDescription>Compare selling prices across marketplaces • Identify pricing inconsistencies and margin opportunities</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex items-center justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
+              ) : skuMappings.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <IndianRupee className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                  <p className="font-medium">No Price Data Available</p>
+                  <p className="text-sm mt-1">Add products via <strong>SKU Mapping</strong> to track channel-wise pricing.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/50">
+                        <TableHead className="font-semibold">Product Name</TableHead>
+                        <TableHead className="font-semibold">Master SKU</TableHead>
+                        <TableHead className="text-right font-semibold">MRP</TableHead>
+                        {portalConfigs.map(p => {
+                          const ch = channelIcons[p.id];
+                          return (
+                            <TableHead key={p.id} className="text-right font-semibold">
+                              <span className="flex items-center justify-end gap-1">{ch?.emoji} {p.name}</span>
+                            </TableHead>
+                          );
+                        })}
+                        <TableHead className="text-center font-semibold bg-primary/5">
+                          <span className="flex items-center justify-center gap-1"><ArrowUpDown className="w-3.5 h-3.5" />Spread</span>
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {skuMappings.map(mapping => {
+                        const mrp = Number(mapping.mrp) || 0;
+                        const channelPrices: { portal: string; price: number }[] = [];
+                        portalConfigs.forEach(p => {
+                          const price = Number(mapping[`${p.id}_price`]) || 0;
+                          if (price > 0) channelPrices.push({ portal: p.id, price });
+                        });
+                        const minPrice = channelPrices.length > 0 ? Math.min(...channelPrices.map(cp => cp.price)) : 0;
+                        const maxPrice = channelPrices.length > 0 ? Math.max(...channelPrices.map(cp => cp.price)) : 0;
+                        const spread = maxPrice - minPrice;
+                        const spreadPct = minPrice > 0 ? Math.round((spread / minPrice) * 100) : 0;
+
+                        return (
+                          <TableRow key={mapping.id}>
+                            <TableCell className="font-medium max-w-[250px] truncate">{mapping.product_name}</TableCell>
+                            <TableCell className="font-mono text-sm text-muted-foreground">{mapping.master_sku_id}</TableCell>
+                            <TableCell className="text-right font-semibold text-sm">
+                              {mrp > 0 ? `₹${mrp.toLocaleString('en-IN')}` : <span className="text-muted-foreground">—</span>}
+                            </TableCell>
+                            {portalConfigs.map(p => {
+                              const price = Number(mapping[`${p.id}_price`]) || 0;
+                              const hasSku = !!mapping[`${p.id}_sku`];
+                              const isLowest = price > 0 && price === minPrice && channelPrices.length > 1;
+                              const isHighest = price > 0 && price === maxPrice && channelPrices.length > 1 && maxPrice !== minPrice;
+                              const discountFromMrp = mrp > 0 && price > 0 ? Math.round(((mrp - price) / mrp) * 100) : 0;
+
+                              return (
+                                <TableCell key={p.id} className="text-right">
+                                  {price > 0 ? (
+                                    <div className="space-y-0.5">
+                                      <div className={`font-semibold text-sm flex items-center justify-end gap-1 ${isLowest ? 'text-emerald-600' : isHighest ? 'text-rose-600' : 'text-foreground'}`}>
+                                        {isLowest && <TrendingDown className="w-3 h-3" />}
+                                        {isHighest && <TrendingUp className="w-3 h-3" />}
+                                        ₹{price.toLocaleString('en-IN')}
+                                      </div>
+                                      {discountFromMrp > 0 && (
+                                        <span className="text-[10px] text-muted-foreground">{discountFromMrp}% off MRP</span>
+                                      )}
+                                    </div>
+                                  ) : hasSku ? (
+                                    <span className="text-xs text-amber-600">No price set</span>
+                                  ) : (
+                                    <span className="text-xs text-muted-foreground">—</span>
+                                  )}
+                                </TableCell>
+                              );
+                            })}
+                            <TableCell className="text-center bg-primary/5">
+                              {channelPrices.length >= 2 ? (
+                                <div className="space-y-0.5">
+                                  <span className={`font-bold text-sm ${spreadPct > 10 ? 'text-rose-600' : spreadPct > 5 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                    ₹{spread.toLocaleString('en-IN')}
+                                  </span>
+                                  <p className="text-[10px] text-muted-foreground">{spreadPct}% variance</p>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Tab: Product URLs per Channel */}
         <TabsContent value="urls">
           <Card>
             <CardHeader>
