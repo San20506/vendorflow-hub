@@ -8,16 +8,7 @@ import { MessageLog } from './WhatsAppTypes';
 
 const daysAgo = (d: number, h = 0) => { const dt = new Date(); dt.setDate(dt.getDate() - d); dt.setHours(dt.getHours() - h); return dt.toISOString(); };
 
-const mockLogs: MessageLog[] = [
-  { id: 'LOG-001', recipient: '+91 98765 43210', recipientName: 'Vikram Patel', template: 'order_confirmation', status: 'read', timestamp: daysAgo(0, 1), direction: 'outbound', content: 'Your order ORD-2026-045 has been confirmed.' },
-  { id: 'LOG-002', recipient: '+91 87654 32109', recipientName: 'Meena Sharma', template: 'shipping_update', status: 'delivered', timestamp: daysAgo(0, 2), direction: 'outbound', content: 'Your order has been shipped via BlueDart.', mediaType: 'image' },
-  { id: 'LOG-003', recipient: '+91 76543 21098', recipientName: 'Amit Kumar', template: 'payment_reminder', status: 'sent', timestamp: daysAgo(0, 3), direction: 'outbound', content: 'Payment of ₹12,500 is pending.' },
-  { id: 'LOG-004', recipient: '+91 65432 10987', recipientName: 'Sneha Reddy', template: '-', status: 'read', timestamp: daysAgo(0, 4), direction: 'inbound', content: 'Hi, I want to place a bulk order for home decor items.' },
-  { id: 'LOG-005', recipient: '+91 98765 43210', recipientName: 'Vikram Patel', template: 'festive_offer', status: 'failed', timestamp: daysAgo(1), direction: 'outbound', content: 'Exclusive 20% off on electronics!', mediaType: 'image' },
-  { id: 'LOG-006', recipient: '+91 54321 09876', recipientName: 'Ravi Joshi', template: 'otp_verification', status: 'delivered', timestamp: daysAgo(0, 5), direction: 'outbound', content: 'Your OTP is 482910.' },
-  { id: 'LOG-007', recipient: '+91 43210 98765', recipientName: 'Priya Nair', template: 'invoice_share', status: 'read', timestamp: daysAgo(0, 6), direction: 'outbound', content: 'Invoice INV-2026-078 attached.', mediaType: 'document' },
-  { id: 'LOG-008', recipient: '+91 32109 87654', recipientName: 'Karan Singh', template: 'product_catalog', status: 'delivered', timestamp: daysAgo(0, 7), direction: 'outbound', content: 'Check out our new summer collection!', mediaType: 'video' },
-];
+const mockLogs: MessageLog[] = [];
 
 export default function WhatsAppMessageLog() {
   const mediaIcon = (type?: string) => {

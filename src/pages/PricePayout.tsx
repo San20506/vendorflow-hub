@@ -43,30 +43,9 @@ interface ReconEntry {
   status: 'matched' | 'mismatch' | 'pending';
 }
 
-const mockPriceData: PriceBreakdown[] = [
-  { productName: 'Premium Wireless Earbuds Pro', productId: 'PROD-001', portal: 'Amazon', portalIcon: '🛒', channel: 'Amazon', marketplacePrice: 2999, commission: 450, commissionPct: 15, platformFees: 45, shippingFees: 60, gst: 162, tcs: 30, netPayout: 2252 },
-  { productName: 'Premium Wireless Earbuds Pro', productId: 'PROD-001', portal: 'Flipkart', portalIcon: '🛍️', channel: 'Flipkart', marketplacePrice: 2999, commission: 390, commissionPct: 13, platformFees: 50, shippingFees: 55, gst: 162, tcs: 30, netPayout: 2312 },
-  { productName: 'Premium Wireless Earbuds Pro', productId: 'PROD-001', portal: 'Own Website', portalIcon: '🌐', channel: 'Website', marketplacePrice: 2999, commission: 0, commissionPct: 0, platformFees: 75, shippingFees: 80, gst: 162, tcs: 0, netPayout: 2682 },
-  { productName: 'Smart Fitness Watch X2', productId: 'PROD-002', portal: 'Amazon', portalIcon: '🛒', channel: 'Amazon', marketplacePrice: 4999, commission: 750, commissionPct: 15, platformFees: 75, shippingFees: 60, gst: 270, tcs: 50, netPayout: 3794 },
-  { productName: 'Smart Fitness Watch X2', productId: 'PROD-002', portal: 'Meesho', portalIcon: '📦', channel: 'Meesho', marketplacePrice: 4999, commission: 600, commissionPct: 12, platformFees: 40, shippingFees: 65, gst: 270, tcs: 50, netPayout: 3974 },
-  { productName: 'Smart Fitness Watch X2', productId: 'PROD-002', portal: 'Shopify', portalIcon: '🛒', channel: 'Shopify', marketplacePrice: 4999, commission: 0, commissionPct: 0, platformFees: 150, shippingFees: 70, gst: 270, tcs: 0, netPayout: 4509 },
-  { productName: 'Organic Cotton T-Shirt', productId: 'PROD-003', portal: 'Amazon', portalIcon: '🛒', channel: 'Amazon', marketplacePrice: 599, commission: 120, commissionPct: 20, platformFees: 15, shippingFees: 50, gst: 32, tcs: 6, netPayout: 376 },
-  { productName: 'Organic Cotton T-Shirt', productId: 'PROD-003', portal: 'Flipkart', portalIcon: '🛍️', channel: 'Flipkart', marketplacePrice: 599, commission: 108, commissionPct: 18, platformFees: 18, shippingFees: 45, gst: 32, tcs: 6, netPayout: 390 },
-  { productName: 'Baby Care Gift Set', productId: 'PROD-005', portal: 'FirstCry', portalIcon: '👶', channel: 'FirstCry', marketplacePrice: 1299, commission: 195, commissionPct: 15, platformFees: 25, shippingFees: 55, gst: 70, tcs: 13, netPayout: 941 },
-  { productName: 'Baby Care Gift Set', productId: 'PROD-005', portal: 'Own Website', portalIcon: '🌐', channel: 'Website', marketplacePrice: 1299, commission: 0, commissionPct: 0, platformFees: 35, shippingFees: 60, gst: 70, tcs: 0, netPayout: 1134 },
-  { productName: 'Stainless Steel Water Bottle', productId: 'PROD-004', portal: 'Blinkit', portalIcon: '⚡', channel: 'Blinkit', marketplacePrice: 799, commission: 160, commissionPct: 20, platformFees: 20, shippingFees: 0, gst: 43, tcs: 8, netPayout: 568 },
-];
+const mockPriceData: PriceBreakdown[] = [];
 
-const mockReconData: ReconEntry[] = [
-  { id: 'RC-001', productId: 'PROD-001', productName: 'Premium Wireless Earbuds Pro', channel: 'Amazon', channelIcon: '🛒', expectedSettlement: 225200, actualSettlement: 225200, commissionExpected: 45000, commissionActual: 45000, refundExpected: 2999, refundActual: 2999, penaltyAmount: 0, status: 'matched' },
-  { id: 'RC-002', productId: 'PROD-001', productName: 'Premium Wireless Earbuds Pro', channel: 'Flipkart', channelIcon: '🛍️', expectedSettlement: 231200, actualSettlement: 228500, commissionExpected: 39000, commissionActual: 41700, refundExpected: 0, refundActual: 0, penaltyAmount: 0, status: 'mismatch' },
-  { id: 'RC-003', productId: 'PROD-002', productName: 'Smart Fitness Watch X2', channel: 'Amazon', channelIcon: '🛒', expectedSettlement: 379400, actualSettlement: 379400, commissionExpected: 75000, commissionActual: 75000, refundExpected: 4999, refundActual: 4999, penaltyAmount: 0, status: 'matched' },
-  { id: 'RC-004', productId: 'PROD-002', productName: 'Smart Fitness Watch X2', channel: 'Meesho', channelIcon: '📦', expectedSettlement: 397400, actualSettlement: 385000, commissionExpected: 60000, commissionActual: 60000, refundExpected: 0, refundActual: 12400, penaltyAmount: 0, status: 'mismatch' },
-  { id: 'RC-005', productId: 'PROD-003', productName: 'Organic Cotton T-Shirt', channel: 'Amazon', channelIcon: '🛒', expectedSettlement: 37600, actualSettlement: 37600, commissionExpected: 12000, commissionActual: 12000, refundExpected: 599, refundActual: 599, penaltyAmount: 0, status: 'matched' },
-  { id: 'RC-006', productId: 'PROD-003', productName: 'Organic Cotton T-Shirt', channel: 'Flipkart', channelIcon: '🛍️', expectedSettlement: 39000, actualSettlement: 37200, commissionExpected: 10800, commissionActual: 12600, refundExpected: 0, refundActual: 0, penaltyAmount: 200, status: 'mismatch' },
-  { id: 'RC-007', productId: 'PROD-005', productName: 'Baby Care Gift Set', channel: 'FirstCry', channelIcon: '👶', expectedSettlement: 94100, actualSettlement: 0, commissionExpected: 19500, commissionActual: 0, refundExpected: 0, refundActual: 0, penaltyAmount: 0, status: 'pending' },
-  { id: 'RC-008', productId: 'PROD-004', productName: 'Stainless Steel Water Bottle', channel: 'Blinkit', channelIcon: '⚡', expectedSettlement: 56800, actualSettlement: 54300, commissionExpected: 16000, commissionActual: 18500, refundExpected: 799, refundActual: 799, penaltyAmount: 500, status: 'mismatch' },
-];
+const mockReconData: ReconEntry[] = [];
 
 const channels = ['All Channels', 'Amazon', 'Flipkart', 'Meesho', 'Shopify', 'Website', 'FirstCry', 'Blinkit'];
 

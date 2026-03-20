@@ -27,12 +27,7 @@ interface BroadcastMessage {
   opens?: number;
 }
 
-const mockBroadcasts: BroadcastMessage[] = [
-  { id: '1', channel: 'whatsapp', title: 'Flash Sale Alert – 50% Off!', content: 'Don\'t miss our biggest sale...', status: 'sent', sentAt: '2026-03-09T10:30:00', reach: 2450, opens: 1820 },
-  { id: '2', channel: 'whatsapp', title: 'New Arrivals This Week', content: 'Check out our latest collection...', status: 'scheduled', scheduledAt: '2026-03-12T09:00:00', reach: 0 },
-  { id: '3', channel: 'youtube', title: 'Product Demo: Smart Watch Pro', content: 'Live demo of our newest smartwatch...', status: 'sent', sentAt: '2026-03-08T15:00:00', reach: 8920, opens: 3400 },
-  { id: '4', channel: 'community', title: 'Weekly Q&A Thread', content: 'Ask us anything about our products...', status: 'sent', sentAt: '2026-03-07T12:00:00', reach: 560, opens: 340 },
-  { id: '5', channel: 'youtube', title: 'Behind the Scenes: Factory Tour', content: 'Take a virtual tour of our factory...', status: 'draft', reach: 0 },
+const mockBroadcasts: BroadcastMessage[] = [];
   { id: '6', channel: 'community', title: 'Vendor Meet-up: March 2026', content: 'Join us for our monthly community meetup...', status: 'scheduled', scheduledAt: '2026-03-15T18:00:00', reach: 0 },
 ];
 

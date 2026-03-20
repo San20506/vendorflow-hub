@@ -11,11 +11,11 @@ const fmt = (n: number) => '₹' + n.toLocaleString('en-IN');
 type Channel = 'all' | 'amazon' | 'flipkart' | 'meesho' | 'website' | 'blinkit';
 
 const channelPnLData: Record<Exclude<Channel, 'all'>, { revenue: number; commission: number; logistics: number; refundImpact: number; otherExpenses: number; gst: number }> = {
-  amazon:   { revenue: 185000, commission: 16650, logistics: 9250, refundImpact: 5550, otherExpenses: 5000, gst: 33300 },
-  flipkart: { revenue: 142000, commission: 11360, logistics: 7100, refundImpact: 2840, otherExpenses: 4000, gst: 25560 },
-  meesho:   { revenue: 78000,  commission: 5460,  logistics: 3900, refundImpact: 2340, otherExpenses: 2500, gst: 14040 },
-  website:  { revenue: 55000,  commission: 2750,  logistics: 2750, refundImpact: 825,  otherExpenses: 2000, gst: 9900 },
-  blinkit:  { revenue: 25000,  commission: 2500,  logistics: 1250, refundImpact: 500,  otherExpenses: 1500, gst: 4500 },
+  amazon:   { revenue: 0, commission: 0, logistics: 0, refundImpact: 0, otherExpenses: 0, gst: 0 },
+  flipkart: { revenue: 0, commission: 0, logistics: 0, refundImpact: 0, otherExpenses: 0, gst: 0 },
+  meesho:   { revenue: 0, commission: 0, logistics: 0, refundImpact: 0, otherExpenses: 0, gst: 0 },
+  website:  { revenue: 0, commission: 0, logistics: 0, refundImpact: 0, otherExpenses: 0, gst: 0 },
+  blinkit:  { revenue: 0, commission: 0, logistics: 0, refundImpact: 0, otherExpenses: 0, gst: 0 },
 };
 
 const channelLabels: Record<Exclude<Channel, 'all'>, string> = {

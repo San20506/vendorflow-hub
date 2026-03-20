@@ -20,11 +20,7 @@ interface NDAFile {
   expiryDate: string;
 }
 
-const mockNDAs: NDAFile[] = [
-  { id: 'NDA-001', name: 'Vendor_NDA_Amazon_2026.pdf', uploadedBy: 'Admin', uploadedAt: '2026-01-15', status: 'active', expiryDate: '2027-01-15' },
-  { id: 'NDA-002', name: 'Contractor_NDA_DevTeam.pdf', uploadedBy: 'Admin', uploadedAt: '2025-08-20', status: 'expired', expiryDate: '2026-02-01' },
-  { id: 'NDA-003', name: 'Partner_NDA_Flipkart_2026.pdf', uploadedBy: 'Legal', uploadedAt: '2026-02-10', status: 'pending_review', expiryDate: '2027-02-10' },
-];
+const mockNDAs: NDAFile[] = [];
 
 interface ChecklistItem {
   id: string;
