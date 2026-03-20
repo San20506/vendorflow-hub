@@ -75,8 +75,8 @@ export default function Reports() {
     }
   };
 
-  const handleExport = (type: 'excel' | 'pdf') => {
-    toast({ title: `Export to ${type === 'excel' ? 'Excel' : 'PDF'}`, description: `Preparing ${type.toUpperCase()} export...` });
+  const handleExport = (type: 'excel' | 'pdf' | 'txt') => {
+    toast({ title: `Export to ${type === 'excel' ? 'Excel' : type === 'pdf' ? 'PDF' : 'TXT'}`, description: `Preparing ${type.toUpperCase()} export...` });
   };
 
   const actionIcons: Record<string, React.ElementType> = {
