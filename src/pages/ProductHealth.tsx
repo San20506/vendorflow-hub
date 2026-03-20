@@ -185,6 +185,7 @@ export default function ProductHealth() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="health" className="gap-1.5"><Activity className="w-4 h-4" />Health Status</TabsTrigger>
+          <TabsTrigger value="prices" className="gap-1.5"><IndianRupee className="w-4 h-4" />Price Comparison</TabsTrigger>
           <TabsTrigger value="urls" className="gap-1.5"><Link2 className="w-4 h-4" />Product URLs</TabsTrigger>
           <TabsTrigger value="channels" className="gap-1.5"><Globe className="w-4 h-4" />Channel Details</TabsTrigger>
         </TabsList>
