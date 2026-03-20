@@ -76,7 +76,7 @@ export default function SettlementCycleTracker() {
                 <SelectTrigger className="w-[160px]"><SelectValue placeholder="Portal" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Portals</SelectItem>
-                  {portalConfigs.map(p => <SelectItem key={p.id} value={p.id}>{p.icon} {p.name}</SelectItem>)}
+                  {portalConfigs.map(p => <SelectItem key={p.id} value={p.id}><span className="flex items-center gap-2"><ChannelIcon channelId={p.id} fallbackIcon={p.icon} size={16} /> {p.name}</span></SelectItem>)}
                 </SelectContent>
               </Select>
               <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as DelayStatus | 'all')}>
