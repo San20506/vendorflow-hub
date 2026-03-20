@@ -1604,20 +1604,27 @@ export type Database = {
       }
       sku_mappings: {
         Row: {
+          amazon_price: number | null
           amazon_sku: string | null
           amazon_url: string | null
+          blinkit_price: number | null
           blinkit_sku: string | null
           blinkit_url: string | null
           brand: string | null
           created_at: string
+          firstcry_price: number | null
           firstcry_sku: string | null
           firstcry_url: string | null
+          flipkart_price: number | null
           flipkart_sku: string | null
           flipkart_url: string | null
           id: string
           master_sku_id: string
+          meesho_price: number | null
           meesho_sku: string | null
           meesho_url: string | null
+          mrp: number | null
+          own_website_price: number | null
           own_website_sku: string | null
           own_website_url: string | null
           product_name: string
@@ -1625,20 +1632,27 @@ export type Database = {
           vendor_id: string | null
         }
         Insert: {
+          amazon_price?: number | null
           amazon_sku?: string | null
           amazon_url?: string | null
+          blinkit_price?: number | null
           blinkit_sku?: string | null
           blinkit_url?: string | null
           brand?: string | null
           created_at?: string
+          firstcry_price?: number | null
           firstcry_sku?: string | null
           firstcry_url?: string | null
+          flipkart_price?: number | null
           flipkart_sku?: string | null
           flipkart_url?: string | null
           id?: string
           master_sku_id: string
+          meesho_price?: number | null
           meesho_sku?: string | null
           meesho_url?: string | null
+          mrp?: number | null
+          own_website_price?: number | null
           own_website_sku?: string | null
           own_website_url?: string | null
           product_name: string
@@ -1646,20 +1660,27 @@ export type Database = {
           vendor_id?: string | null
         }
         Update: {
+          amazon_price?: number | null
           amazon_sku?: string | null
           amazon_url?: string | null
+          blinkit_price?: number | null
           blinkit_sku?: string | null
           blinkit_url?: string | null
           brand?: string | null
           created_at?: string
+          firstcry_price?: number | null
           firstcry_sku?: string | null
           firstcry_url?: string | null
+          flipkart_price?: number | null
           flipkart_sku?: string | null
           flipkart_url?: string | null
           id?: string
           master_sku_id?: string
+          meesho_price?: number | null
           meesho_sku?: string | null
           meesho_url?: string | null
+          mrp?: number | null
+          own_website_price?: number | null
           own_website_sku?: string | null
           own_website_url?: string | null
           product_name?: string
