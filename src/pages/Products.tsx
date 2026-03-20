@@ -46,25 +46,35 @@ export default function Products() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({ name: '', masterSku: '', brand: '', category: '', hsn: '', mrp: '', basePrice: '', gst: '' });
 
-  const { options: brandOptions, loading: brandsLoading } = useDropdownOptions('brand');
+  const { options: brandOptions } = useDropdownOptions('brand');
+  const { options: categoryOptions } = useDropdownOptions('category');
+  const { options: sizeOptions } = useDropdownOptions('size');
   const [newBrandName, setNewBrandName] = useState('');
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newSizeName, setNewSizeName] = useState('');
   const [addingBrand, setAddingBrand] = useState(false);
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [addingSize, setAddingSize] = useState(false);
   const [localBrands, setLocalBrands] = useState<{ label: string; value: string }[]>([]);
+  const [localCategories, setLocalCategories] = useState<{ label: string; value: string }[]>([]);
+  const [localSizes, setLocalSizes] = useState<{ label: string; value: string }[]>([]);
 
   useEffect(() => { setLocalBrands(brandOptions); }, [brandOptions]);
+  useEffect(() => { setLocalCategories(categoryOptions); }, [categoryOptions]);
+  useEffect(() => { setLocalSizes(sizeOptions); }, [sizeOptions]);
 
-  const handleAddBrand = async () => {
-    const name = newBrandName.trim();
-    if (!name) return;
-    setAddingBrand(true);
+  const handleAddDropdownItem = async (fieldType: string, name: string, setLocal: React.Dispatch<React.SetStateAction<{label:string;value:string}[]>>, setNew: React.Dispatch<React.SetStateAction<string>>, setAdding: React.Dispatch<React.SetStateAction<boolean>>, formKey?: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setAdding(true);
     try {
-      await dropdownOptionsDb.create({ field_type: 'brand', label: name, value: name });
-      setLocalBrands(prev => [...prev, { label: name, value: name }]);
-      setFormData(f => ({ ...f, brand: name }));
-      setNewBrandName('');
-      toast({ title: 'Brand Added', description: `"${name}" has been added to brands.` });
-    } catch { toast({ title: 'Error', description: 'Failed to add brand', variant: 'destructive' }); }
-    setAddingBrand(false);
+      await dropdownOptionsDb.create({ field_type: fieldType, label: trimmed, value: trimmed });
+      setLocal(prev => [...prev, { label: trimmed, value: trimmed }]);
+      if (formKey) setFormData(f => ({ ...f, [formKey]: trimmed }));
+      setNew('');
+      toast({ title: `${fieldType.charAt(0).toUpperCase() + fieldType.slice(1)} Added`, description: `"${trimmed}" has been added.` });
+    } catch { toast({ title: 'Error', description: `Failed to add ${fieldType}`, variant: 'destructive' }); }
+    setAdding(false);
   };
 
   const [allProducts, setAllProducts] = useState<any[]>([]);
