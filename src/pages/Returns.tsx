@@ -213,7 +213,7 @@ export default function Returns() {
     toast({ title: 'Stage Advanced', description: `Return ${returnId} moved to next stage` });
   };
 
-  const handleExport = (type: 'excel' | 'pdf') => {
+  const handleExport = (type: 'excel' | 'pdf' | 'txt') => {
     toast({ title: `${type.toUpperCase()} Export`, description: `${currentFiltered.length} items exported` });
   };
 
@@ -358,6 +358,9 @@ export default function Returns() {
           </Button>
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleExport('pdf')}>
             <FileDown className="w-4 h-4" />PDF
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleExport('txt')}>
+            <FileDown className="w-4 h-4" />TXT
           </Button>
           <GlobalDateFilter value={globalDateRange} onChange={setGlobalDateRange} />
           <ExportButton selectedCount={rowSelection.count} data={filteredReturns} filename="returns" />

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { IndianRupee, TrendingUp, Download, FileSpreadsheet, AlertTriangle, CheckCircle2, XCircle, Shield, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { IndianRupee, TrendingUp, Download, FileSpreadsheet, FileDown, FileText, AlertTriangle, CheckCircle2, XCircle, Shield, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import PriceAuditEngine from '@/components/settlements/PriceAuditEngine';
 import { GlobalDateFilter, type DateRange } from '@/components/GlobalDateFilter';
 import { useToast } from '@/hooks/use-toast';
@@ -94,8 +94,8 @@ export default function PricePayout() {
     return { totalExpected, totalReceived, totalDiff, mismatches, totalPenalty };
   }, [filteredRecon]);
 
-  const handleExport = () => {
-    toast({ title: 'Export Initiated', description: `Exporting ${activeTab === 'payout' ? 'payout' : 'reconciliation'} data` });
+  const handleExport = (format: 'excel' | 'pdf' | 'txt' = 'excel') => {
+    toast({ title: `${format.toUpperCase()} Export Initiated`, description: `Exporting ${activeTab === 'payout' ? 'payout' : 'reconciliation'} data` });
   };
 
   return (
@@ -105,9 +105,17 @@ export default function PricePayout() {
           <h1 className="text-2xl font-bold text-foreground">Price & Payout Split</h1>
           <p className="text-muted-foreground">Per-product payout breakdown & channel reconciliation engine</p>
         </div>
-        <Button variant="outline" className="gap-2" onClick={handleExport}>
-          <Download className="w-4 h-4" />Export to Excel
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => handleExport('excel')}>
+            <FileSpreadsheet className="w-4 h-4" />Excel
+          </Button>
+          <Button variant="outline" className="gap-2" onClick={() => handleExport('pdf')}>
+            <FileDown className="w-4 h-4" />PDF
+          </Button>
+          <Button variant="outline" className="gap-2" onClick={() => handleExport('txt')}>
+            <FileText className="w-4 h-4" />TXT
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>

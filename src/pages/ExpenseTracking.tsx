@@ -13,7 +13,7 @@ import { expensesDb } from '@/services/database';
 import { useDropdownOptions } from '@/hooks/useDropdownOptions';
 import {
   Plus, Download, Search, IndianRupee, TrendingUp, TrendingDown,
-  Building2, Warehouse, Coffee, Bus, Pencil, Receipt, Calendar, Trash2, Loader2, AlertCircle
+  Building2, Warehouse, Coffee, Bus, Pencil, Receipt, Calendar, Trash2, Loader2, AlertCircle, FileSpreadsheet, FileDown, FileText
 } from 'lucide-react';
 
 const iconMap: Record<string, any> = {
@@ -120,7 +120,9 @@ export default function ExpenseTracking() {
           <p className="text-muted-foreground">Track office, warehouse & daily business expenses</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export</Button>
+          <Button variant="outline" size="sm"><FileSpreadsheet className="w-4 h-4 mr-2" />Excel</Button>
+          <Button variant="outline" size="sm"><FileDown className="w-4 h-4 mr-2" />PDF</Button>
+          <Button variant="outline" size="sm"><FileText className="w-4 h-4 mr-2" />TXT</Button>
           <Dialog open={showAddDialog} onOpenChange={(open) => { setShowAddDialog(open); if (!open) setErrors({}); }}>
             <DialogTrigger asChild>
               <Button size="sm"><Plus className="w-4 h-4 mr-2" />Add Expense</Button>

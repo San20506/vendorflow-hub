@@ -61,8 +61,8 @@ export default function LegalCompliance() {
     toast({ title: 'Upload NDA', description: 'NDA upload dialog opened. Select your file to proceed.' });
   };
 
-  const handleExport = () => {
-    toast({ title: 'Report Exported', description: 'Compliance report exported successfully.' });
+  const handleExport = (format: 'excel' | 'pdf' | 'txt' = 'excel') => {
+    toast({ title: `${format.toUpperCase()} Report Exported`, description: 'Compliance report exported successfully.' });
   };
 
   const statusBadge = (status: NDAFile['status']) => {
@@ -78,9 +78,17 @@ export default function LegalCompliance() {
           <h1 className="text-2xl font-bold text-foreground">Legal & Compliance</h1>
           <p className="text-muted-foreground">NDA management, IP protection, security assessments & audit readiness</p>
         </div>
-        <Button variant="outline" className="gap-2" onClick={handleExport}>
-          <Download className="w-4 h-4" />Export Compliance Report
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => handleExport('excel')}>
+            <Download className="w-4 h-4" />Excel
+          </Button>
+          <Button variant="outline" className="gap-2" onClick={() => handleExport('pdf')}>
+            <Download className="w-4 h-4" />PDF
+          </Button>
+          <Button variant="outline" className="gap-2" onClick={() => handleExport('txt')}>
+            <FileText className="w-4 h-4" />TXT
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

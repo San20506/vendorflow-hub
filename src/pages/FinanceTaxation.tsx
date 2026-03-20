@@ -320,7 +320,7 @@ export default function FinanceTaxation() {
     setPurchaseDialog(false);
   };
 
-  const handleExport = (what: string, format: 'excel' | 'pdf') => {
+  const handleExport = (what: string, format: 'excel' | 'pdf' | 'txt') => {
     toast({ title: `Export ${format.toUpperCase()}`, description: `Preparing ${what} export...` });
   };
 
@@ -450,6 +450,9 @@ export default function FinanceTaxation() {
           <Button variant="outline" className="gap-2" onClick={() => handleExport('Finance Data', 'pdf')}>
             <FileDown className="w-4 h-4" />PDF
           </Button>
+          <Button variant="outline" className="gap-2" onClick={() => handleExport('Finance Data', 'txt')}>
+            <FileText className="w-4 h-4" />TXT
+          </Button>
         </div>
       </div>
 
@@ -492,6 +495,7 @@ export default function FinanceTaxation() {
             <div className="ml-auto flex gap-2">
               <Button variant="outline" size="sm" className="gap-1" onClick={() => handleExport('Invoices', 'excel')}><FileSpreadsheet className="w-3.5 h-3.5" />Excel</Button>
               <Button variant="outline" size="sm" className="gap-1" onClick={() => handleExport('Invoices', 'pdf')}><FileDown className="w-3.5 h-3.5" />PDF</Button>
+              <Button variant="outline" size="sm" className="gap-1" onClick={() => handleExport('Invoices', 'txt')}><FileText className="w-3.5 h-3.5" />TXT</Button>
             </div>
           </div>
 
@@ -579,6 +583,7 @@ export default function FinanceTaxation() {
             <Button className="gap-2" onClick={() => setQuotationDialog(true)}><Plus className="w-4 h-4" />New Quotation</Button>
             <div className="ml-auto flex gap-2">
               <Button variant="outline" size="sm" className="gap-1" onClick={() => handleExport('Quotations', 'excel')}><FileSpreadsheet className="w-3.5 h-3.5" />Excel</Button>
+              <Button variant="outline" size="sm" className="gap-1" onClick={() => handleExport('Quotations', 'txt')}><FileText className="w-3.5 h-3.5" />TXT</Button>
             </div>
           </div>
           <Card>
@@ -636,6 +641,7 @@ export default function FinanceTaxation() {
             <div className="ml-auto flex gap-2">
               <Button variant="outline" size="sm" className="gap-1" onClick={() => handleExport('Purchase Bills', 'excel')}><FileSpreadsheet className="w-3.5 h-3.5" />Excel</Button>
               <Button variant="outline" size="sm" className="gap-1" onClick={() => handleExport('Purchase Bills', 'pdf')}><FileDown className="w-3.5 h-3.5" />PDF</Button>
+              <Button variant="outline" size="sm" className="gap-1" onClick={() => handleExport('Purchase Bills', 'txt')}><FileText className="w-3.5 h-3.5" />TXT</Button>
             </div>
           </div>
 
@@ -705,6 +711,7 @@ export default function FinanceTaxation() {
                 <Download className="w-4 h-4" />Export GSTR-1 CSV
               </Button>
               <Button variant="outline" size="sm" className="gap-1" onClick={() => handleExport('GSTR-1', 'excel')}><FileSpreadsheet className="w-3.5 h-3.5" />Excel</Button>
+              <Button variant="outline" size="sm" className="gap-1" onClick={() => handleExport('GSTR-1', 'txt')}><FileText className="w-3.5 h-3.5" />TXT</Button>
             </div>
           </div>
 

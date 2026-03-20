@@ -75,8 +75,8 @@ export default function Reports() {
     }
   };
 
-  const handleExport = (type: 'excel' | 'pdf') => {
-    toast({ title: `Export to ${type === 'excel' ? 'Excel' : 'PDF'}`, description: `Preparing ${type.toUpperCase()} export...` });
+  const handleExport = (type: 'excel' | 'pdf' | 'txt') => {
+    toast({ title: `Export to ${type === 'excel' ? 'Excel' : type === 'pdf' ? 'PDF' : 'TXT'}`, description: `Preparing ${type.toUpperCase()} export...` });
   };
 
   const actionIcons: Record<string, React.ElementType> = {
@@ -118,6 +118,7 @@ export default function Reports() {
           <div className="flex flex-wrap items-center gap-3">
             <Button variant="outline" className="gap-2" onClick={() => handleExport('excel')}><FileSpreadsheet className="w-4 h-4" />Export to Excel</Button>
             <Button variant="outline" className="gap-2" onClick={() => handleExport('pdf')}><FileDown className="w-4 h-4" />Export to PDF</Button>
+            <Button variant="outline" className="gap-2" onClick={() => handleExport('txt')}><FileText className="w-4 h-4" />Export to TXT</Button>
           </div>
 
           <Card>

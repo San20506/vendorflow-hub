@@ -167,7 +167,7 @@ export default function Subscription() {
     }));
   };
 
-  const handleExport = (fmt: 'excel' | 'pdf') => {
+  const handleExport = (fmt: 'excel' | 'pdf' | 'txt') => {
     toast({ title: `Export ${fmt.toUpperCase()}`, description: `Preparing subscription data export...` });
   };
 
@@ -197,6 +197,9 @@ export default function Subscription() {
           </Button>
           <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleExport('pdf')}>
             <FileDown className="w-4 h-4" />PDF
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleExport('txt')}>
+            <FileDown className="w-4 h-4" />TXT
           </Button>
         </div>
       </div>

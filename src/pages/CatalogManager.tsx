@@ -118,7 +118,7 @@ export default function CatalogManager() {
     toast({ title: `Portal ${action === 'enable' ? 'Enabled' : 'Disabled'}`, description: `${portal} ${action}d for ${selectedIds.length} products.` });
   };
 
-  const handleExport = (format: 'excel' | 'pdf') => {
+  const handleExport = (format: 'excel' | 'pdf' | 'txt') => {
     const dataToExport = selectedIds.length > 0
       ? filteredProducts.filter(p => selectedIds.includes(p.id))
       : filteredProducts;
@@ -194,6 +194,9 @@ export default function CatalogManager() {
           </Button>
           <Button variant="outline" className="gap-2" onClick={() => handleExport('pdf')}>
             <FileText className="w-4 h-4" />Export PDF
+          </Button>
+          <Button variant="outline" className="gap-2" onClick={() => handleExport('txt')}>
+            <FileText className="w-4 h-4" />Export TXT
           </Button>
         </div>
       </div>

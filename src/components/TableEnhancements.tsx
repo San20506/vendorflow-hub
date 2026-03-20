@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, Calendar, Upload, X, CheckCircle, AlertTriangle, XCircle, FileDown } from 'lucide-react';
+import { Download, Calendar, Upload, X, CheckCircle, AlertTriangle, XCircle, FileDown, FileText } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -79,11 +79,40 @@ export function ExportButton({ label, selectedCount, data, filename }: { label?:
     }
   };
 
+  const handleTxtExport = () => {
+    if (!data || data.length === 0) {
+      toast({ title: 'No Data', description: 'No data available to export.', variant: 'destructive' });
+      return;
+    }
+    try {
+      const headers = Object.keys(data[0]);
+      const lines = data.map(row => headers.map(h => `${h}: ${row[h] ?? ''}`).join(' | '));
+      const txtContent = lines.join('\n');
+      const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${filename || 'export'}_${new Date().toISOString().slice(0, 10)}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast({ title: 'TXT Export Complete', description: `${data.length} rows exported as TXT.` });
+    } catch {
+      toast({ title: 'Export Failed', description: 'Could not generate TXT file.', variant: 'destructive' });
+    }
+  };
+
   return (
-    <Button variant="outline" className="gap-2" onClick={handleExport}>
-      <Download className="w-4 h-4" />
-      {dynamicLabel}
-    </Button>
+    <div className="flex gap-1">
+      <Button variant="outline" className="gap-2" onClick={handleExport}>
+        <Download className="w-4 h-4" />
+        {dynamicLabel}
+      </Button>
+      <Button variant="outline" size="sm" className="gap-1.5" onClick={handleTxtExport}>
+        <FileText className="w-4 h-4" />TXT
+      </Button>
+    </div>
   );
 }
 

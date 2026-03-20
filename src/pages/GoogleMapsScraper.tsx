@@ -89,15 +89,15 @@ export default function GoogleMapsScraper() {
   const toggleRow = (id: number) => setSelectedRows(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   const selectAll = () => setSelectedRows(filtered.map(b => b.id));
 
-  const handleExport = (format: 'csv' | 'excel') => {
+  const handleExport = (format: 'csv' | 'excel' | 'txt') => {
     const data = (selectedRows.length > 0 ? filtered.filter(b => selectedRows.includes(b.id)) : filtered);
-    if (format === 'csv') {
+    if (format === 'csv' || format === 'txt') {
       const headers = 'Name,Category,Rating,Reviews,Phone,Address,Website,Hours,Status,Price Level\n';
       const rows = data.map(b => `"${b.name}","${b.category}",${b.rating},${b.reviews},"${b.phone}","${b.address}","${b.website}","${b.hours}","${b.status}","${b.priceLevel}"`).join('\n');
-      const blob = new Blob([headers + rows], { type: 'text/csv' });
+      const blob = new Blob([headers + rows], { type: format === 'txt' ? 'text/plain' : 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = `google-maps-data-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+      a.href = url; a.download = `google-maps-data-${new Date().toISOString().slice(0, 10)}.${format === 'txt' ? 'txt' : 'csv'}`; a.click();
       URL.revokeObjectURL(url);
     }
     toast({ title: `Exported ${data.length} records`, description: `Data exported as ${format.toUpperCase()}` });
@@ -163,6 +163,9 @@ export default function GoogleMapsScraper() {
                   </Button>
                   <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleExport('excel')}>
                     <FileSpreadsheet className="w-4 h-4" />Export Excel
+                  </Button>
+                  <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleExport('txt')}>
+                    <Download className="w-4 h-4" />Export TXT
                   </Button>
                 </div>
               </div>
