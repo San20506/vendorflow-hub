@@ -323,7 +323,7 @@ export function AppSidebar() {
               <div className={`px-3 py-2.5 ${sectionIndex > 0 ? 'mt-3 pt-4' : ''}`}
                 style={sectionIndex > 0 ? { borderTop: '1px solid rgba(197, 157, 217, 0.08)' } : {}}
               >
-                <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: 'rgba(197, 157, 217, 0.5)' }}>
+                <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: 'rgba(220, 190, 240, 0.85)' }}>
                   {section.heading}
                 </span>
               </div>
@@ -337,7 +337,7 @@ export function AppSidebar() {
                   {!isCollapsed ? (
                     <CollapsibleTrigger
                       className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors"
-                      style={{ color: 'rgba(197, 157, 217, 0.45)' }}
+                      style={{ color: 'rgba(220, 190, 240, 0.8)' }}
                     >
                       {group.label}
                       <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-data-[state=closed]/collapsible:rotate-[-90deg]" />
@@ -368,7 +368,7 @@ export function AppSidebar() {
                                     fontWeight: 500,
                                     boxShadow: '0 0 20px rgba(197, 157, 217, 0.3), 0 4px 12px rgba(122, 63, 145, 0.2)',
                                   } : {
-                                    color: 'rgba(255, 255, 255, 0.55)',
+                                    color: 'rgba(255, 255, 255, 0.85)',
                                   }}
                                 >
                                   <item.icon className="w-4 h-4 shrink-0" />
