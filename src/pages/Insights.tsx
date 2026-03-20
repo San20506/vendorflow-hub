@@ -7,12 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   TrendingUp, TrendingDown, IndianRupee, Users, ShoppingCart, Package,
   BarChart3, HeadphonesIcon, Clock, AlertTriangle, Activity, Zap,
-  ArrowUpRight, ArrowDownRight, ShieldAlert, CheckCircle2, Filter,
+  ArrowUpRight, ArrowDownRight, ShieldAlert, CheckCircle2, Filter, LayoutDashboard,
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LabelList,
 } from 'recharts';
+import Dashboard from '@/pages/Dashboard';
 
 const fmt = (n: number) => '₹' + n.toLocaleString('en-IN');
 
