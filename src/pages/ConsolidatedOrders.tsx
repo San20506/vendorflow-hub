@@ -239,8 +239,8 @@ export default function ConsolidatedOrders() {
 
   const exportLabel = isYoY ? 'Export – Year Comparison' : dateRange === 'this_year' ? `Export – ${currentYear}` : dateRange === 'last_year' ? `Export – ${prevYear}` : 'Export to Excel';
 
-  const handleExport = (format: 'excel' | 'pdf' = 'excel') => {
-    toast({ title: `${format === 'pdf' ? 'PDF' : 'Excel'} Export Started`, description: `Preparing ${format.toUpperCase()}: ${exportLabel}` });
+  const handleExport = (format: 'excel' | 'pdf' | 'txt' = 'excel') => {
+    toast({ title: `${format.toUpperCase()} Export Started`, description: `Preparing ${format.toUpperCase()}: ${exportLabel}` });
   };
 
   const handleCopySku = (sku: string) => {
