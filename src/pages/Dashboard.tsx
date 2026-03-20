@@ -31,6 +31,7 @@ import {
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { criticalDecisionToggle } = useAIAccess();
   const [selectedPortal, setSelectedPortal] = useState<Portal | 'all'>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [salesViewMode, setSalesViewMode] = useState<'revenue' | 'units'>('revenue');
