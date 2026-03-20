@@ -1,7 +1,9 @@
 import { useSyncExternalStore } from 'react';
 import { Portal } from '@/types';
 import { getChannels, subscribeChannels } from '@/services/channelManager';
+import { getChannelLogo } from '@/utils/channelLogos';
 import { cn } from '@/lib/utils';
+import { Check } from 'lucide-react';
 
 interface PortalFilterProps {
   selectedPortal: Portal | 'all';
@@ -13,34 +15,45 @@ export function PortalFilter({ selectedPortal, onPortalChange, className }: Port
   const channels = useSyncExternalStore(subscribeChannels, getChannels);
 
   return (
-    <div className={cn('flex items-center gap-2 flex-wrap', className)}>
+    <div className={cn('flex flex-col gap-1', className)}>
       <button
         onClick={() => onPortalChange('all')}
         className={cn(
-          'px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200',
+          'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left',
           selectedPortal === 'all'
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-muted text-muted-foreground hover:bg-muted/80'
+            ? 'bg-primary/10 text-primary'
+            : 'text-muted-foreground hover:bg-muted'
         )}
       >
-        All Portals
+        {selectedPortal === 'all' && <Check className="w-4 h-4 text-primary" />}
+        {selectedPortal !== 'all' && <span className="w-4" />}
+        <span>All Channels</span>
       </button>
       
-      {channels.map((portal) => (
-        <button
-          key={portal.id}
-          onClick={() => onPortalChange(portal.id)}
-          className={cn(
-            'px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-1.5',
-            selectedPortal === portal.id
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-muted-foreground hover:bg-muted/80'
-          )}
-        >
-          <span>{portal.icon}</span>
-          <span>{portal.name}</span>
-        </button>
-      ))}
+      {channels.map((portal) => {
+        const logo = getChannelLogo(portal.id);
+        return (
+          <button
+            key={portal.id}
+            onClick={() => onPortalChange(portal.id)}
+            className={cn(
+              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left',
+              selectedPortal === portal.id
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-muted'
+            )}
+          >
+            {selectedPortal === portal.id && <Check className="w-4 h-4 text-primary" />}
+            {selectedPortal !== portal.id && <span className="w-4" />}
+            {logo ? (
+              <img src={logo} alt={portal.name} className="w-5 h-5 object-contain" />
+            ) : (
+              <span className="text-base">{portal.icon}</span>
+            )}
+            <span>{portal.name}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
