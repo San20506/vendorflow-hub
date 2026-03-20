@@ -529,7 +529,6 @@ export default function SystemSettings() {
           </Card>
         </TabsContent>
 
-
                   <CardDescription>Security-driven access control — configure feature access per role</CardDescription>
                 </div>
                 <div className="flex gap-2">
