@@ -176,8 +176,8 @@ export default function Orders() {
 
   // Video reconciliation state
   const [videoRecords, setVideoRecords] = useState<Record<string, VideoRecord>>({});
-  const [returnPolicyDays] = useState(15);
-  const [videoRetentionDays] = useState(100);
+  const [returnPolicyDays] = useState(30);
+  const [videoRetentionDays] = useState(120);
 
   useEffect(() => {
     if (allOrders.length > 0) setVideoRecords(generateVideoRecords(allOrders));
