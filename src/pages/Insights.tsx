@@ -483,7 +483,7 @@ export default function Insights() {
           <ExecutiveWidgets orders={[]} formatCurrency={(n: number) => '₹' + n.toLocaleString('en-IN')} />
           <div className="mt-6"><ExecutiveDashboard /></div>
         </TabsContent>
-        <TabsContent value="sales"><SalesDashboard /></TabsContent>
+        <TabsContent value="sales"><Dashboard /></TabsContent>
         <TabsContent value="support"><SupportDashboard /></TabsContent>
         <TabsContent value="financial"><FinancialDashboard /></TabsContent>
         <TabsContent value="operations"><OperationsDashboard /></TabsContent>
