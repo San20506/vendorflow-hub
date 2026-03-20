@@ -42,16 +42,7 @@ export interface ClientCategory {
 
 export const CLIENT_CATEGORIES: ClientCategory[] = [];
 
-export const SAMPLE_CONTACTS: ClientContact[] = [
-  { id: 'C-001', name: 'Vikram Patel', phone: '+91 98765 43210', category: 'vip', tags: ['frequent', 'bulk'], lastMessage: 'Order confirmed' },
-  { id: 'C-002', name: 'Meena Sharma', phone: '+91 87654 32109', category: 'wholesale', tags: ['wholesale'], lastMessage: 'Shipping update sent' },
-  { id: 'C-003', name: 'Amit Kumar', phone: '+91 76543 21098', category: 'retail', tags: ['new'], lastMessage: 'Payment reminder' },
-  { id: 'C-004', name: 'Sneha Reddy', phone: '+91 65432 10987', category: 'new', tags: ['lead'], lastMessage: 'Inquiry received' },
-  { id: 'C-005', name: 'Ravi Joshi', phone: '+91 54321 09876', category: 'vip', tags: ['premium'], lastMessage: 'OTP sent' },
-  { id: 'C-006', name: 'Priya Nair', phone: '+91 43210 98765', category: 'wholesale', tags: ['bulk'], lastMessage: 'Invoice shared' },
-  { id: 'C-007', name: 'Karan Singh', phone: '+91 32109 87654', category: 'retail', tags: [], lastMessage: 'Delivery confirmed' },
-  { id: 'C-008', name: 'Anita Desai', phone: '+91 21098 76543', category: 'inactive', tags: ['churned'], lastMessage: '3 months ago' },
-];
+export const SAMPLE_CONTACTS: ClientContact[] = [];
 
 export const SAMPLE_TEMPLATES: WhatsAppTemplate[] = [
   { id: 'TPL-001', name: 'order_confirmation', category: 'utility', status: 'approved', language: 'en', body: 'Hi {{1}}, your order {{2}} has been confirmed. Track: {{3}}', lastUsed: '', sentCount: 1240 },
