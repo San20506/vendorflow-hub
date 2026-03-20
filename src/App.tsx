@@ -129,8 +129,9 @@ const App = () => (
             <Route path="/staff" element={<AppLayout><StaffManagement /></AppLayout>} />
             <Route path="/technical-docs" element={<AppLayout><TechnicalDocs /></AppLayout>} />
             <Route path="/broadcast" element={<AppLayout><Broadcast /></AppLayout>} />
-            <Route path="/profit-calculator" element={<AppLayout><ProfitCalculator /></AppLayout>} />
-            <Route path="/payout-comparison" element={<AppLayout><PayoutComparison /></AppLayout>} />
+            <Route path="/profit-calculator" element={<Navigate to="/price-payout" replace />} />
+            <Route path="/payout-comparison" element={<Navigate to="/price-payout" replace />} />
+            <Route path="/ai-learning" element={<Navigate to="/chatbot" replace />} />
             <Route path="/integrations" element={<AppLayout><Integrations /></AppLayout>} />
             <Route path="/purchase" element={<AppLayout><PurchaseManagement /></AppLayout>} />
             <Route path="/review-analytics" element={<AppLayout><ReviewRatingAnalytics /></AppLayout>} />
