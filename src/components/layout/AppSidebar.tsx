@@ -119,6 +119,12 @@ const navigationSections: NavSection[] = [
           { title: 'Data Intelligence', url: '/data-intelligence', icon: MapPin, roles: ['admin'] },
         ],
       },
+      {
+        label: 'Affiliated',
+        items: [
+          { title: 'Affiliated', url: '/affiliated', icon: Handshake, roles: ['admin', 'vendor'] },
+        ],
+      },
     ],
   },
   {
