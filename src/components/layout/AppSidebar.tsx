@@ -26,7 +26,7 @@ import {
   Crown, LifeBuoy, Shield, FileText, IndianRupee, Receipt, Code, Camera, Gavel,
   UserPlus, MessageCircle, Building2, Contact, PieChart, Megaphone, Wallet,
   Scissors, Calculator, ArrowUpDown, MapPin, StarIcon, Mail, Video, HardDrive,
-  GraduationCap, Store,
+  GraduationCap, Store, Tag,
 } from 'lucide-react';
 
 interface NavItem {
