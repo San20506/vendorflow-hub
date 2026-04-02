@@ -280,6 +280,8 @@ export default function Dashboard() {
 
   const hasNoData = orders.length === 0 && inventoryItems.length === 0 && !isLoading;
 
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
   const handleSeedDemoData = async () => {
     setIsLoading(true);
     try {
@@ -312,8 +314,14 @@ export default function Dashboard() {
           ...s, settlementId: s.settlement_id, netAmount: s.net_amount,
           settlementDate: s.settlement_date,
         })));
+        toast({ title: 'Demo Data Loaded', description: 'Metrics and charts have been populated with sample data.' });
+      } else {
+        toast({ title: 'Demo Data', description: response.data?.message || 'Data already exists.', variant: 'default' });
       }
-    } catch (e) { console.error('Seed error:', e); }
+    } catch (e) {
+      console.error('Seed error:', e);
+      toast({ title: 'Error', description: 'Failed to load demo data. Try again.', variant: 'destructive' });
+    }
     setIsLoading(false);
   };
 

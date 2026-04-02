@@ -20,15 +20,32 @@ const sampleSKUTemplate = [
 const mockPreviewData: any[] = [];
 
 export function ExcelProductUpload({ onClose }: { onClose: () => void }) {
-  const [file, setFile] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
   const [uploaded, setUploaded] = useState(false);
+  const [parsedRows, setParsedRows] = useState<any[]>([]);
   const { toast } = useToast();
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      setFile(e.target.files[0].name);
-      setTimeout(() => setUploaded(true), 800);
-    }
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setFile(f);
+    setFileName(f.name);
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = evt.target?.result;
+        const wb = XLSX.read(data, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json<any>(ws);
+        setParsedRows(json.slice(0, 50)); // limit preview
+        setUploaded(true);
+      } catch {
+        toast({ title: 'Parse Error', description: 'Failed to read the file.', variant: 'destructive' });
+      }
+    };
+    reader.readAsArrayBuffer(f);
   };
 
   const downloadTemplate = (name: string, data: any[]) => {
@@ -38,6 +55,8 @@ export function ExcelProductUpload({ onClose }: { onClose: () => void }) {
     XLSX.writeFile(wb, `${name}_template.xlsx`);
     toast({ title: 'Template Downloaded', description: `${name} template with ${data.length} sample rows` });
   };
+
+  const headers = parsedRows.length > 0 ? Object.keys(parsedRows[0]) : [];
 
   return (
     <div className="space-y-4">
@@ -58,45 +77,62 @@ export function ExcelProductUpload({ onClose }: { onClose: () => void }) {
         <p className="text-[11px] text-muted-foreground">Templates include sample data — replace with your own data before uploading</p>
       </div>
 
-      {!file ? (
+      {!fileName ? (
         <label>
           <input type="file" accept=".xlsx,.xls,.csv" onChange={handleFile} className="hidden" />
           <div className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-all">
             <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-            <p className="font-medium">Upload Excel file with product data</p>
+            <p className="font-medium text-foreground">Upload Excel file with product data</p>
             <p className="text-sm text-muted-foreground mt-1">Supports .xlsx, .xls, .csv</p>
-            <p className="text-xs text-muted-foreground mt-2">Also usable for SKU Mapping bulk import</p>
           </div>
         </label>
       ) : (
         <>
           <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
             <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
-            <span className="font-medium text-sm flex-1">{file}</span>
+            <span className="font-medium text-sm flex-1 text-foreground">{fileName}</span>
             {uploaded ? (
               <Badge variant="outline" className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 gap-1">
-                <CheckCircle2 className="w-3 h-3" />Uploaded
+                <CheckCircle2 className="w-3 h-3" />Parsed
               </Badge>
             ) : (
               <Badge variant="outline" className="bg-blue-500/15 text-blue-600 border-blue-500/30">Processing...</Badge>
             )}
           </div>
-          {uploaded && (
+          {uploaded && parsedRows.length > 0 && (
             <>
-              <p className="text-sm font-medium">Preview (3 rows detected)</p>
-              <Table>
-                <TableHeader><TableRow className="bg-muted/50"><TableHead>SKU</TableHead><TableHead>Name</TableHead><TableHead>Category</TableHead><TableHead className="text-right">Price</TableHead></TableRow></TableHeader>
-                <TableBody>
-                  {mockPreviewData.map(r => (
-                    <TableRow key={r.skuId}><TableCell className="font-mono text-sm">{r.skuId}</TableCell><TableCell>{r.name}</TableCell><TableCell>{r.category}</TableCell><TableCell className="text-right">₹{r.price}</TableCell></TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <p className="text-sm font-medium text-foreground">{parsedRows.length} rows detected</p>
+              <div className="max-h-[300px] overflow-auto border rounded-lg">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      {headers.slice(0, 6).map(h => (
+                        <TableHead key={h} className="text-xs">{h}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {parsedRows.slice(0, 10).map((row, i) => (
+                      <TableRow key={i}>
+                        {headers.slice(0, 6).map(h => (
+                          <TableCell key={h} className="text-sm">{String(row[h] ?? '')}</TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={onClose}>Cancel</Button>
-                <Button onClick={() => { toast({ title: 'Products Imported', description: '3 products added from Excel.' }); onClose(); }}>Import Products</Button>
+                <Button onClick={() => {
+                  toast({ title: 'Products Imported', description: `${parsedRows.length} rows imported from Excel.` });
+                  onClose();
+                }}>Import {parsedRows.length} Products</Button>
               </div>
             </>
+          )}
+          {uploaded && parsedRows.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">No data rows found in the file.</p>
           )}
         </>
       )}

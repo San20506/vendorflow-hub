@@ -210,16 +210,35 @@ export default function Products() {
     return Object.keys(errors).length === 0;
   };
 
-  const handleProductSubmit = (e: React.FormEvent) => {
+  const handleProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateProductForm()) {
       toast({ title: 'Validation Error', description: 'Please fix the highlighted errors before submitting.', variant: 'destructive' });
       return;
     }
-    toast({ title: 'Product Created', description: 'New product added to catalog.' });
-    setIsAddDialogOpen(false);
-    setFormData({ name: '', masterSku: '', brand: '', category: '', hsn: '', mrp: '', basePrice: '', gst: '' });
-    setFormErrors({});
+    try {
+      await productsDb.create({
+        name: formData.name,
+        sku: formData.masterSku,
+        brand: formData.brand,
+        category: formData.category,
+        hsn_code: formData.hsn,
+        mrp: parseFloat(formData.mrp),
+        base_price: parseFloat(formData.basePrice),
+        gst_percent: parseFloat(formData.gst),
+        status: 'active',
+        image_url: productImage || null,
+      });
+      toast({ title: 'Product Created', description: 'New product added to catalog.' });
+      setIsAddDialogOpen(false);
+      setFormData({ name: '', masterSku: '', brand: '', category: '', hsn: '', mrp: '', basePrice: '', gst: '' });
+      setFormErrors({});
+      setProductImage(null);
+      setProductVideo(null);
+      await fetchProducts();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Failed to create product', variant: 'destructive' });
+    }
   };
 
   // Bulk actions (from Catalog Manager)
