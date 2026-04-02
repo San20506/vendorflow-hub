@@ -24,9 +24,10 @@ export default function Login() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const { login, signup } = useAuth();
+  const { login, signup, emailNotVerified, logout } = useAuth();
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
+  const [showVerifyScreen, setShowVerifyScreen] = useState(false);
 
   useEffect(() => {
     if (authUser) {
