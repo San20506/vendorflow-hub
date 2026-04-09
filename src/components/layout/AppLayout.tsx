@@ -76,7 +76,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(160deg, #F2EAF7 0%, #e8d8f0 30%, #f0e6f5 60%, #F2EAF7 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-purple-50 to-slate-100">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" />
       </div>
     );
@@ -215,8 +215,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                     <Avatar className="w-8 h-8">
                       <AvatarImage src={user?.avatar} alt={user?.name} />
                       <AvatarFallback
-                        className="text-xs font-semibold text-white"
-                        style={{ background: 'linear-gradient(135deg, #C59DD9, #7A3F91)' }}
+                        className="text-xs font-semibold text-white bg-gradient-to-br from-purple-400 to-purple-700"
                       >
                         {user?.name?.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>

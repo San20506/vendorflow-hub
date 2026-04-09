@@ -86,10 +86,7 @@ export default function Login() {
   if (showVerifyScreen || emailNotVerified) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center relative overflow-hidden p-4"
-        style={{
-          background: 'linear-gradient(160deg, #F2EAF7 0%, #e0ccea 30%, #d4b8e0 60%, #F2EAF7 100%)',
-        }}
+        className="min-h-screen flex items-center justify-center relative overflow-hidden p-4 bg-gradient-to-br from-slate-100 via-purple-50 to-slate-100"
       >
         <div className="w-full max-w-md relative z-10">
           <div
@@ -102,13 +99,7 @@ export default function Login() {
             }}
           >
             <div
-              className="inline-flex items-center justify-center rounded-2xl mb-6"
-              style={{
-                width: '72px',
-                height: '72px',
-                background: 'linear-gradient(135deg, #C59DD9 0%, #7A3F91 100%)',
-                boxShadow: '0 0 30px rgba(197, 157, 217, 0.5)',
-              }}
+              className="inline-flex items-center justify-center rounded-2xl mb-6 w-[72px] h-[72px] bg-gradient-to-br from-purple-400 to-purple-700 shadow-lg shadow-purple-500/50"
             >
               <Package className="w-9 h-9 text-white" />
             </div>
@@ -116,8 +107,8 @@ export default function Login() {
             <p className="text-muted-foreground text-sm mb-6">
               We've sent a verification link to <strong className="text-foreground">{email}</strong>. Please click the link to verify your account before signing in.
             </p>
-            <div className="p-4 rounded-xl mb-6" style={{ background: 'rgba(60, 160, 100, 0.1)' }}>
-              <p className="text-sm font-medium" style={{ color: 'hsl(var(--success))' }}>
+            <div className="p-4 rounded-xl mb-6 bg-emerald-500/10">
+              <p className="text-sm font-medium text-emerald-600">
                 ✉️ Verification email sent successfully
               </p>
             </div>
@@ -139,10 +130,7 @@ export default function Login() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center relative overflow-hidden p-4"
-      style={{
-        background: 'linear-gradient(160deg, #F2EAF7 0%, #e0ccea 30%, #d4b8e0 60%, #F2EAF7 100%)',
-      }}
+      className="min-h-screen flex items-center justify-center relative overflow-hidden p-4 bg-gradient-to-br from-slate-100 via-purple-50 to-slate-100"
     >
       {/* Animated glow orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -164,13 +152,7 @@ export default function Login() {
         {/* Logo */}
         <div className="text-center mb-8 animate-slide-up">
           <div
-            className="inline-flex items-center justify-center rounded-2xl mb-4 relative animate-glow"
-            style={{
-              width: '72px',
-              height: '72px',
-              background: 'linear-gradient(135deg, #C59DD9 0%, #7A3F91 100%)',
-              boxShadow: '0 0 30px rgba(197, 157, 217, 0.5), 0 8px 24px rgba(122, 63, 145, 0.3)',
-            }}
+            className="inline-flex items-center justify-center rounded-2xl mb-4 relative animate-glow w-[72px] h-[72px] bg-gradient-to-br from-purple-400 to-purple-700 shadow-lg shadow-purple-500/50"
           >
             <Package className="w-9 h-9 text-white" />
             <Sparkles className="w-4 h-4 text-white/60 absolute -top-1 -right-1" />
@@ -240,13 +222,11 @@ export default function Login() {
                               }}
                             >
                               <Icon
-                                className="w-5 h-5 transition-colors duration-300"
-                                style={{ color: isSelected ? '#7A3F91' : 'hsl(var(--muted-foreground))' }}
+                                className={`w-5 h-5 transition-colors duration-300 ${isSelected ? 'text-purple-700' : 'text-muted-foreground'}`}
                               />
                             </div>
                             <span
-                              className="text-xs font-semibold transition-colors duration-300"
-                              style={{ color: isSelected ? '#7A3F91' : 'hsl(var(--foreground) / 0.7)' }}
+                              className={`text-xs font-semibold transition-colors duration-300 ${isSelected ? 'text-purple-700' : 'text-foreground/70'}`}
                             >
                               {role.label}
                             </span>
@@ -271,7 +251,7 @@ export default function Login() {
                   </div>
 
                   {error && (
-                    <div className="p-3 rounded-xl text-sm font-medium animate-fade-in" style={{ background: 'rgba(220, 70, 70, 0.1)', color: 'hsl(var(--destructive))' }}>{error}</div>
+                    <div className="p-3 rounded-xl text-sm font-medium animate-fade-in bg-destructive/10 text-destructive">{error}</div>
                   )}
 
                   <Button type="submit" className="w-full h-11 font-semibold text-sm tracking-wide" disabled={isLoading}>
@@ -301,10 +281,10 @@ export default function Login() {
                   </div>
 
                   {error && (
-                    <div className="p-3 rounded-xl text-sm font-medium animate-fade-in" style={{ background: 'rgba(220, 70, 70, 0.1)', color: 'hsl(var(--destructive))' }}>{error}</div>
+                    <div className="p-3 rounded-xl text-sm font-medium animate-fade-in bg-destructive/10 text-destructive">{error}</div>
                   )}
                   {success && (
-                    <div className="p-3 rounded-xl text-sm font-medium animate-fade-in" style={{ background: 'rgba(60, 160, 100, 0.1)', color: 'hsl(var(--success))' }}>{success}</div>
+                    <div className="p-3 rounded-xl text-sm font-medium animate-fade-in bg-emerald-500/10 text-emerald-600">{success}</div>
                   )}
 
                   <Button type="submit" className="w-full h-11 font-semibold text-sm tracking-wide" disabled={isLoading}>
