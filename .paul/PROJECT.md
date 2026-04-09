@@ -13,9 +13,9 @@ Vendors can track and manage their product stock across multiple e-stores from a
 | Attribute | Value |
 |-----------|-------|
 | Type | Application |
-| Version | 0.1.0-alpha |
-| Status | MVP (UI/UX polished, backend integration in progress) |
-| Last Updated | 2026-04-09 |
+| Version | 0.2.0-alpha |
+| Status | MVP (UI/UX polished, data wired to Supabase, ready for channel connectors) |
+| Last Updated | 2026-04-10 |
 
 ## Requirements
 
@@ -30,15 +30,19 @@ Vendors can track and manage their product stock across multiple e-stores from a
 ### Validated (Shipped)
 
 - ✓ UI/UX polish and frontend fixes — Phase 1 (2026-04-09)
+- ✓ Supabase schema with users, vendors, products, orders, settlements — Phase 2 Plan 01 (2026-04-09)
+- ✓ Real backend integration: Dashboard, Orders, Insights wired to live Supabase queries — Phase 2 Plan 02 (2026-04-10)
 
 ### Active (In Progress)
 
-- [ ] Real backend integration (Supabase)
+- [ ] Live e-commerce channel connectors (Shopify, Amazon, etc.)
 
 ### Planned (Next)
 
-- [ ] Real backend integration (Supabase)
 - [ ] Live e-commerce channel connectors
+- [ ] Row-level security (RLS) and multi-tenant hardening
+- [ ] Pagination and performance optimization
+- [ ] Real-time subscriptions (Supabase Realtime)
 - [ ] AI agents for insights on demand
 - [ ] Marketing funnel / lead management
 
@@ -73,6 +77,11 @@ Vendors can track and manage their product stock across multiple e-stores from a
 |----------|-----------|------|--------|
 | Use existing Lovable codebase as foundation | Client requirement, half-built | 2026-04-07 | Active |
 | React + Vite + Shadcn/ui | Lovable default stack | 2026-04-07 | Active |
+| Phase 1: Migrate inline styles to Tailwind CSS | Consistency, maintainability, theme support | 2026-04-09 | ✓ Shipped |
+| Phase 2: Use Supabase PostgreSQL with auto-generated types | Type safety, schema-first approach, minimal migration needed | 2026-04-09 | ✓ Shipped |
+| Phase 2: Custom React hooks + TanStack Query for data | Encapsulation, caching, vendor-scoped data access | 2026-04-10 | ✓ Shipped |
+| Defer RLS policies to Phase 4 | Focus on functionality first; security hardening after channel connectors | 2026-04-10 | Deferred |
+| Defer pagination to Phase 3/4 | Current demo data volume manageable; add when scaling | 2026-04-10 | Deferred |
 
 ## Success Metrics
 

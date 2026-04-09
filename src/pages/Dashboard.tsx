@@ -1,13 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAIAccess } from '@/contexts/AIAccessContext';
-import { Portal } from '@/types';
-import { portalConfigs } from '@/services/mockData';
-import { ChannelIcon } from '@/components/ChannelIcon';
-import { ordersDb, inventoryDb, returnsDb, settlementsDb, expensesDb } from '@/services/database';
-import { supabase } from '@/integrations/supabase/client';
+import { useProducts } from '@/hooks/useProducts';
+import { useOrders } from '@/hooks/useOrders';
+import { useSettlements } from '@/hooks/useSettlements';
+import { seedDemoData } from '@/services/seedDemoData';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { InventoryChart, PortalSalesChart, CHART_COLORS } from '@/components/dashboard/Charts';
 import { FinancialOverview } from '@/components/dashboard/FinancialOverview';
@@ -39,60 +38,19 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { criticalDecisionToggle } = useAIAccess();
-  const [selectedPortal, setSelectedPortal] = useState<Portal | 'all'>('all');
-  const [isLoading, setIsLoading] = useState(true);
   const [salesViewMode, setSalesViewMode] = useState<'revenue' | 'units'>('revenue');
-  const [sortMode, setSortMode] = useState<'revenue' | 'units' | 'returns'>('revenue');
   const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
   const { widgets, toggleWidget, moveWidget, isVisible, resetWidgets } = useDashboardWidgets();
 
-  const [orders, setOrders] = useState<any[]>([]);
-  const [returns, setReturns] = useState<any[]>([]);
-  const [salesData, setSalesData] = useState<any[]>([]);
-  const [inventoryItems, setInventoryItems] = useState<any[]>([]);
-  const [settlements, setSettlements] = useState<any[]>([]);
-  const [expenses, setExpenses] = useState<any[]>([]);
-  const [invoices, setInvoices] = useState<any[]>([]);
+  // Get vendor ID from current user
+  const vendorId = user?.id || null;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [ordersData, returnsData, inventoryData, settlementsData, expensesData, invoicesData] = await Promise.all([
-          ordersDb.getAll(),
-          returnsDb.getAll(),
-          inventoryDb.getAll(),
-          settlementsDb.getAll(),
-          expensesDb.getAll(),
-          supabase.from('invoices').select('*').then(r => r.data || []),
-        ]);
-        setOrders(ordersData.map((o: any) => ({
-          ...o, orderId: o.order_number, orderDate: o.order_date, totalAmount: o.total_amount,
-          customerName: o.customer_name, customerId: o.id, customerEmail: o.customer_email,
-          customerPhone: o.customer_phone, customerPinCode: o.customer_pincode,
-          customerCity: o.customer_city, customerState: o.customer_state,
-          shippingAddress: o.customer_address, deliveryDate: o.delivered_date,
-          portalOrderId: o.order_number, items: [],
-        })));
-        setReturns(returnsData.map((r: any) => ({
-          ...r, orderId: r.order_number, requestDate: r.requested_at, items: [],
-          claimEligible: false,
-        })));
-        setInventoryItems(inventoryData.map((i: any) => ({
-          ...i, skuId: i.sku_id, productName: i.product_name,
-          availableQuantity: i.available_quantity ?? 0,
-          lowStockThreshold: i.low_stock_threshold ?? 10,
-        })));
-        setSettlements(settlementsData.map((s: any) => ({
-          ...s, settlementId: s.settlement_id, netAmount: s.net_amount,
-          settlementDate: s.settlement_date,
-        })));
-        setExpenses(expensesData);
-        setInvoices(invoicesData);
-      } catch (e) { console.error(e); }
-      setIsLoading(false);
-    };
-    fetchData();
-  }, []);
+  // Fetch real data from Supabase
+  const { data: products = [], isLoading: isLoadingProducts } = useProducts(vendorId);
+  const { data: orders = [], isLoading: isLoadingOrders } = useOrders(vendorId);
+  const { data: settlements = [], isLoading: isLoadingSettlements } = useSettlements(vendorId);
+
+  const isLoading = isLoadingProducts || isLoadingOrders || isLoadingSettlements;
 
   const formatCurrency = (value: number) => {
     if (value >= 10000000) return `₹${(value / 10000000).toFixed(2)}Cr`;
@@ -101,231 +59,49 @@ export default function Dashboard() {
     return `₹${value}`;
   };
 
-  // Filtered orders by portal & date
+  // Filter orders by date range
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {
-      if (selectedPortal !== 'all' && o.portal !== selectedPortal) return false;
-      if (dateRange.from && new Date(o.orderDate) < dateRange.from) return false;
-      if (dateRange.to && new Date(o.orderDate) > dateRange.to) return false;
+      if (dateRange.from && new Date(o.created_at) < dateRange.from) return false;
+      if (dateRange.to && new Date(o.created_at) > dateRange.to) return false;
       return true;
     });
-  }, [selectedPortal, dateRange]);
+  }, [orders, dateRange]);
 
-  const filteredReturns = useMemo(() => {
-    return returns.filter(r => {
-      if (selectedPortal !== 'all' && r.portal !== selectedPortal) return false;
-      if (dateRange.from && new Date(r.requestDate) < dateRange.from) return false;
-      if (dateRange.to && new Date(r.requestDate) > dateRange.to) return false;
-      return true;
-    });
-  }, [selectedPortal, dateRange]);
-
-  // ─── DAILY SALES SUMMARY ───
-  const dailySummary = useMemo(() => {
-    const today = new Date().toDateString();
-    const yesterday = new Date(Date.now() - 86400000).toDateString();
-    const todayOrders = orders.filter(o => new Date(o.orderDate).toDateString() === today && (selectedPortal === 'all' || o.portal === selectedPortal));
-    const yesterdayOrders = orders.filter(o => new Date(o.orderDate).toDateString() === yesterday && (selectedPortal === 'all' || o.portal === selectedPortal));
-    const todayRevenue = todayOrders.reduce((s, o) => s + o.totalAmount, 0);
-    const yesterdayRevenue = yesterdayOrders.reduce((s, o) => s + o.totalAmount, 0);
-    const revenueGrowth = yesterdayRevenue > 0 ? +((todayRevenue - yesterdayRevenue) / yesterdayRevenue * 100).toFixed(1) : 0;
-    const orderGrowth = yesterdayOrders.length > 0 ? +((todayOrders.length - yesterdayOrders.length) / yesterdayOrders.length * 100).toFixed(1) : 0;
-    return { todayCount: todayOrders.length, todayRevenue, revenueGrowth, orderGrowth };
-  }, [selectedPortal]);
-
-  // ─── TOP 5 PRODUCTS BY ORDER COUNT ───
-  const topProductsByOrders = useMemo(() => {
-    const map: Record<string, { name: string; units: number; revenue: number }> = {};
-    filteredOrders.forEach(o => o.items.forEach(item => {
-      if (!map[item.productName]) map[item.productName] = { name: item.productName, units: 0, revenue: 0 };
-      map[item.productName].units += item.quantity;
-      map[item.productName].revenue += item.price * item.quantity;
-    }));
-    return Object.values(map).sort((a, b) => b.units - a.units).slice(0, 5);
-  }, [filteredOrders]);
-
-  // ─── TOP 5 BRANDS BY REVENUE ───
-  const topBrandsByRevenue = useMemo(() => {
-    const map: Record<string, { brand: string; units: number; revenue: number }> = {};
-    filteredOrders.forEach(o => o.items.forEach(item => {
-      if (!map[item.brand]) map[item.brand] = { brand: item.brand, units: 0, revenue: 0 };
-      map[item.brand].units += item.quantity;
-      map[item.brand].revenue += item.price * item.quantity;
-    }));
-    const arr = Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
-    const totalRev = arr.reduce((s, b) => s + b.revenue, 0);
-    return arr.map(b => ({ ...b, contribution: totalRev > 0 ? +((b.revenue / totalRev) * 100).toFixed(1) : 0 }));
-  }, [filteredOrders]);
-
-  // ─── TOP 5 RETURN PRODUCTS ───
-  const topReturnProducts = useMemo(() => {
-    const map: Record<string, { name: string; returnCount: number; totalSold: number }> = {};
-    filteredOrders.forEach(o => o.items.forEach(item => {
-      if (!map[item.productName]) map[item.productName] = { name: item.productName, returnCount: 0, totalSold: 0 };
-      map[item.productName].totalSold += item.quantity;
-    }));
-    filteredReturns.forEach(r => {
-      r.items.forEach(item => {
-        if (!map[item.productName]) map[item.productName] = { name: item.productName, returnCount: 0, totalSold: 0 };
-        map[item.productName].returnCount += item.quantity;
-      });
-    });
-    return Object.values(map)
-      .filter(p => p.returnCount > 0)
-      .map(p => ({ ...p, returnRate: p.totalSold > 0 ? +((p.returnCount / p.totalSold) * 100).toFixed(1) : 0 }))
-      .sort((a, b) => b.returnCount - a.returnCount)
-      .slice(0, 5);
-  }, [filteredOrders, filteredReturns]);
-
-  // ─── RETURN CATEGORY COUNTS ───
-  const returnCategories = useMemo(() => {
-    const total = filteredReturns.length;
-    const pending = filteredReturns.filter(r => r.status === 'pending').length;
-    const approved = filteredReturns.filter(r => r.status === 'approved' || r.status === 'completed').length;
-    const rejected = filteredReturns.filter(r => r.status === 'rejected' || r.status === 'ineligible').length;
-    return { total, pending, approved, rejected };
-  }, [filteredReturns]);
-
-  // ─── ELIGIBLE FOR CLAIM ───
-  const eligibleForClaim = useMemo(() => {
-    return filteredReturns.filter(r => r.claimEligible && r.status === 'eligible').length;
-  }, [filteredReturns]);
-
-  // ─── UPCOMING RETURN PRODUCTS (within 7-30 day return window) ───
-  const upcomingReturns = useMemo(() => {
-    const now = Date.now();
-    return filteredOrders
-      .filter(o => o.status === 'delivered' && o.deliveryDate)
-      .map(o => {
-        const deliveredMs = new Date(o.deliveryDate!).getTime();
-        const daysElapsed = Math.floor((now - deliveredMs) / 86400000);
-        const daysRemaining = 30 - daysElapsed;
-        return { orderId: o.orderId, product: o.items[0]?.productName || 'N/A', daysRemaining };
-      })
-      .filter(o => o.daysRemaining >= 0 && o.daysRemaining <= 30)
-      .sort((a, b) => a.daysRemaining - b.daysRemaining)
-      .slice(0, 5);
-  }, [filteredOrders]);
-
-  // ─── DELIVERED RETURN PRODUCTS ───
-  const deliveredReturns = useMemo(() => {
-    return filteredReturns
-      .filter(r => r.status === 'completed')
-      .slice(0, 5)
-      .map(r => ({
-        orderId: r.orderId,
-        product: r.items[0]?.productName || 'N/A',
-        status: r.status,
-      }));
-  }, [filteredReturns]);
-
-  // ─── SALES CHART ───
-  const salesChartData = useMemo(() => {
-    const grouped: Record<string, { date: string; revenue: number; orders: number }> = {};
-    salesData
-      .filter(d => selectedPortal === 'all' || d.portal === selectedPortal)
-      .forEach(d => {
-        const dateKey = new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        if (!grouped[dateKey]) grouped[dateKey] = { date: dateKey, revenue: 0, orders: 0 };
-        grouped[dateKey].revenue += d.revenue;
-        grouped[dateKey].orders += d.orders;
-      });
-    return Object.values(grouped).slice(-10);
-  }, [selectedPortal]);
-
-  const totalUnitsSold = useMemo(() =>
-    salesData.filter(d => selectedPortal === 'all' || d.portal === selectedPortal).reduce((s, d) => s + (d.orders || 0), 0),
-  [selectedPortal]);
-
-  const duplicateCustomerCount = useMemo(() => {
-    const m: Record<string, number> = {};
-    orders.forEach(o => { m[o.customerEmail || o.customerId] = (m[o.customerEmail || o.customerId] || 0) + 1; });
-    return Object.values(m).filter(c => c > 1).length;
-  }, []);
-
-  const inventoryStatusData = useMemo(() => {
-    const items = selectedPortal === 'all' ? inventoryItems : inventoryItems.filter(i => i.portal === selectedPortal);
-    return [
-      { name: 'Healthy', value: items.filter(i => i.availableQuantity > i.lowStockThreshold).length, color: CHART_COLORS.success },
-      { name: 'Low Stock', value: items.filter(i => i.availableQuantity <= i.lowStockThreshold && i.availableQuantity > 0).length, color: CHART_COLORS.warning },
-      { name: 'Out of Stock', value: items.filter(i => i.availableQuantity === 0).length, color: CHART_COLORS.destructive },
-    ];
-  }, [selectedPortal]);
-
-  const portalRevenueData = useMemo(() =>
-    portalConfigs.map(portal => ({
-      portal: portal.name,
-      revenue: salesData.filter(d => d.portal === portal.id).reduce((s, d) => s + (d.revenue || 0), 0),
-    })).sort((a, b) => b.revenue - a.revenue),
-  []);
-
+  // ─── KPI CALCULATIONS FROM REAL DATA ───
   const kpiData = useMemo(() => {
-    const defaultKpi = { totalSales: orders.reduce((s, o) => s + (o.totalAmount || 0), 0), ordersToday: orders.filter(o => new Date(o.orderDate).toDateString() === new Date().toDateString()).length, inventoryValue: inventoryItems.reduce((s, i) => s + (i.availableQuantity * 500), 0), lowStockItems: inventoryItems.filter(i => i.availableQuantity <= i.lowStockThreshold).length, pendingReturns: returns.filter(r => r.status === 'requested' || r.status === 'pending').length, pendingSettlements: settlements.filter(s => s.status === 'pending').length, salesGrowth: 0, ordersGrowth: 0 };
-    if (selectedPortal === 'all') return defaultKpi;
-    const po = orders.filter(o => o.portal === selectedPortal);
-    const pi = inventoryItems.filter(i => i.portal === selectedPortal);
-    const pr = returns.filter(r => r.portal === selectedPortal);
-    const ps = settlements.filter(s => s.portal === selectedPortal);
+    const totalSales = filteredOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+    const ordersCount = filteredOrders.length;
+    const deliveredOrders = filteredOrders.filter(o => o.status === 'delivered').length;
+    const pendingSettlements = settlements.filter(s => s.status === 'pending').length;
+    const processedSettlements = settlements.filter(s => s.status === 'processed').length;
+    const healthyProducts = products.filter(p => p.stock > 0).length;
+
     return {
-      totalSales: po.reduce((s, o) => s + o.totalAmount, 0),
-      ordersToday: po.filter(o => new Date(o.orderDate).toDateString() === new Date().toDateString()).length,
-      inventoryValue: pi.reduce((s, i) => s + (i.availableQuantity * 500), 0),
-      lowStockItems: pi.filter(i => i.availableQuantity <= i.lowStockThreshold).length,
-      pendingReturns: pr.filter(r => r.status === 'pending').length,
-      pendingSettlements: ps.filter(s => s.status === 'pending').length,
-      salesGrowth: 8.2, ordersGrowth: 5.4,
+      totalSales,
+      ordersCount,
+      deliveredOrders,
+      pendingSettlements,
+      processedSettlements,
+      healthyProducts,
+      productCount: products.length,
     };
-  }, [selectedPortal]);
+  }, [filteredOrders, products, settlements]);
 
-  const maxProductUnits = topProductsByOrders.length > 0 ? topProductsByOrders[0].units : 1;
-  const maxBrandRevenue = topBrandsByRevenue.length > 0 ? topBrandsByRevenue[0].revenue : 1;
-
-  const hasNoData = orders.length === 0 && inventoryItems.length === 0 && !isLoading;
+  const hasNoData = products.length === 0 && orders.length === 0 && !isLoading;
 
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   const handleSeedDemoData = async () => {
-    setIsLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-      const response = await supabase.functions.invoke('seed-demo-data');
-      if (response.data?.seeded) {
-        // Refetch data
-        const [ordersData, returnsData, inventoryData, settlementsData] = await Promise.all([
-          ordersDb.getAll(), returnsDb.getAll(), inventoryDb.getAll(), settlementsDb.getAll(),
-        ]);
-        setOrders(ordersData.map((o: any) => ({
-          ...o, orderId: o.order_number, orderDate: o.order_date, totalAmount: o.total_amount,
-          customerName: o.customer_name, customerId: o.id, customerEmail: o.customer_email,
-          customerPhone: o.customer_phone, customerPinCode: o.customer_pincode,
-          customerCity: o.customer_city, customerState: o.customer_state,
-          shippingAddress: o.customer_address, deliveryDate: o.delivered_date,
-          portalOrderId: o.order_number, items: [],
-        })));
-        setReturns(returnsData.map((r: any) => ({
-          ...r, orderId: r.order_number, requestDate: r.requested_at, items: [],
-          claimEligible: false,
-        })));
-        setInventoryItems(inventoryData.map((i: any) => ({
-          ...i, skuId: i.sku_id, productName: i.product_name,
-          availableQuantity: i.available_quantity ?? 0,
-          lowStockThreshold: i.low_stock_threshold ?? 10,
-        })));
-        setSettlements(settlementsData.map((s: any) => ({
-          ...s, settlementId: s.settlement_id, netAmount: s.net_amount,
-          settlementDate: s.settlement_date,
-        })));
-        toast({ title: 'Demo Data Loaded', description: 'Metrics and charts have been populated with sample data.' });
-      } else {
-        toast({ title: 'Demo Data', description: response.data?.message || 'Data already exists.', variant: 'default' });
-      }
-    } catch (e) {
-      console.error('Seed error:', e);
-      toast({ title: 'Error', description: 'Failed to load demo data. Try again.', variant: 'destructive' });
+      await seedDemoData();
+      toast({ title: 'Demo Data Seeded', description: 'Demo data loaded successfully. Refresh to see updates.' });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Seeding failed.';
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
     }
-    setIsLoading(false);
   };
+
 
   return (
     <div className="space-y-6 animate-fade-in relative">
@@ -381,6 +157,11 @@ export default function Dashboard() {
             </div>
           </div>
           <Badge variant="outline" className="text-xs font-mono">VendorFlow v1.2</Badge>
+          {user?.role === 'admin' && !hasNoData && (
+            <Button variant="outline" size="sm" onClick={handleResetDemoData} className="gap-1.5 text-xs text-destructive border-destructive/30 hover:bg-destructive/5">
+              <RotateCcw className="w-3.5 h-3.5" /> Reset Data
+            </Button>
+          )}
         </div>
       </div>
 

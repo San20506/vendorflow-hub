@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import type { UserRole } from '@/types/database';
+import { Session } from '@supabase/supabase-js';
 
-export type UserRole = 'admin' | 'vendor' | 'operations';
+export type { UserRole };
 
 export interface AppUser {
   id: string;
-  name: string;
   email: string;
   role: UserRole;
   avatar?: string;
@@ -16,101 +16,78 @@ interface AuthContextType {
   user: AppUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  emailNotVerified: boolean;
+  error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string) => Promise<void>;
+  signup: (email: string, password: string, role: UserRole) => Promise<void>;
   logout: () => Promise<void>;
-  switchRole: (role: UserRole) => void;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-async function fetchUserRole(userId: string): Promise<UserRole> {
-  const { data } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', userId)
-    .limit(1)
-    .single();
-  return (data?.role as UserRole) || 'vendor';
-}
-
-async function fetchProfile(userId: string): Promise<{ name: string; avatar_url: string | null } | null> {
-  const { data } = await supabase
-    .from('profiles')
-    .select('name, avatar_url')
-    .eq('id', userId)
-    .single();
-  return data;
-}
-
 async function buildAppUser(session: Session): Promise<AppUser | null> {
   const supaUser = session.user;
-  
-  // Block unverified email users
-  if (!supaUser.email_confirmed_at) {
+
+  const { data: userProfile } = await supabase
+    .from('users')
+    .select('id, email, role, avatar')
+    .eq('id', supaUser.id)
+    .single();
+
+  if (!userProfile) {
     return null;
   }
-  
-  const [role, profile] = await Promise.all([
-    fetchUserRole(supaUser.id),
-    fetchProfile(supaUser.id),
-  ]);
+
   return {
-    id: supaUser.id,
-    name: profile?.name || supaUser.user_metadata?.name || supaUser.email?.split('@')[0] || 'User',
-    email: supaUser.email || '',
-    role,
-    avatar: profile?.avatar_url || undefined,
+    id: userProfile.id,
+    email: userProfile.email,
+    role: userProfile.role as UserRole,
+    avatar: userProfile.avatar || undefined,
   };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  const [emailNotVerified, setEmailNotVerified] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Set up auth listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) {
-        setTimeout(async () => {
+    // Set up auth listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session) {
           try {
             const appUser = await buildAppUser(session);
-            if (appUser) {
-              setUser(appUser);
-              setEmailNotVerified(false);
-            } else {
-              setUser(null);
-              setEmailNotVerified(true);
-            }
-          } catch {
+            setUser(appUser);
+            setError(null);
+          } catch (err) {
             setUser(null);
+            setError(err instanceof Error ? err.message : 'Failed to load user');
           }
-          setIsLoading(false);
-        }, 0);
-      } else {
-        setUser(null);
-        setEmailNotVerified(false);
+        } else {
+          setUser(null);
+          setError(null);
+        }
         setIsLoading(false);
       }
-    });
+    );
 
-    // THEN check existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // Check existing session
+    supabase.auth.getSession().then(async ({ data: { session }, error: sessionError }) => {
+      if (sessionError) {
+        setError(sessionError.message);
+        setIsLoading(false);
+        return;
+      }
+
       if (session) {
         try {
           const appUser = await buildAppUser(session);
-          if (appUser) {
-            setUser(appUser);
-            setEmailNotVerified(false);
-          } else {
-            setUser(null);
-            setEmailNotVerified(true);
-          }
-        } catch {
+          setUser(appUser);
+          setError(null);
+        } catch (err) {
           setUser(null);
+          setError(err instanceof Error ? err.message : 'Failed to load user');
         }
       }
       setIsLoading(false);
@@ -120,42 +97,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw new Error(error.message);
+    try {
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (authError) throw authError;
+      setError(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Login failed';
+      setError(message);
+      throw new Error(message);
+    }
   }, []);
 
-  const signup = useCallback(async (email: string, password: string, name: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { name },
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    if (error) throw new Error(error.message);
+  const signup = useCallback(async (email: string, password: string, role: UserRole = 'vendor') => {
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (authError) throw authError;
+      if (!authData.user) throw new Error('Failed to create user');
+
+      // Create user profile
+      const { error: profileError } = await supabase.from('users').insert({
+        id: authData.user.id,
+        email,
+        password_hash: '', // Managed by Supabase Auth
+        role,
+      });
+      if (profileError) throw profileError;
+      setError(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Signup failed';
+      setError(message);
+      throw new Error(message);
+    }
   }, []);
 
   const logout = useCallback(async () => {
-    await supabase.auth.signOut();
-    setUser(null);
+    try {
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) throw signOutError;
+      setUser(null);
+      setError(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Logout failed';
+      setError(message);
+      throw new Error(message);
+    }
   }, []);
 
-  const switchRole = useCallback((role: UserRole) => {
-    if (user) {
-      setUser({ ...user, role });
+  const resetPassword = useCallback(async (email: string) => {
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (resetError) throw resetError;
+      setError(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Password reset failed';
+      setError(message);
+      throw new Error(message);
     }
-  }, [user]);
+  }, []);
 
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
     isLoading,
-    emailNotVerified,
+    error,
     login,
     signup,
     logout,
-    switchRole,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
