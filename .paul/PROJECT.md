@@ -13,9 +13,9 @@ Vendors can track and manage their product stock across multiple e-stores from a
 | Attribute | Value |
 |-----------|-------|
 | Type | Application |
-| Version | 0.0.0 |
-| Status | MVP (half-built, UI/UX polish needed) |
-| Last Updated | 2026-04-07 |
+| Version | 0.1.0-alpha |
+| Status | MVP (UI/UX polished, backend integration in progress) |
+| Last Updated | 2026-04-09 |
 
 ## Requirements
 
@@ -65,7 +65,7 @@ Vendors can track and manage their product stock across multiple e-stores from a
 
 ### Business Constraints
 
-- UI/UX polish required by client today (2026-04-07)
+- Phase 1 (UI/UX polish) complete as of 2026-04-09
 
 ## Key Decisions
 
@@ -78,8 +78,8 @@ Vendors can track and manage their product stock across multiple e-stores from a
 
 | Metric | Target | Current | Status |
 |--------|--------|---------|--------|
-| UI/UX client approval | Today | In progress | At risk |
-| Build passing | No errors | Passing | On track |
+| UI/UX client approval | Today | Complete | ✓ On track |
+| Build passing | No errors | Passing | ✓ On track |
 
 ## Tech Stack / Tools
 

@@ -6,9 +6,9 @@ Building a multi-channel vendor management platform from a half-built Lovable sc
 
 ## Current Milestone
 
-**v0.1 Client Demo Ready** (v0.1.0)
-Status: In progress
-Phases: 0 of TBD complete
+**v0.1 Client Demo Ready** (v0.1.0-alpha)
+Status: In progress (1 of 5 phases complete)
+Phases: 1 of 5 complete
 
 ## Phases
 
@@ -25,4 +25,4 @@ Phases: 0 of TBD complete
 Phases will be defined during `/paul:plan`.
 
 ---
-*Roadmap created: 2026-04-07*
+*Roadmap created: 2026-04-07, updated 2026-04-09 after Phase 1*
