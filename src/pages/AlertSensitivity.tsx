@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ThresholdPreview } from '@/components/ThresholdPreview';
+import { RecommendationCard } from '@/components/RecommendationCard';
 import {
   AnomalyType,
   SENSITIVITY_DEFAULTS,
@@ -21,6 +22,10 @@ import {
   fetchVendorSensitivitySettings,
   saveVendorSensitivitySettings,
 } from '@/lib/alert-sensitivity';
+import {
+  ThresholdRecommender,
+  SensitivityRecommendation,
+} from '@/lib/threshold-recommender';
 import { useAuth } from '@/contexts/AuthContext';
 import { alertEngine } from '@/lib/alert-engine';
 
@@ -43,6 +48,12 @@ export function AlertSensitivity() {
     AnomalyType,
     number
   > | null>(null);
+  const [recommendations, setRecommendations] = useState<
+    SensitivityRecommendation[]
+  >([]);
+  const [dismissedRecommendations, setDismissedRecommendations] = useState<
+    Set<AnomalyType>
+  >(new Set());
 
   // Load alerts for preview
   const { data: alerts = [], isLoading: alertsLoading } = useQuery({
@@ -66,7 +77,20 @@ export function AlertSensitivity() {
     },
   });
 
-  const isLoading = settingsLoading || alertsLoading;
+  // Load recommendations
+  const { isLoading: recommendationsLoading } = useQuery({
+    queryKey: ['alertRecommendations', vendorId],
+    queryFn: () =>
+      vendorId
+        ? ThresholdRecommender.getRecommendations(vendorId, thresholds)
+        : Promise.resolve([]),
+    enabled: !!vendorId && Object.keys(thresholds).length > 0,
+    onSuccess: (data) => {
+      setRecommendations(data);
+    },
+  });
+
+  const isLoading = settingsLoading || alertsLoading || recommendationsLoading;
 
   // Save mutation
   const saveMutation = useMutation({
@@ -93,6 +117,24 @@ export function AlertSensitivity() {
 
   const handleCancel = () => {
     setNewThresholds(null);
+  };
+
+  const handleApplyRecommendation = async (
+    recommendation: SensitivityRecommendation
+  ) => {
+    const updated = { ...thresholds, [recommendation.anomaly_type]: recommendation.recommended_threshold };
+    setNewThresholds(updated);
+
+    // Save recommendation history
+    try {
+      await ThresholdRecommender.saveRecommendation(vendorId, recommendation);
+    } catch (error) {
+      console.error('Failed to save recommendation:', error);
+    }
+  };
+
+  const handleDismissRecommendation = (anomalyType: AnomalyType) => {
+    setDismissedRecommendations(new Set([...dismissedRecommendations, anomalyType]));
   };
 
   const currentSettings = newThresholds || thresholds;
@@ -125,6 +167,27 @@ export function AlertSensitivity() {
           numbers show more alerts; higher numbers are more strict.
         </p>
       </div>
+
+      {/* Recommendations Section */}
+      {recommendations.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold text-gray-900">AI-Powered Recommendations</h2>
+          <p className="text-sm text-gray-600">
+            Based on your alert history, here are suggested adjustments to reduce false positives.
+          </p>
+          {recommendations
+            .filter((rec) => !dismissedRecommendations.has(rec.anomaly_type))
+            .map((rec) => (
+              <RecommendationCard
+                key={rec.anomaly_type}
+                recommendation={rec}
+                onApply={handleApplyRecommendation}
+                onDismiss={handleDismissRecommendation}
+                isApplying={saveMutation.isPending}
+              />
+            ))}
+        </div>
+      )}
 
       {/* Sensitivity Sliders */}
       <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-6">

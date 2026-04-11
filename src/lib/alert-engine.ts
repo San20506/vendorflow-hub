@@ -454,9 +454,20 @@ export class AlertEngine {
   /**
    * Dismiss alert
    */
-  async dismissAlert(alertId: string): Promise<void> {
+  async dismissAlert(alertId: string, reason: 'false_positive' | 'already_addressed' | 'low_priority' | 'other' = 'other'): Promise<void> {
     try {
+      // Update alerts table
       await supabase.from('alerts').update({ status: 'resolved', dismissed_at: new Date().toISOString() }).eq('id', alertId)
+
+      // Update alert_history with dismissal reason (for recommendation engine)
+      await supabase
+        .from('alert_history')
+        .update({
+          dismissed_at: new Date().toISOString(),
+          dismissal_reason: reason,
+          dismissed_by: 'user', // Can be enhanced to track actual user
+        })
+        .eq('id', alertId)
     } catch (err) {
       console.error('Failed to dismiss alert:', err)
     }

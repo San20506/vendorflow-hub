@@ -7,8 +7,8 @@ Building a multi-channel vendor management platform from a half-built Lovable sc
 ## Current Milestone
 
 **v0.1 Client Demo Ready** (v0.1.0-alpha)
-Status: 90% complete (4 of 5 phases complete, Phase 4 at 75%)
-Phases: 3 of 5 complete + Phase 4 mostly done
+Status: 95% complete (4 of 5 phases complete, Phase 5 ready to start)
+Phases: 4 of 5 complete
 
 ## Phases
 
@@ -17,7 +17,7 @@ Phases: 3 of 5 complete + Phase 4 mostly done
 | 1 | UI/UX Polish | 01-01 | Complete | 2026-04-09 |
 | 2 | Backend Integration | 02-01, 02-02 | Complete | 2026-04-10 |
 | 3 | Channel Connectors | 03-01: Shopify ✓, 03-02: Amazon ✓, 03-03: WooCommerce ✓ | Complete | 2026-04-10 |
-| 4 | AI Insights | 04-01: Dashboard ✓, 04-02: Alerts ✓, 04-03: Reports ✓, 04-04: Sensitivity ✓ | Mostly Complete | 2026-04-11 |
+| 4 | AI Insights | 04-01: Dashboard ✓, 04-02: Alerts ✓, 04-03: Reports ✓, 04-04: Sensitivity ✓, 04-05: Recommendations ✓ | Complete | 2026-04-11 |
 | 5 | Marketing Funnel | TBD | Not started | - |
 
 ## Phase Details
