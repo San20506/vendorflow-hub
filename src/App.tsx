@@ -47,6 +47,7 @@ const BusinessOnboarding = lazy(() => import('./pages/BusinessOnboarding'));
 const CustomerManagement = lazy(() => import('./pages/CustomerManagement'));
 const Insights = lazy(() => import('./pages/Insights'));
 const AlertSensitivity = lazy(() => import('./pages/AlertSensitivity'));
+const MarketingCampaigns = lazy(() => import('./pages/MarketingCampaigns'));
 const MarketingConfig = lazy(() => import('./pages/MarketingConfig'));
 const ExpenseTracking = lazy(() => import('./pages/ExpenseTracking'));
 const StaffManagement = lazy(() => import('./pages/StaffManagement'));
@@ -138,6 +139,7 @@ const App = () => (
               <Route path="/customers" element={<AppLayout><CustomerManagement /></AppLayout>} />
               <Route path="/insights" element={<AppLayout><Insights /></AppLayout>} />
               <Route path="/alert-sensitivity" element={<AppLayout><AlertSensitivity /></AppLayout>} />
+              <Route path="/marketing-campaigns" element={<AppLayout><MarketingCampaigns /></AppLayout>} />
               <Route path="/marketing-config" element={<AppLayout><MarketingConfig /></AppLayout>} />
               <Route path="/expenses" element={<AppLayout><ExpenseTracking /></AppLayout>} />
               <Route path="/staff" element={<AppLayout><StaffManagement /></AppLayout>} />
