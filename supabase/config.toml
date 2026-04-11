@@ -9,5 +9,8 @@ verify_jwt = false
 [functions.seed-test-users]
 verify_jwt = false
 
+[functions.reset-test-users]
+verify_jwt = false
+
 [functions.map-columns]
 verify_jwt = false

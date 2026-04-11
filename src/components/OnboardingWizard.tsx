@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Package, Upload, ShoppingCart, BarChart3, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
+import { Package, Upload, ShoppingCart, BarChart3, ArrowRight, CheckCircle2, Sparkles, X } from 'lucide-react';
 
 const ONBOARDING_KEY = 'vendorflow_onboarding_completed';
 
@@ -77,12 +77,21 @@ export function OnboardingWizard() {
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); }}>
-      <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-lg p-0 overflow-hidden" hideCloseButton>
         {/* Header */}
         <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent px-6 pt-6 pb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <h2 className="text-xl font-bold text-foreground">Welcome to VendorFlow!</h2>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              <h2 className="text-xl font-bold text-foreground">Welcome to VendorFlow!</h2>
+            </div>
+            <button
+              onClick={handleClose}
+              className="rounded-full p-1.5 hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
           <p className="text-sm text-muted-foreground">Let's get your business set up in 4 simple steps.</p>
           {/* Step indicators */}

@@ -10,22 +10,24 @@ See: .paul/PROJECT.md (updated 2026-04-07)
 ## Current Position
 
 Milestone: v0.1 Client Demo Ready
-Phase: 2 of 5 (Backend Integration) — Complete
-Plan: 02-02 completed, Phase 2 ready for transition
-Status: Phase 2 Backend Integration complete — dashboard, orders, insights wired to Supabase
-Last activity: 2026-04-10T01:10 — Closed Loop 02-02 UNIFY
+Phase: 4 of 5 (AI Insights) — In Progress
+Plan: 04-04 complete, ready for 04-05 or Phase 5
+Status: APPLY phase complete, UNIFY in progress
+Last activity: 2026-04-11T22:45 — Completed 04-04-SUMMARY.md (Alert Sensitivity Settings)
 
 Progress:
-- Milestone: [██████████░░] 50%
+- Milestone: [██████████████████] 90%
 - Phase 1: [██████████] 100%
 - Phase 2: [██████████] 100% (Plan 01 + 02 complete)
+- Phase 3: [██████████] 100% (Plans 01 + 02 + 03 complete)
+- Phase 4: [████████░░░░] 75% (Plans 01 + 02 + 03 + 04 complete, 05 optional)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Plan 02-02 complete — Phase 2 ready for transition]
+  ✓        ✓        ⧖     [Plan 04-04 APPLY complete; UNIFY in progress]
 ```
 
 ## Accumulated Context
@@ -45,6 +47,11 @@ PLAN ──▶ APPLY ──▶ UNIFY
 - Query encapsulation in src/lib/queries.ts for single source of truth
 - Defer RLS policies to Phase 4 (security hardening after channel connectors)
 - Defer pagination to Phase 3/4 (demo data volume manageable now)
+- Phase 3 Plan 01: OAuth config via environment variables + test app fallback (secure, flexible, demo-ready)
+- Phase 3 Plan 01: Connector registry singleton pattern for extensibility (Amazon/WooCommerce next)
+- Phase 3 Plan 01: Template method pattern (BaseConnector) — shared sync logic, subclasses override fetchProducts()
+- Phase 3 Plan 01: Async generator pagination for Shopify (memory efficient, handles 10k+ products)
+- Phase 3 Plan 01: Unique constraint (channel_id, external_product_id) to prevent duplicate syncs
 
 ### Deferred Issues
 
@@ -56,10 +63,10 @@ None — Phase 1 complete, build passing, ready for Phase 2 (Backend Integration
 
 ## Session Continuity
 
-Last session: 2026-04-10 01:10 UTC
-Stopped at: Phase 2 Plan 02 UNIFY complete
-Next action: Run /paul:unify transition workflow (Phase 2 complete, moving to Phase 3)
-Resume file: .paul/phases/02-backend-integration/02-02-SUMMARY.md
+Last session: 2026-04-11 22:45 UTC
+Stopped at: Plan 04-04 APPLY complete, UNIFY in progress (Alert Sensitivity Settings)
+Next action: Commit changes, then Plan 04-05 (if proceeding) or Phase 5 (Marketing Funnel)
+Resume file: .paul/phases/04-ai-insights/04-04-SUMMARY.md
 
 ---
 *STATE.md — Updated after every significant action*

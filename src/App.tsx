@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,75 +7,77 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AIAccessProvider } from "@/contexts/AIAccessContext";
 import { AppLayout } from "@/components/layout/AppLayout";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Products from "./pages/Products";
 
-import Inventory from "./pages/Inventory";
-import Orders from "./pages/Orders";
-import Returns from "./pages/Returns";
-import Settlements from "./pages/Settlements";
-import Alerts from "./pages/Alerts";
-import ProductHealth from "./pages/ProductHealth";
-import ConsolidatedOrders from "./pages/ConsolidatedOrders";
-import SKUMapping from "./pages/SKUMapping";
-import Reconciliation from "./pages/Reconciliation";
-import DataImport from "./pages/DataImport";
-import SocialInsights from "./pages/SocialInsights";
-import Subscription from "./pages/Subscription";
-import Support from "./pages/Support";
-import Vendors from "./pages/Vendors";
-import Warehouses from "./pages/Warehouses";
-import Tasks from "./pages/Tasks";
-import Analytics from "./pages/Analytics";
-import AIChatbot from "./pages/AIChatbot";
-import OwnWebsite from "./pages/OwnWebsite";
-import Permissions from "./pages/Permissions";
-import Reports from "./pages/Reports";
-import PricePayout from "./pages/PricePayout";
-import NotFound from "./pages/NotFound";
-import DataConfiguration from "./pages/DataConfiguration";
-import SystemArchitecture from "./pages/SystemArchitecture";
-import SystemSettings from "./pages/SystemSettings";
-import FinanceTaxation from "./pages/FinanceTaxation";
-import APISettings from "./pages/APISettings";
-import VideoManagement from "./pages/VideoManagement";
-import LegalCompliance from "./pages/LegalCompliance";
-import LeadManagement from "./pages/LeadManagement";
-import WhatsAppAPI from "./pages/WhatsAppAPI";
-import BusinessOnboarding from "./pages/BusinessOnboarding";
-import CustomerManagement from "./pages/CustomerManagement";
-import Insights from "./pages/Insights";
-import MarketingConfig from "./pages/MarketingConfig";
-import ExpenseTracking from "./pages/ExpenseTracking";
-import StaffManagement from "./pages/StaffManagement";
-import TechnicalDocs from "./pages/TechnicalDocs";
-import ProfitCalculator from "./pages/ProfitCalculator";
-import PayoutComparison from "./pages/PayoutComparison";
-import Integrations from "./pages/Integrations";
-import Broadcast from "./pages/Broadcast";
-import PurchaseManagement from "./pages/PurchaseManagement";
-import ReviewRatingAnalytics from "./pages/ReviewRatingAnalytics";
-import GoogleMapsScraper from "./pages/GoogleMapsScraper";
-import EmailSocialMarketing from "./pages/EmailSocialMarketing";
-import GoogleMeetIntegration from "./pages/GoogleMeetIntegration";
-import StorageDashboard from "./pages/StorageDashboard";
-import AILearningUpgrade from "./pages/AILearningUpgrade";
-import ChannelManagement from "./pages/ChannelManagement";
-import Brands from "./pages/Brands";
-import ProductsCatalog from "./pages/ProductsCatalog";
-import Affiliated from "./pages/Affiliated";
-import ReconciliationHub from "./pages/ReconciliationHub";
-import DemoLayout from "./pages/demo/DemoLayout";
-import DemoDashboard from "./pages/demo/DemoDashboard";
-import DemoSalesAnalysis from "./pages/demo/DemoSalesAnalysis";
-import DemoReconciliation from "./pages/demo/DemoReconciliation";
-import DemoDataImport from "./pages/demo/DemoDataImport";
-import DemoReports from "./pages/demo/DemoReports";
-import DemoSettings from "./pages/demo/DemoSettings";
-import DemoSubscription from "./pages/demo/DemoSubscription";
-import DemoOnboarding from "./pages/demo/DemoOnboarding";
-import DemoTicketing from "./pages/demo/DemoTicketing";
+const Login = lazy(() => import('./pages/Login'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Products = lazy(() => import('./pages/Products'));
+const Inventory = lazy(() => import('./pages/Inventory'));
+const Orders = lazy(() => import('./pages/Orders'));
+const Returns = lazy(() => import('./pages/Returns'));
+const Settlements = lazy(() => import('./pages/Settlements'));
+const Alerts = lazy(() => import('./pages/Alerts'));
+const ProductHealth = lazy(() => import('./pages/ProductHealth'));
+const ConsolidatedOrders = lazy(() => import('./pages/ConsolidatedOrders'));
+const SKUMapping = lazy(() => import('./pages/SKUMapping'));
+const Reconciliation = lazy(() => import('./pages/Reconciliation'));
+const DataImport = lazy(() => import('./pages/DataImport'));
+const SocialInsights = lazy(() => import('./pages/SocialInsights'));
+const Subscription = lazy(() => import('./pages/Subscription'));
+const Support = lazy(() => import('./pages/Support'));
+const Vendors = lazy(() => import('./pages/Vendors'));
+const Warehouses = lazy(() => import('./pages/Warehouses'));
+const Tasks = lazy(() => import('./pages/Tasks'));
+const Analytics = lazy(() => import('./pages/Analytics'));
+const AIChatbot = lazy(() => import('./pages/AIChatbot'));
+const OwnWebsite = lazy(() => import('./pages/OwnWebsite'));
+const Permissions = lazy(() => import('./pages/Permissions'));
+const Reports = lazy(() => import('./pages/Reports'));
+const PricePayout = lazy(() => import('./pages/PricePayout'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const DataConfiguration = lazy(() => import('./pages/DataConfiguration'));
+const SystemArchitecture = lazy(() => import('./pages/SystemArchitecture'));
+const SystemSettings = lazy(() => import('./pages/SystemSettings'));
+const FinanceTaxation = lazy(() => import('./pages/FinanceTaxation'));
+const APISettings = lazy(() => import('./pages/APISettings'));
+const VideoManagement = lazy(() => import('./pages/VideoManagement'));
+const LegalCompliance = lazy(() => import('./pages/LegalCompliance'));
+const LeadManagement = lazy(() => import('./pages/LeadManagement'));
+const WhatsAppAPI = lazy(() => import('./pages/WhatsAppAPI'));
+const BusinessOnboarding = lazy(() => import('./pages/BusinessOnboarding'));
+const CustomerManagement = lazy(() => import('./pages/CustomerManagement'));
+const Insights = lazy(() => import('./pages/Insights'));
+const AlertSensitivity = lazy(() => import('./pages/AlertSensitivity'));
+const MarketingConfig = lazy(() => import('./pages/MarketingConfig'));
+const ExpenseTracking = lazy(() => import('./pages/ExpenseTracking'));
+const StaffManagement = lazy(() => import('./pages/StaffManagement'));
+const TechnicalDocs = lazy(() => import('./pages/TechnicalDocs'));
+const ProfitCalculator = lazy(() => import('./pages/ProfitCalculator'));
+const PayoutComparison = lazy(() => import('./pages/PayoutComparison'));
+const Integrations = lazy(() => import('./pages/Integrations'));
+const Broadcast = lazy(() => import('./pages/Broadcast'));
+const PurchaseManagement = lazy(() => import('./pages/PurchaseManagement'));
+const ReviewRatingAnalytics = lazy(() => import('./pages/ReviewRatingAnalytics'));
+const GoogleMapsScraper = lazy(() => import('./pages/GoogleMapsScraper'));
+const EmailSocialMarketing = lazy(() => import('./pages/EmailSocialMarketing'));
+const GoogleMeetIntegration = lazy(() => import('./pages/GoogleMeetIntegration'));
+const StorageDashboard = lazy(() => import('./pages/StorageDashboard'));
+const AILearningUpgrade = lazy(() => import('./pages/AILearningUpgrade'));
+const ChannelManagement = lazy(() => import('./pages/ChannelManagement'));
+const Brands = lazy(() => import('./pages/Brands'));
+const ProductsCatalog = lazy(() => import('./pages/ProductsCatalog'));
+const Affiliated = lazy(() => import('./pages/Affiliated'));
+const ReconciliationHub = lazy(() => import('./pages/ReconciliationHub'));
+const AdminTools = lazy(() => import('./pages/AdminTools'));
+const DemoLayout = lazy(() => import('./pages/demo/DemoLayout'));
+const DemoDashboard = lazy(() => import('./pages/demo/DemoDashboard'));
+const DemoSalesAnalysis = lazy(() => import('./pages/demo/DemoSalesAnalysis'));
+const DemoReconciliation = lazy(() => import('./pages/demo/DemoReconciliation'));
+const DemoDataImport = lazy(() => import('./pages/demo/DemoDataImport'));
+const DemoReports = lazy(() => import('./pages/demo/DemoReports'));
+const DemoSettings = lazy(() => import('./pages/demo/DemoSettings'));
+const DemoSubscription = lazy(() => import('./pages/demo/DemoSubscription'));
+const DemoOnboarding = lazy(() => import('./pages/demo/DemoOnboarding'));
+const DemoTicketing = lazy(() => import('./pages/demo/DemoTicketing'));
 
 const queryClient = new QueryClient();
 
@@ -86,80 +89,84 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Navigate to="/insights" replace />} />
-            <Route path="/dashboard" element={<Navigate to="/insights" replace />} />
-            <Route path="/channels" element={<AppLayout><ChannelManagement /></AppLayout>} />
-            <Route path="/brands" element={<AppLayout><Brands /></AppLayout>} />
-            <Route path="/products-catalog" element={<AppLayout><ProductsCatalog /></AppLayout>} />
-            <Route path="/products" element={<Navigate to="/products-catalog" replace />} />
-            <Route path="/catalog-manager" element={<Navigate to="/products-catalog" replace />} />
-            <Route path="/product-health" element={<AppLayout><ProductHealth /></AppLayout>} />
-            <Route path="/inventory" element={<AppLayout><Inventory /></AppLayout>} />
-            <Route path="/orders" element={<AppLayout><Orders /></AppLayout>} />
-            <Route path="/consolidated-orders" element={<AppLayout><ConsolidatedOrders /></AppLayout>} />
-            <Route path="/returns" element={<AppLayout><Returns /></AppLayout>} />
-            <Route path="/settlements" element={<AppLayout><Settlements /></AppLayout>} />
-            <Route path="/sku-mapping" element={<AppLayout><SKUMapping /></AppLayout>} />
-            <Route path="/reconciliation" element={<AppLayout><ReconciliationHub /></AppLayout>} />
-            <Route path="/stock-reconciliation" element={<Navigate to="/reconciliation" replace />} />
-            <Route path="/affiliated" element={<AppLayout><Affiliated /></AppLayout>} />
-            <Route path="/data-import" element={<AppLayout><DataImport /></AppLayout>} />
-            <Route path="/social-insights" element={<AppLayout><SocialInsights /></AppLayout>} />
-            <Route path="/subscription" element={<AppLayout><Subscription /></AppLayout>} />
-            <Route path="/support" element={<AppLayout><Support /></AppLayout>} />
-            <Route path="/alerts" element={<AppLayout><Alerts /></AppLayout>} />
-            <Route path="/vendors" element={<AppLayout><Vendors /></AppLayout>} />
-            <Route path="/warehouses" element={<AppLayout><Warehouses /></AppLayout>} />
-            <Route path="/tasks" element={<AppLayout><Tasks /></AppLayout>} />
-            <Route path="/analytics" element={<AppLayout><Analytics /></AppLayout>} />
-            <Route path="/ecommerce" element={<AppLayout><OwnWebsite /></AppLayout>} />
-            <Route path="/chatbot" element={<AppLayout><AIChatbot /></AppLayout>} />
-            <Route path="/permissions" element={<AppLayout><Permissions /></AppLayout>} />
-            <Route path="/reports" element={<AppLayout><Reports /></AppLayout>} />
-            <Route path="/price-payout" element={<AppLayout><PricePayout /></AppLayout>} />
-            <Route path="/settings" element={<Navigate to="/permissions" replace />} />
-            <Route path="/data-configuration" element={<Navigate to="/system-settings" replace />} />
-            <Route path="/system-architecture" element={<Navigate to="/system-settings" replace />} />
-            <Route path="/system-settings" element={<AppLayout><SystemSettings /></AppLayout>} />
-            <Route path="/finance" element={<AppLayout><FinanceTaxation /></AppLayout>} />
-            <Route path="/api-settings" element={<AppLayout><APISettings /></AppLayout>} />
-            <Route path="/video-management" element={<AppLayout><VideoManagement /></AppLayout>} />
-            <Route path="/legal-compliance" element={<AppLayout><LegalCompliance /></AppLayout>} />
-            <Route path="/leads" element={<AppLayout><LeadManagement /></AppLayout>} />
-            <Route path="/whatsapp" element={<AppLayout><WhatsAppAPI /></AppLayout>} />
-            <Route path="/onboarding" element={<AppLayout><BusinessOnboarding /></AppLayout>} />
-            <Route path="/customers" element={<AppLayout><CustomerManagement /></AppLayout>} />
-            <Route path="/insights" element={<AppLayout><Insights /></AppLayout>} />
-            <Route path="/marketing-config" element={<AppLayout><MarketingConfig /></AppLayout>} />
-            <Route path="/expenses" element={<AppLayout><ExpenseTracking /></AppLayout>} />
-            <Route path="/staff" element={<AppLayout><StaffManagement /></AppLayout>} />
-            <Route path="/technical-docs" element={<AppLayout><TechnicalDocs /></AppLayout>} />
-            <Route path="/broadcast" element={<AppLayout><Broadcast /></AppLayout>} />
-            <Route path="/profit-calculator" element={<Navigate to="/price-payout" replace />} />
-            <Route path="/payout-comparison" element={<Navigate to="/price-payout" replace />} />
-            <Route path="/ai-learning" element={<Navigate to="/chatbot" replace />} />
-            <Route path="/integrations" element={<AppLayout><Integrations /></AppLayout>} />
-            <Route path="/purchase" element={<AppLayout><PurchaseManagement /></AppLayout>} />
-            <Route path="/review-analytics" element={<AppLayout><ReviewRatingAnalytics /></AppLayout>} />
-            <Route path="/data-intelligence" element={<AppLayout><GoogleMapsScraper /></AppLayout>} />
-            <Route path="/email-marketing" element={<AppLayout><EmailSocialMarketing /></AppLayout>} />
-            <Route path="/google-meet" element={<AppLayout><GoogleMeetIntegration /></AppLayout>} />
-            <Route path="/storage" element={<AppLayout><StorageDashboard /></AppLayout>} />
-            <Route path="/ai-learning" element={<AppLayout><AILearningUpgrade /></AppLayout>} />
-            {/* Demo Routes */}
-            <Route path="/demo" element={<DemoLayout><DemoDashboard /></DemoLayout>} />
-            <Route path="/demo/sales" element={<DemoLayout><DemoSalesAnalysis /></DemoLayout>} />
-            <Route path="/demo/reconciliation" element={<DemoLayout><DemoReconciliation /></DemoLayout>} />
-            <Route path="/demo/import" element={<DemoLayout><DemoDataImport /></DemoLayout>} />
-            <Route path="/demo/reports" element={<DemoLayout><DemoReports /></DemoLayout>} />
-            <Route path="/demo/settings" element={<DemoLayout><DemoSettings /></DemoLayout>} />
-            <Route path="/demo/subscription" element={<DemoLayout><DemoSubscription /></DemoLayout>} />
-            <Route path="/demo/onboarding" element={<DemoLayout><DemoOnboarding /></DemoLayout>} />
-            <Route path="/demo/support" element={<DemoLayout><DemoTicketing /></DemoLayout>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<div className="flex items-center justify-center h-screen bg-background"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<Navigate to="/insights" replace />} />
+              <Route path="/dashboard" element={<Navigate to="/insights" replace />} />
+              <Route path="/channels" element={<AppLayout><ChannelManagement /></AppLayout>} />
+              <Route path="/brands" element={<AppLayout><Brands /></AppLayout>} />
+              <Route path="/products-catalog" element={<AppLayout><ProductsCatalog /></AppLayout>} />
+              <Route path="/products" element={<Navigate to="/products-catalog" replace />} />
+              <Route path="/catalog-manager" element={<Navigate to="/products-catalog" replace />} />
+              <Route path="/product-health" element={<AppLayout><ProductHealth /></AppLayout>} />
+              <Route path="/inventory" element={<AppLayout><Inventory /></AppLayout>} />
+              <Route path="/orders" element={<AppLayout><Orders /></AppLayout>} />
+              <Route path="/consolidated-orders" element={<AppLayout><ConsolidatedOrders /></AppLayout>} />
+              <Route path="/returns" element={<AppLayout><Returns /></AppLayout>} />
+              <Route path="/settlements" element={<AppLayout><Settlements /></AppLayout>} />
+              <Route path="/sku-mapping" element={<AppLayout><SKUMapping /></AppLayout>} />
+              <Route path="/reconciliation" element={<AppLayout><ReconciliationHub /></AppLayout>} />
+              <Route path="/stock-reconciliation" element={<Navigate to="/reconciliation" replace />} />
+              <Route path="/affiliated" element={<AppLayout><Affiliated /></AppLayout>} />
+              <Route path="/data-import" element={<AppLayout><DataImport /></AppLayout>} />
+              <Route path="/social-insights" element={<AppLayout><SocialInsights /></AppLayout>} />
+              <Route path="/subscription" element={<AppLayout><Subscription /></AppLayout>} />
+              <Route path="/support" element={<AppLayout><Support /></AppLayout>} />
+              <Route path="/alerts" element={<AppLayout><Alerts /></AppLayout>} />
+              <Route path="/vendors" element={<AppLayout><Vendors /></AppLayout>} />
+              <Route path="/warehouses" element={<AppLayout><Warehouses /></AppLayout>} />
+              <Route path="/tasks" element={<AppLayout><Tasks /></AppLayout>} />
+              <Route path="/analytics" element={<AppLayout><Analytics /></AppLayout>} />
+              <Route path="/ecommerce" element={<AppLayout><OwnWebsite /></AppLayout>} />
+              <Route path="/chatbot" element={<AppLayout><AIChatbot /></AppLayout>} />
+              <Route path="/permissions" element={<AppLayout><Permissions /></AppLayout>} />
+              <Route path="/reports" element={<AppLayout><Reports /></AppLayout>} />
+              <Route path="/price-payout" element={<AppLayout><PricePayout /></AppLayout>} />
+              <Route path="/settings" element={<Navigate to="/permissions" replace />} />
+              <Route path="/data-configuration" element={<Navigate to="/system-settings" replace />} />
+              <Route path="/system-architecture" element={<Navigate to="/system-settings" replace />} />
+              <Route path="/system-settings" element={<AppLayout><SystemSettings /></AppLayout>} />
+              <Route path="/admin-tools" element={<AppLayout><AdminTools /></AppLayout>} />
+              <Route path="/finance" element={<AppLayout><FinanceTaxation /></AppLayout>} />
+              <Route path="/api-settings" element={<AppLayout><APISettings /></AppLayout>} />
+              <Route path="/video-management" element={<AppLayout><VideoManagement /></AppLayout>} />
+              <Route path="/legal-compliance" element={<AppLayout><LegalCompliance /></AppLayout>} />
+              <Route path="/leads" element={<AppLayout><LeadManagement /></AppLayout>} />
+              <Route path="/whatsapp" element={<AppLayout><WhatsAppAPI /></AppLayout>} />
+              <Route path="/onboarding" element={<AppLayout><BusinessOnboarding /></AppLayout>} />
+              <Route path="/customers" element={<AppLayout><CustomerManagement /></AppLayout>} />
+              <Route path="/insights" element={<AppLayout><Insights /></AppLayout>} />
+              <Route path="/alert-sensitivity" element={<AppLayout><AlertSensitivity /></AppLayout>} />
+              <Route path="/marketing-config" element={<AppLayout><MarketingConfig /></AppLayout>} />
+              <Route path="/expenses" element={<AppLayout><ExpenseTracking /></AppLayout>} />
+              <Route path="/staff" element={<AppLayout><StaffManagement /></AppLayout>} />
+              <Route path="/technical-docs" element={<AppLayout><TechnicalDocs /></AppLayout>} />
+              <Route path="/broadcast" element={<AppLayout><Broadcast /></AppLayout>} />
+              <Route path="/profit-calculator" element={<Navigate to="/price-payout" replace />} />
+              <Route path="/payout-comparison" element={<Navigate to="/price-payout" replace />} />
+              <Route path="/ai-learning" element={<Navigate to="/chatbot" replace />} />
+              <Route path="/integrations" element={<AppLayout><Integrations /></AppLayout>} />
+              <Route path="/purchase" element={<AppLayout><PurchaseManagement /></AppLayout>} />
+              <Route path="/review-analytics" element={<AppLayout><ReviewRatingAnalytics /></AppLayout>} />
+              <Route path="/data-intelligence" element={<AppLayout><GoogleMapsScraper /></AppLayout>} />
+              <Route path="/email-marketing" element={<AppLayout><EmailSocialMarketing /></AppLayout>} />
+              <Route path="/google-meet" element={<AppLayout><GoogleMeetIntegration /></AppLayout>} />
+              <Route path="/storage" element={<AppLayout><StorageDashboard /></AppLayout>} />
+              <Route path="/ai-learning" element={<AppLayout><AILearningUpgrade /></AppLayout>} />
+              {/* Demo Routes */}
+              <Route path="/demo" element={<DemoLayout><DemoDashboard /></DemoLayout>} />
+              <Route path="/demo/sales" element={<DemoLayout><DemoSalesAnalysis /></DemoLayout>} />
+              <Route path="/demo/reconciliation" element={<DemoLayout><DemoReconciliation /></DemoLayout>} />
+              <Route path="/demo/import" element={<DemoLayout><DemoDataImport /></DemoLayout>} />
+              <Route path="/demo/reports" element={<DemoLayout><DemoReports /></DemoLayout>} />
+              <Route path="/demo/settings" element={<DemoLayout><DemoSettings /></DemoLayout>} />
+              <Route path="/demo/subscription" element={<DemoLayout><DemoSubscription /></DemoLayout>} />
+              <Route path="/demo/onboarding" element={<DemoLayout><DemoOnboarding /></DemoLayout>} />
+              <Route path="/demo/support" element={<DemoLayout><DemoTicketing /></DemoLayout>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </BrowserRouter>
         </AIAccessProvider>
       </AuthProvider>

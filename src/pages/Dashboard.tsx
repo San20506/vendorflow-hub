@@ -136,16 +136,13 @@ export default function Dashboard() {
       )}
 
       {/* ═══ PAGE HEADER ═══ */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-2xl font-bold text-foreground">Sales Dashboard</h1>
+      <div className="space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex flex-col">
+            <h1 className="text-3xl font-bold text-foreground">Sales Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-1">Welcome back, {user?.name}!</p>
           </div>
-        </div>
-        <div className="absolute left-1/2 -translate-x-1/2 top-4 hidden md:block">
-          <p className="text-lg font-semibold text-muted-foreground">Welcome back, {user?.name}!</p>
-        </div>
-        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-blue-500/30 bg-blue-500/5">
               <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
@@ -163,10 +160,10 @@ export default function Dashboard() {
             </Button>
           )}
         </div>
-      </div>
+        </div>
 
-      {/* ═══ FILTER CONTROLS ═══ */}
-      <div className="flex items-center gap-3 flex-wrap">
+        {/* ═══ FILTER CONTROLS ═══ */}
+        <div className="flex items-center gap-3 flex-wrap">
         <Select value={selectedPortal} onValueChange={(v) => setSelectedPortal(v as Portal | 'all')}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select Channel" />
@@ -196,6 +193,7 @@ export default function Dashboard() {
           Add Channel
         </Button>
         <DashboardCustomizer widgets={widgets} onToggle={toggleWidget} onMove={moveWidget} onReset={resetWidgets} />
+      </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
