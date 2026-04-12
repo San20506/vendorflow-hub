@@ -1,24 +1,12 @@
 import { useState, useRef, useCallback } from 'react';
-import { SmartExcelImport } from '@/components/SmartExcelImport';
-import { BarcodeScanner } from '@/components/BarcodeScanner';
+import { processImport, PipelineResult } from '@/lib/import-pipeline';
+import { processImportWorkflow, IngestionResult } from '@/lib/import-ingestion';
+import { ImportMetrics } from '@/components/ImportMetrics';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileSpreadsheet, Package, RotateCcw, CheckCircle, AlertTriangle, XCircle, Lightbulb, Upload, FolderOpen, X, File, Image, FileText } from 'lucide-react';
-
-const validationChecks = [
-  { label: 'Orders Imported', status: 'success' as const, detail: '1,247 records synced' },
-  { label: 'Inventory Synced', status: 'success' as const, detail: 'All warehouses up to date' },
-  { label: 'SKU Mapping Complete', status: 'success' as const, detail: '98% mapped' },
-  { label: 'Missing Product Data', status: 'warning' as const, detail: '3 products missing images' },
-  { label: 'Incorrect Fields', status: 'error' as const, detail: '2 SKUs with invalid barcodes' },
-];
-
-const suggestions = [
-  'Upload SKU master to resolve mapping errors',
-  'Update product images for 3 incomplete listings',
-  'Review barcode format for SKU-MSH-007 and SKU-BLK-004',
-];
+import { useAuth } from '@/contexts/AuthContext';
+import { FileSpreadsheet, Package, RotateCcw, Upload, FolderOpen, X, File, Image, FileText, Loader2 } from 'lucide-react';
 
 interface UploadedFileInfo {
   id: string;
@@ -40,8 +28,12 @@ function getFileIcon(type: string) {
 }
 
 export default function DataImport() {
+  const { user } = useAuth();
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFileInfo[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [pipelineResult, setPipelineResult] = useState<PipelineResult | null>(null);
+  const [ingestionResult, setIngestionResult] = useState<IngestionResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
 
@@ -71,157 +63,152 @@ export default function DataImport() {
 
   const removeFile = (id: string) => setUploadedFiles(prev => prev.filter(f => f.id !== id));
 
+  const handleProcessFile = useCallback(async (file: File) => {
+    if (!user?.vendor_id) {
+      alert('Vendor ID not found. Please log in again.');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // Step 1: Run preprocessing pipeline
+      const result = await processImport(file);
+      setPipelineResult(result);
+
+      // Step 2: Run ingestion workflow (Gemini fixes + Supabase insert + logging)
+      const ingestion = await processImportWorkflow(result, user.vendor_id, file.name);
+      setIngestionResult(ingestion);
+
+      // Clear uploaded files on success
+      setUploadedFiles([]);
+    } catch (error) {
+      console.error('Import error:', error);
+      setIngestionResult({
+        success: false,
+        metrics: {
+          totalRecords: 0,
+          successfulRecords: 0,
+          skippedRecords: 0,
+          fixedErrors: 0,
+          unfixableErrors: 0,
+          importDuration: 0,
+          entityCounts: {},
+          missingFields: {},
+        },
+        errors: [{ rowIndex: 0, field: 'system', originalValue: String(error) }],
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [user?.vendor_id]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Data Import & Scanning</h1>
-          <p className="text-muted-foreground">Smart Excel import with AI column mapping, validation & barcode scanning</p>
+          <h1 className="text-2xl font-bold text-foreground">Bulk Data Import</h1>
+          <p className="text-muted-foreground">Auto-detect format, validate schema, fix errors with AI, and import data</p>
         </div>
-        <Badge variant="outline">✔ Updated</Badge>
+        <Badge variant="outline">v0.2</Badge>
       </div>
 
-      {/* Quick action cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-primary/10"><FileSpreadsheet className="w-6 h-6 text-primary" /></div>
-              <div><h3 className="font-semibold">Smart Import</h3><p className="text-sm text-muted-foreground">AI-powered Excel import</p></div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardContent className="pt-6">
-            <BarcodeScanner mode="order" trigger={
-              <div className="flex items-center gap-4 w-full">
-                <div className="p-3 rounded-lg bg-emerald-500/10"><Package className="w-6 h-6 text-emerald-600" /></div>
-                <div className="text-left"><h3 className="font-semibold">Scan Order</h3><p className="text-sm text-muted-foreground">Process shipments</p></div>
-              </div>
-            } />
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardContent className="pt-6">
-            <BarcodeScanner mode="return" trigger={
-              <div className="flex items-center gap-4 w-full">
-                <div className="p-3 rounded-lg bg-amber-500/10"><RotateCcw className="w-6 h-6 text-amber-600" /></div>
-                <div className="text-left"><h3 className="font-semibold">Scan Return</h3><p className="text-sm text-muted-foreground">Accept returns</p></div>
-              </div>
-            } />
-          </CardContent>
-        </Card>
-      </div>
+      {/* Display metrics after import completes */}
+      {ingestionResult && (
+        <ImportMetrics
+          metrics={ingestionResult.metrics}
+          status={ingestionResult.success ? 'success' : 'error'}
+          fileName={uploadedFiles[0]?.name}
+        />
+      )}
 
-      {/* Smart Excel Import - main feature */}
-      <SmartExcelImport />
-
-      {/* Multi-File Upload Zone */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Upload className="w-5 h-5 text-primary" />Bulk File Upload</CardTitle>
-          <CardDescription>Drag & drop multiple files or select a folder</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-              dragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-            }`}
-          >
-            <Upload className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-            <p className="font-medium text-foreground mb-1">Drag & drop files here</p>
-            <p className="text-sm text-muted-foreground mb-4">Supports Excel, CSV, images, documents, and more</p>
-            <div className="flex items-center justify-center gap-3">
-              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                <File className="w-4 h-4 mr-1.5" />Select Files
+      {/* Drag & Drop Import Zone */}
+      {!ingestionResult && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-primary" />
+              Import Your Data
+            </CardTitle>
+            <CardDescription>Drag & drop a CSV, JSON, JSONL, or XLSX file</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+                dragActive ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+              }`}
+            >
+              <Upload className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+              <p className="font-medium text-foreground mb-1">Drag & drop file here</p>
+              <p className="text-sm text-muted-foreground mb-4">Supports CSV, JSON, JSONL, and XLSX formats</p>
+              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={isProcessing}>
+                <File className="w-4 h-4 mr-1.5" />
+                Select File
               </Button>
-              <Button variant="outline" size="sm" onClick={() => folderInputRef.current?.click()}>
-                <FolderOpen className="w-4 h-4 mr-1.5" />Select Folder
-              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                onChange={(e) => handleFiles(e.target.files)}
+                accept=".csv,.json,.jsonl,.xlsx,.xls"
+                disabled={isProcessing}
+              />
             </div>
-            <input ref={fileInputRef} type="file" multiple className="hidden" onChange={e => handleFiles(e.target.files)} accept=".xlsx,.xls,.csv,.pdf,.png,.jpg,.jpeg,.doc,.docx" />
-            <input ref={folderInputRef} type="file" multiple className="hidden" onChange={e => handleFiles(e.target.files)} {...{ webkitdirectory: '', directory: '' } as any} />
-          </div>
 
-          {uploadedFiles.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium text-sm">{uploadedFiles.length} file(s) selected</h4>
-                <Button variant="ghost" size="sm" onClick={() => setUploadedFiles([])}>Clear All</Button>
-              </div>
-              <div className="max-h-48 overflow-y-auto space-y-1 scrollbar-thin">
-                {uploadedFiles.map(file => (
-                  <div key={file.id} className="flex items-center justify-between p-2.5 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center gap-3 min-w-0">
-                      {getFileIcon(file.type)}
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">{file.name}</p>
-                        <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
+            {uploadedFiles.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-sm">{uploadedFiles.length} file(s) selected</h4>
+                  <Button variant="ghost" size="sm" onClick={() => setUploadedFiles([])} disabled={isProcessing}>
+                    Clear
+                  </Button>
+                </div>
+                <div className="max-h-48 overflow-y-auto space-y-2 scrollbar-thin">
+                  {uploadedFiles.map((file) => (
+                    <div key={file.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                      <div className="flex items-center gap-3 min-w-0">
+                        {getFileIcon(file.type)}
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{file.name}</p>
+                          <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleProcessFile(new File([new Blob()], file.name, { type: file.type }))}
+                          disabled={isProcessing}
+                        >
+                          {isProcessing ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-1.5 animate-spin" />
+                              Processing...
+                            </>
+                          ) : (
+                            'Import'
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="shrink-0 h-7 w-7"
+                          onClick={() => removeFile(file.id)}
+                          disabled={isProcessing}
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </Button>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="shrink-0 h-7 w-7" onClick={() => removeFile(file.id)}>
-                      <X className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Data Validation Center */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2"><CheckCircle className="w-5 h-5 text-primary" />Data Validation Center</CardTitle>
-          <CardDescription>System-wide data health checklist</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {validationChecks.map((check) => (
-              <div key={check.label} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                <div className="flex items-center gap-3">
-                  {check.status === 'success' && <CheckCircle className="w-5 h-5 text-emerald-600" />}
-                  {check.status === 'warning' && <AlertTriangle className="w-5 h-5 text-amber-600" />}
-                  {check.status === 'error' && <XCircle className="w-5 h-5 text-rose-600" />}
-                  <div>
-                    <p className="font-medium">{check.label}</p>
-                    <p className="text-sm text-muted-foreground">{check.detail}</p>
-                  </div>
+                  ))}
                 </div>
-                <Badge variant="outline" className={`${
-                  check.status === 'success' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' :
-                  check.status === 'warning' ? 'bg-amber-500/10 text-amber-600 border-amber-500/30' :
-                  'bg-rose-500/10 text-rose-600 border-rose-500/30'
-                }`}>
-                  {check.status === 'success' ? '✔ Passed' : check.status === 'warning' ? '⚠ Warning' : '❌ Failed'}
-                </Badge>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Suggestions */}
-      <Card className="border-dashed">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2"><Lightbulb className="w-4 h-4 text-amber-500" />Suggestions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2">
-            {suggestions.map((s, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm">
-                <span className="text-primary font-bold">→</span>
-                <span className="text-muted-foreground">{s}</span>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
