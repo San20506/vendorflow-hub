@@ -1,2 +1,1867 @@
-<testsuites id="" name="" tests="0" failures="0" skipped="0" errors="0" time="0.19294600000000003">
+<testsuites id="" name="" tests="50" failures="12" skipped="3" errors="13" time="542.247966">
+<testsuite name="01-auth.spec.ts" timestamp="2026-04-11T20:12:47.790Z" hostname="chromium" tests="4" failures="0" skipped="0" time="3.343" errors="0">
+<testcase name="Auth — Login page › login page renders form correctly" classname="01-auth.spec.ts" time="1.279">
+</testcase>
+<testcase name="Auth — Login page › login page has branding or heading" classname="01-auth.spec.ts" time="0.712">
+</testcase>
+<testcase name="Auth — Login page › empty form submit shows validation error" classname="01-auth.spec.ts" time="0.563">
+</testcase>
+<testcase name="Auth — Login page › screenshot: login page" classname="01-auth.spec.ts" time="0.789">
+</testcase>
+</testsuite>
+<testsuite name="02-navigation.spec.ts" timestamp="2026-04-11T20:12:47.790Z" hostname="chromium" tests="11" failures="1" skipped="0" time="45.543" errors="0">
+<testcase name="Navigation — sidebar and routing (mocked auth) › sidebar is visible after auth injection" classname="02-navigation.spec.ts" time="41.057">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/02-navigation-Navigation-—-555d8-isible-after-auth-injection-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/02-navigation-Navigation-—-555d8-isible-after-auth-injection-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/02-navigation-Navigation-—-555d8-isible-after-auth-injection-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/02-navigation-Navigation-—-555d8-isible-after-auth-injection-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/02-navigation-Navigation-—-555d8-isible-after-auth-injection-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeVisible() failed" type="expect.toBeVisible">
+<![CDATA[  [chromium] › 02-navigation.spec.ts:18:3 › Navigation — sidebar and routing (mocked auth) › sidebar is visible after auth injection 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('nav, [data-testid="sidebar"], aside, [class*="sidebar"]').first()
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 10000ms
+      - waiting for locator('nav, [data-testid="sidebar"], aside, [class*="sidebar"]').first()
+
+
+      22 |     await page.waitForSelector('.animate-spin', { state: 'detached', timeout: 10000 }).catch(() => {});
+      23 |     const sidebar = page.locator('nav, [data-testid="sidebar"], aside, [class*="sidebar"]').first();
+    > 24 |     await expect(sidebar).toBeVisible({ timeout: 10000 });
+         |                           ^
+      25 |   });
+      26 |
+      27 |   for (const { path, label } of PAGES) {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/02-navigation.spec.ts:24:27
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/02-navigation-Navigation-—-555d8-isible-after-auth-injection-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/02-navigation-Navigation-—-555d8-isible-after-auth-injection-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('nav, [data-testid="sidebar"], aside, [class*="sidebar"]').first()
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 10000ms
+      - waiting for locator('nav, [data-testid="sidebar"], aside, [class*="sidebar"]').first()
+
+
+      22 |     await page.waitForSelector('.animate-spin', { state: 'detached', timeout: 10000 }).catch(() => {});
+      23 |     const sidebar = page.locator('nav, [data-testid="sidebar"], aside, [class*="sidebar"]').first();
+    > 24 |     await expect(sidebar).toBeVisible({ timeout: 10000 });
+         |                           ^
+      25 |   });
+      26 |
+      27 |   for (const { path, label } of PAGES) {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/02-navigation.spec.ts:24:27
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/02-navigation-Navigation-—-555d8-isible-after-auth-injection-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/02-navigation-Navigation-—-555d8-isible-after-auth-injection-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/02-navigation-Navigation-—-555d8-isible-after-auth-injection-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/02-navigation-Navigation-—-555d8-isible-after-auth-injection-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="Navigation — sidebar and routing (mocked auth) › navigates to Insights (/insights)" classname="02-navigation.spec.ts" time="0.68">
+</testcase>
+<testcase name="Navigation — sidebar and routing (mocked auth) › navigates to Inventory (/inventory)" classname="02-navigation.spec.ts" time="0.387">
+</testcase>
+<testcase name="Navigation — sidebar and routing (mocked auth) › navigates to Orders (/orders)" classname="02-navigation.spec.ts" time="0.423">
+</testcase>
+<testcase name="Navigation — sidebar and routing (mocked auth) › navigates to Returns (/returns)" classname="02-navigation.spec.ts" time="0.426">
+</testcase>
+<testcase name="Navigation — sidebar and routing (mocked auth) › navigates to Settlements (/settlements)" classname="02-navigation.spec.ts" time="0.46">
+</testcase>
+<testcase name="Navigation — sidebar and routing (mocked auth) › navigates to Products Catalog (/products-catalog)" classname="02-navigation.spec.ts" time="0.36">
+</testcase>
+<testcase name="Navigation — sidebar and routing (mocked auth) › navigates to Reconciliation (/reconciliation)" classname="02-navigation.spec.ts" time="0.545">
+</testcase>
+<testcase name="Navigation — sidebar and routing (mocked auth) › navigates to Analytics (/analytics)" classname="02-navigation.spec.ts" time="0.371">
+</testcase>
+<testcase name="Navigation — sidebar and routing (mocked auth) › navigates to Reports (/reports)" classname="02-navigation.spec.ts" time="0.43">
+</testcase>
+<testcase name="Navigation — sidebar and routing (mocked auth) › navigates to Expenses (/expenses)" classname="02-navigation.spec.ts" time="0.404">
+</testcase>
+</testsuite>
+<testsuite name="03-page-smoke.spec.ts" timestamp="2026-04-11T20:12:47.790Z" hostname="chromium" tests="10" failures="10" skipped="0" time="307.631" errors="0">
+<testcase name="Page smoke tests — all 10 critical pages › Insights — renders without crash" classname="03-page-smoke.spec.ts" time="30.65">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-da945-hts-—-renders-without-crash-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-da945-hts-—-renders-without-crash-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-da945-hts-—-renders-without-crash-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-da945-hts-—-renders-without-crash-chromium-retry1/error-context.md]]
+]]>
+</system-out>
+<failure message="Insights should render visible content" type="expect.toBe">
+<![CDATA[  [chromium] › 03-page-smoke.spec.ts:37:5 › Page smoke tests — all 10 critical pages › Insights — renders without crash 
+
+    Error: Insights should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-da945-hts-—-renders-without-crash-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-da945-hts-—-renders-without-crash-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: Insights should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    Error: apiRequestContext._wrapApiCall: ENOENT: no such file or directory, open '/home/sandy/Documents/Projects/vendorflow-hub/test-results/.playwright-artifacts-3/traces/bdba64d352688aa4aba8-4a0fb2b8646ae2b68efa-retry1.network'
+
+    Error: ENOENT: no such file or directory, open '/home/sandy/Documents/Projects/vendorflow-hub/test-results/.playwright-artifacts-3/5273f1caaec05b9f1c787ff6f34107ba.zip'
+
+    Test timeout of 30000ms exceeded.
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-da945-hts-—-renders-without-crash-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-da945-hts-—-renders-without-crash-chromium-retry1/error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="Page smoke tests — all 10 critical pages › Inventory — renders without crash" classname="03-page-smoke.spec.ts" time="30.808">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-23004-ory-—-renders-without-crash-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-23004-ory-—-renders-without-crash-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-23004-ory-—-renders-without-crash-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-23004-ory-—-renders-without-crash-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-23004-ory-—-renders-without-crash-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<failure message="Inventory should render visible content" type="expect.toBe">
+<![CDATA[  [chromium] › 03-page-smoke.spec.ts:37:5 › Page smoke tests — all 10 critical pages › Inventory — renders without crash 
+
+    Error: Inventory should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-23004-ory-—-renders-without-crash-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-23004-ory-—-renders-without-crash-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: Inventory should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-23004-ory-—-renders-without-crash-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-23004-ory-—-renders-without-crash-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-23004-ory-—-renders-without-crash-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/03-page-smoke-Page-smoke-t-23004-ory-—-renders-without-crash-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="Page smoke tests — all 10 critical pages › Orders — renders without crash" classname="03-page-smoke.spec.ts" time="30.772">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-85c0d-ers-—-renders-without-crash-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-85c0d-ers-—-renders-without-crash-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-85c0d-ers-—-renders-without-crash-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-85c0d-ers-—-renders-without-crash-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-85c0d-ers-—-renders-without-crash-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<failure message="Orders should render visible content" type="expect.toBe">
+<![CDATA[  [chromium] › 03-page-smoke.spec.ts:37:5 › Page smoke tests — all 10 critical pages › Orders — renders without crash 
+
+    Error: Orders should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-85c0d-ers-—-renders-without-crash-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-85c0d-ers-—-renders-without-crash-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: Orders should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-85c0d-ers-—-renders-without-crash-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-85c0d-ers-—-renders-without-crash-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-85c0d-ers-—-renders-without-crash-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/03-page-smoke-Page-smoke-t-85c0d-ers-—-renders-without-crash-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="Page smoke tests — all 10 critical pages › Returns — renders without crash" classname="03-page-smoke.spec.ts" time="30.766">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-99ceb-rns-—-renders-without-crash-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-99ceb-rns-—-renders-without-crash-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-99ceb-rns-—-renders-without-crash-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-99ceb-rns-—-renders-without-crash-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-99ceb-rns-—-renders-without-crash-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<failure message="Returns should render visible content" type="expect.toBe">
+<![CDATA[  [chromium] › 03-page-smoke.spec.ts:37:5 › Page smoke tests — all 10 critical pages › Returns — renders without crash 
+
+    Error: Returns should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-99ceb-rns-—-renders-without-crash-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-99ceb-rns-—-renders-without-crash-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: Returns should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-99ceb-rns-—-renders-without-crash-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-99ceb-rns-—-renders-without-crash-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-99ceb-rns-—-renders-without-crash-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/03-page-smoke-Page-smoke-t-99ceb-rns-—-renders-without-crash-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="Page smoke tests — all 10 critical pages › Settlements — renders without crash" classname="03-page-smoke.spec.ts" time="30.785">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-c592c-nts-—-renders-without-crash-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-c592c-nts-—-renders-without-crash-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-c592c-nts-—-renders-without-crash-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-c592c-nts-—-renders-without-crash-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-c592c-nts-—-renders-without-crash-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<failure message="Settlements should render visible content" type="expect.toBe">
+<![CDATA[  [chromium] › 03-page-smoke.spec.ts:37:5 › Page smoke tests — all 10 critical pages › Settlements — renders without crash 
+
+    Error: Settlements should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-c592c-nts-—-renders-without-crash-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-c592c-nts-—-renders-without-crash-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: Settlements should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-c592c-nts-—-renders-without-crash-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-c592c-nts-—-renders-without-crash-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-c592c-nts-—-renders-without-crash-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/03-page-smoke-Page-smoke-t-c592c-nts-—-renders-without-crash-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="Page smoke tests — all 10 critical pages › Products Catalog — renders without crash" classname="03-page-smoke.spec.ts" time="30.756">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-a6f3b-log-—-renders-without-crash-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-a6f3b-log-—-renders-without-crash-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-a6f3b-log-—-renders-without-crash-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-a6f3b-log-—-renders-without-crash-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-a6f3b-log-—-renders-without-crash-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<failure message="Products Catalog should render visible content" type="expect.toBe">
+<![CDATA[  [chromium] › 03-page-smoke.spec.ts:37:5 › Page smoke tests — all 10 critical pages › Products Catalog — renders without crash 
+
+    Error: Products Catalog should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-a6f3b-log-—-renders-without-crash-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-a6f3b-log-—-renders-without-crash-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: Products Catalog should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-a6f3b-log-—-renders-without-crash-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-a6f3b-log-—-renders-without-crash-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-a6f3b-log-—-renders-without-crash-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/03-page-smoke-Page-smoke-t-a6f3b-log-—-renders-without-crash-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="Page smoke tests — all 10 critical pages › Reconciliation — renders without crash" classname="03-page-smoke.spec.ts" time="30.764">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-a44fe-ion-—-renders-without-crash-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-a44fe-ion-—-renders-without-crash-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-a44fe-ion-—-renders-without-crash-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-a44fe-ion-—-renders-without-crash-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-a44fe-ion-—-renders-without-crash-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<failure message="Reconciliation should render visible content" type="expect.toBe">
+<![CDATA[  [chromium] › 03-page-smoke.spec.ts:37:5 › Page smoke tests — all 10 critical pages › Reconciliation — renders without crash 
+
+    Error: Reconciliation should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-a44fe-ion-—-renders-without-crash-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-a44fe-ion-—-renders-without-crash-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: Reconciliation should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-a44fe-ion-—-renders-without-crash-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-a44fe-ion-—-renders-without-crash-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-a44fe-ion-—-renders-without-crash-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/03-page-smoke-Page-smoke-t-a44fe-ion-—-renders-without-crash-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="Page smoke tests — all 10 critical pages › Analytics — renders without crash" classname="03-page-smoke.spec.ts" time="30.786">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-f9000-ics-—-renders-without-crash-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-f9000-ics-—-renders-without-crash-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-f9000-ics-—-renders-without-crash-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-f9000-ics-—-renders-without-crash-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-f9000-ics-—-renders-without-crash-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<failure message="Analytics should render visible content" type="expect.toBe">
+<![CDATA[  [chromium] › 03-page-smoke.spec.ts:37:5 › Page smoke tests — all 10 critical pages › Analytics — renders without crash 
+
+    Error: Analytics should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-f9000-ics-—-renders-without-crash-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-f9000-ics-—-renders-without-crash-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: Analytics should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-f9000-ics-—-renders-without-crash-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-f9000-ics-—-renders-without-crash-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-f9000-ics-—-renders-without-crash-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/03-page-smoke-Page-smoke-t-f9000-ics-—-renders-without-crash-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="Page smoke tests — all 10 critical pages › Reports — renders without crash" classname="03-page-smoke.spec.ts" time="30.781">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-8bd14-rts-—-renders-without-crash-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-8bd14-rts-—-renders-without-crash-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-8bd14-rts-—-renders-without-crash-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-8bd14-rts-—-renders-without-crash-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-8bd14-rts-—-renders-without-crash-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<failure message="Reports should render visible content" type="expect.toBe">
+<![CDATA[  [chromium] › 03-page-smoke.spec.ts:37:5 › Page smoke tests — all 10 critical pages › Reports — renders without crash 
+
+    Error: Reports should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-8bd14-rts-—-renders-without-crash-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-8bd14-rts-—-renders-without-crash-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: Reports should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-8bd14-rts-—-renders-without-crash-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-8bd14-rts-—-renders-without-crash-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-8bd14-rts-—-renders-without-crash-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/03-page-smoke-Page-smoke-t-8bd14-rts-—-renders-without-crash-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="Page smoke tests — all 10 critical pages › Expenses — renders without crash" classname="03-page-smoke.spec.ts" time="30.763">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-e75fc-ses-—-renders-without-crash-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-e75fc-ses-—-renders-without-crash-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-e75fc-ses-—-renders-without-crash-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-e75fc-ses-—-renders-without-crash-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/03-page-smoke-Page-smoke-t-e75fc-ses-—-renders-without-crash-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<failure message="Expenses should render visible content" type="expect.toBe">
+<![CDATA[  [chromium] › 03-page-smoke.spec.ts:37:5 › Page smoke tests — all 10 critical pages › Expenses — renders without crash 
+
+    Error: Expenses should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-e75fc-ses-—-renders-without-crash-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-e75fc-ses-—-renders-without-crash-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: Expenses should render visible content
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      66 |         .isVisible({ timeout: 8000 })
+      67 |         .catch(() => false);
+    > 68 |       expect(hasContent, `${label} should render visible content`).toBe(true);
+         |                                                                    ^
+      69 |
+      70 |       // Filter out known non-critical console noise
+      71 |       const realErrors = consoleErrors.filter(
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/03-page-smoke.spec.ts:68:68
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-e75fc-ses-—-renders-without-crash-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/03-page-smoke-Page-smoke-t-e75fc-ses-—-renders-without-crash-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/03-page-smoke-Page-smoke-t-e75fc-ses-—-renders-without-crash-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/03-page-smoke-Page-smoke-t-e75fc-ses-—-renders-without-crash-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+</testsuite>
+<testsuite name="04-interactive.spec.ts" timestamp="2026-04-11T20:12:47.790Z" hostname="chromium" tests="9" failures="1" skipped="3" time="123.357" errors="0">
+<testcase name="Interactive components (mocked auth) › sidebar search input accepts text" classname="04-interactive.spec.ts">
+<properties>
+<property name="skip" value="No sidebar/header search input found — may use different selector">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Interactive components (mocked auth) › top header search input accepts text" classname="04-interactive.spec.ts">
+<properties>
+<property name="skip" value="Header search input not visible">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Interactive components (mocked auth) › insights page — tabs or metric cards are present" classname="04-interactive.spec.ts" time="24.841">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/04-interactive-Interactive-82289-or-metric-cards-are-present-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/04-interactive-Interactive-82289-or-metric-cards-are-present-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/04-interactive-Interactive-82289-or-metric-cards-are-present-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/04-interactive-Interactive-82289-or-metric-cards-are-present-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/04-interactive-Interactive-82289-or-metric-cards-are-present-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<failure message="Insights page should have tabs or metric cards" type="expect.toBeGreaterThan">
+<![CDATA[  [chromium] › 04-interactive.spec.ts:58:3 › Interactive components (mocked auth) › insights page — tabs or metric cards are present 
+
+    Error: Insights page should have tabs or metric cards
+
+    expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+      66 |     const tabCount = await tabs.count();
+      67 |     const cardCount = await cards.count();
+    > 68 |     expect(tabCount + cardCount, 'Insights page should have tabs or metric cards').toBeGreaterThan(0);
+         |                                                                                    ^
+      69 |   });
+      70 |
+      71 |   test('sidebar trigger button is clickable', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/04-interactive.spec.ts:68:84
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/04-interactive-Interactive-82289-or-metric-cards-are-present-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/04-interactive-Interactive-82289-or-metric-cards-are-present-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: Insights page should have tabs or metric cards
+
+    expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+      66 |     const tabCount = await tabs.count();
+      67 |     const cardCount = await cards.count();
+    > 68 |     expect(tabCount + cardCount, 'Insights page should have tabs or metric cards').toBeGreaterThan(0);
+         |                                                                                    ^
+      69 |   });
+      70 |
+      71 |   test('sidebar trigger button is clickable', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/04-interactive.spec.ts:68:84
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/04-interactive-Interactive-82289-or-metric-cards-are-present-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/04-interactive-Interactive-82289-or-metric-cards-are-present-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/04-interactive-Interactive-82289-or-metric-cards-are-present-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/04-interactive-Interactive-82289-or-metric-cards-are-present-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</failure>
+</testcase>
+<testcase name="Interactive components (mocked auth) › sidebar trigger button is clickable" classname="04-interactive.spec.ts">
+<properties>
+<property name="skip" value="Sidebar trigger not found">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Interactive components (mocked auth) › screenshot: insights page" classname="04-interactive.spec.ts" time="12.354">
+</testcase>
+<testcase name="Interactive components (mocked auth) › screenshot: orders page" classname="04-interactive.spec.ts" time="12.329">
+</testcase>
+<testcase name="Interactive components (mocked auth) › screenshot: inventory page" classname="04-interactive.spec.ts" time="12.309">
+</testcase>
+<testcase name="Interactive components (mocked auth) › screenshot: analytics page" classname="04-interactive.spec.ts" time="12.337">
+</testcase>
+<testcase name="Interactive components (mocked auth) › screenshot: reports page" classname="04-interactive.spec.ts" time="12.316">
+</testcase>
+</testsuite>
+<testsuite name="ui-ux-verification.spec.ts" timestamp="2026-04-11T20:12:47.790Z" hostname="chromium" tests="16" failures="0" skipped="0" time="4.308" errors="13">
+<testcase name="VendorFlow UI/UX Verification › 01: Login page loads and renders correctly" classname="ui-ux-verification.spec.ts" time="0.277">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-79e9d-loads-and-renders-correctly-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-79e9d-loads-and-renders-correctly-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-79e9d-loads-and-renders-correctly-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-79e9d-loads-and-renders-correctly-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-79e9d-loads-and-renders-correctly-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<error message="page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login" type="Error">
+<![CDATA[  [chromium] › ui-ux-verification.spec.ts:9:3 › VendorFlow UI/UX Verification › 01: Login page loads and renders correctly 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-79e9d-loads-and-renders-correctly-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-79e9d-loads-and-renders-correctly-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-79e9d-loads-and-renders-correctly-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-79e9d-loads-and-renders-correctly-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-79e9d-loads-and-renders-correctly-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/ui-ux-verification-VendorF-79e9d-loads-and-renders-correctly-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="VendorFlow UI/UX Verification › 02: Navigation sidebar renders correctly" classname="ui-ux-verification.spec.ts" time="0.347">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-2495d-n-sidebar-renders-correctly-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-2495d-n-sidebar-renders-correctly-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-2495d-n-sidebar-renders-correctly-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-2495d-n-sidebar-renders-correctly-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-2495d-n-sidebar-renders-correctly-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<error message="page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login" type="Error">
+<![CDATA[  [chromium] › ui-ux-verification.spec.ts:22:3 › VendorFlow UI/UX Verification › 02: Navigation sidebar renders correctly 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-2495d-n-sidebar-renders-correctly-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-2495d-n-sidebar-renders-correctly-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-2495d-n-sidebar-renders-correctly-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-2495d-n-sidebar-renders-correctly-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-2495d-n-sidebar-renders-correctly-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/ui-ux-verification-VendorF-2495d-n-sidebar-renders-correctly-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="VendorFlow UI/UX Verification › 03: Insights page layout responsive at multiple breakpoints" classname="ui-ux-verification.spec.ts" time="0.308">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-1704f-ive-at-multiple-breakpoints-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-1704f-ive-at-multiple-breakpoints-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-1704f-ive-at-multiple-breakpoints-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-1704f-ive-at-multiple-breakpoints-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-1704f-ive-at-multiple-breakpoints-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<error message="page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login" type="Error">
+<![CDATA[  [chromium] › ui-ux-verification.spec.ts:49:3 › VendorFlow UI/UX Verification › 03: Insights page layout responsive at multiple breakpoints 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-1704f-ive-at-multiple-breakpoints-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-1704f-ive-at-multiple-breakpoints-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-1704f-ive-at-multiple-breakpoints-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-1704f-ive-at-multiple-breakpoints-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-1704f-ive-at-multiple-breakpoints-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/ui-ux-verification-VendorF-1704f-ive-at-multiple-breakpoints-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="VendorFlow UI/UX Verification › 04: Orders page loads and shows empty state with demo data button" classname="ui-ux-verification.spec.ts" time="0.296">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-217d4-state-with-demo-data-button-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-217d4-state-with-demo-data-button-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-217d4-state-with-demo-data-button-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-217d4-state-with-demo-data-button-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-217d4-state-with-demo-data-button-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<error message="page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login" type="Error">
+<![CDATA[  [chromium] › ui-ux-verification.spec.ts:68:3 › VendorFlow UI/UX Verification › 04: Orders page loads and shows empty state with demo data button 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-217d4-state-with-demo-data-button-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-217d4-state-with-demo-data-button-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-217d4-state-with-demo-data-button-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-217d4-state-with-demo-data-button-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-217d4-state-with-demo-data-button-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/ui-ux-verification-VendorF-217d4-state-with-demo-data-button-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="VendorFlow UI/UX Verification › 05: Dialog components accessible and closeable" classname="ui-ux-verification.spec.ts" time="0.299">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-3a4ca-ts-accessible-and-closeable-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-3a4ca-ts-accessible-and-closeable-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-3a4ca-ts-accessible-and-closeable-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-3a4ca-ts-accessible-and-closeable-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-3a4ca-ts-accessible-and-closeable-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<error message="page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login" type="Error">
+<![CDATA[  [chromium] › ui-ux-verification.spec.ts:89:3 › VendorFlow UI/UX Verification › 05: Dialog components accessible and closeable 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-3a4ca-ts-accessible-and-closeable-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-3a4ca-ts-accessible-and-closeable-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-3a4ca-ts-accessible-and-closeable-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-3a4ca-ts-accessible-and-closeable-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-3a4ca-ts-accessible-and-closeable-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/ui-ux-verification-VendorF-3a4ca-ts-accessible-and-closeable-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="VendorFlow UI/UX Verification › 06: Forms have proper labels and are keyboard accessible" classname="ui-ux-verification.spec.ts" time="0.304">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-d9bed-and-are-keyboard-accessible-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-d9bed-and-are-keyboard-accessible-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-d9bed-and-are-keyboard-accessible-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-d9bed-and-are-keyboard-accessible-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-d9bed-and-are-keyboard-accessible-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<error message="page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login" type="Error">
+<![CDATA[  [chromium] › ui-ux-verification.spec.ts:111:3 › VendorFlow UI/UX Verification › 06: Forms have proper labels and are keyboard accessible 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-d9bed-and-are-keyboard-accessible-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-d9bed-and-are-keyboard-accessible-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-d9bed-and-are-keyboard-accessible-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-d9bed-and-are-keyboard-accessible-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-d9bed-and-are-keyboard-accessible-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/ui-ux-verification-VendorF-d9bed-and-are-keyboard-accessible-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="VendorFlow UI/UX Verification › 07: Buttons have visible focus/hover states" classname="ui-ux-verification.spec.ts" time="0.315">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-c001a--visible-focus-hover-states-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-c001a--visible-focus-hover-states-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-c001a--visible-focus-hover-states-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-c001a--visible-focus-hover-states-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-c001a--visible-focus-hover-states-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<error message="page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login" type="Error">
+<![CDATA[  [chromium] › ui-ux-verification.spec.ts:127:3 › VendorFlow UI/UX Verification › 07: Buttons have visible focus/hover states 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-c001a--visible-focus-hover-states-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-c001a--visible-focus-hover-states-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-c001a--visible-focus-hover-states-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-c001a--visible-focus-hover-states-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-c001a--visible-focus-hover-states-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/ui-ux-verification-VendorF-c001a--visible-focus-hover-states-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="VendorFlow UI/UX Verification › 08: No horizontal scrolling on mobile" classname="ui-ux-verification.spec.ts" time="0.298">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-e9240-izontal-scrolling-on-mobile-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-e9240-izontal-scrolling-on-mobile-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-e9240-izontal-scrolling-on-mobile-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-e9240-izontal-scrolling-on-mobile-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-e9240-izontal-scrolling-on-mobile-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<error message="page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login" type="Error">
+<![CDATA[  [chromium] › ui-ux-verification.spec.ts:152:3 › VendorFlow UI/UX Verification › 08: No horizontal scrolling on mobile 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-e9240-izontal-scrolling-on-mobile-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-e9240-izontal-scrolling-on-mobile-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-e9240-izontal-scrolling-on-mobile-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-e9240-izontal-scrolling-on-mobile-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-e9240-izontal-scrolling-on-mobile-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/ui-ux-verification-VendorF-e9240-izontal-scrolling-on-mobile-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="VendorFlow UI/UX Verification › 09: Color contrast - text is readable" classname="ui-ux-verification.spec.ts" time="0.304">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-fbd2b-contrast---text-is-readable-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-fbd2b-contrast---text-is-readable-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-fbd2b-contrast---text-is-readable-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-fbd2b-contrast---text-is-readable-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-fbd2b-contrast---text-is-readable-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<error message="page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login" type="Error">
+<![CDATA[  [chromium] › ui-ux-verification.spec.ts:174:3 › VendorFlow UI/UX Verification › 09: Color contrast - text is readable 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-fbd2b-contrast---text-is-readable-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-fbd2b-contrast---text-is-readable-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-fbd2b-contrast---text-is-readable-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-fbd2b-contrast---text-is-readable-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-fbd2b-contrast---text-is-readable-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/ui-ux-verification-VendorF-fbd2b-contrast---text-is-readable-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="VendorFlow UI/UX Verification › 10: Multiple pages navigate without errors" classname="ui-ux-verification.spec.ts" time="0.324">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-e3216-ges-navigate-without-errors-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-e3216-ges-navigate-without-errors-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-e3216-ges-navigate-without-errors-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-e3216-ges-navigate-without-errors-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-e3216-ges-navigate-without-errors-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<error message="page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login" type="Error">
+<![CDATA[  [chromium] › ui-ux-verification.spec.ts:196:3 › VendorFlow UI/UX Verification › 10: Multiple pages navigate without errors 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-e3216-ges-navigate-without-errors-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-e3216-ges-navigate-without-errors-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-e3216-ges-navigate-without-errors-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-e3216-ges-navigate-without-errors-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-e3216-ges-navigate-without-errors-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/ui-ux-verification-VendorF-e3216-ges-navigate-without-errors-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="VendorFlow UI/UX Verification › 11: Components render without layout shift" classname="ui-ux-verification.spec.ts" time="0.345">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-0fd39-render-without-layout-shift-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-0fd39-render-without-layout-shift-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-0fd39-render-without-layout-shift-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-0fd39-render-without-layout-shift-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-0fd39-render-without-layout-shift-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<error message="page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login" type="Error">
+<![CDATA[  [chromium] › ui-ux-verification.spec.ts:234:3 › VendorFlow UI/UX Verification › 11: Components render without layout shift 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-0fd39-render-without-layout-shift-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-0fd39-render-without-layout-shift-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-0fd39-render-without-layout-shift-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-0fd39-render-without-layout-shift-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-0fd39-render-without-layout-shift-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/ui-ux-verification-VendorF-0fd39-render-without-layout-shift-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="VendorFlow UI/UX Verification › 12: Sidebar collapse/expand works on mobile" classname="ui-ux-verification.spec.ts" time="0.302">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-31bb7-apse-expand-works-on-mobile-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-31bb7-apse-expand-works-on-mobile-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-31bb7-apse-expand-works-on-mobile-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-31bb7-apse-expand-works-on-mobile-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-VendorF-31bb7-apse-expand-works-on-mobile-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<error message="page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login" type="Error">
+<![CDATA[  [chromium] › ui-ux-verification.spec.ts:265:3 › VendorFlow UI/UX Verification › 12: Sidebar collapse/expand works on mobile 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-31bb7-apse-expand-works-on-mobile-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-31bb7-apse-expand-works-on-mobile-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      4 |   test.beforeEach(async ({ page }) => {
+      5 |     // Navigate to app
+    > 6 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+        |                ^
+      7 |   });
+      8 |
+      9 |   test('01: Login page loads and renders correctly', async ({ page }) => {
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:6:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-31bb7-apse-expand-works-on-mobile-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-VendorF-31bb7-apse-expand-works-on-mobile-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-VendorF-31bb7-apse-expand-works-on-mobile-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/ui-ux-verification-VendorF-31bb7-apse-expand-works-on-mobile-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="Component Functionality Tests › Badge components render with proper styling" classname="ui-ux-verification.spec.ts" time="0.122">
+<system-out>
+<![CDATA[✓ Found 0 badge components
+]]>
+</system-out>
+</testcase>
+<testcase name="Component Functionality Tests › Buttons have consistent spacing and sizing" classname="ui-ux-verification.spec.ts" time="0.251">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|test-results/ui-ux-verification-Compone-7464e-nsistent-spacing-and-sizing-chromium/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-Compone-7464e-nsistent-spacing-and-sizing-chromium/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-Compone-7464e-nsistent-spacing-and-sizing-chromium-retry1/test-failed-1.png]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-Compone-7464e-nsistent-spacing-and-sizing-chromium-retry1/error-context.md]]
+
+[[ATTACHMENT|test-results/ui-ux-verification-Compone-7464e-nsistent-spacing-and-sizing-chromium-retry1/trace.zip]]
+]]>
+</system-out>
+<error message="page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login" type="Error">
+<![CDATA[  [chromium] › ui-ux-verification.spec.ts:295:3 › Component Functionality Tests › Buttons have consistent spacing and sizing 
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      294 |
+      295 |   test('Buttons have consistent spacing and sizing', async ({ page }) => {
+    > 296 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+          |                ^
+      297 |
+      298 |     const buttons = page.locator('button').all();
+      299 |     const btnCount = await buttons.then(b => b.length);
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:296:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-Compone-7464e-nsistent-spacing-and-sizing-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-Compone-7464e-nsistent-spacing-and-sizing-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+      - navigating to "http://localhost:5173/login", waiting until "networkidle"
+
+
+      294 |
+      295 |   test('Buttons have consistent spacing and sizing', async ({ page }) => {
+    > 296 |     await page.goto('http://localhost:5173/login', { waitUntil: 'networkidle' });
+          |                ^
+      297 |
+      298 |     const buttons = page.locator('button').all();
+      299 |     const btnCount = await buttons.then(b => b.length);
+        at /home/sandy/Documents/Projects/vendorflow-hub/tests/e2e/ui-ux-verification.spec.ts:296:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-Compone-7464e-nsistent-spacing-and-sizing-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../../test-results/ui-ux-verification-Compone-7464e-nsistent-spacing-and-sizing-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../../test-results/ui-ux-verification-Compone-7464e-nsistent-spacing-and-sizing-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace ../../test-results/ui-ux-verification-Compone-7464e-nsistent-spacing-and-sizing-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="Component Functionality Tests › Select/dropdown components are accessible" classname="ui-ux-verification.spec.ts" time="0.133">
+<system-out>
+<![CDATA[✓ Found 0 select/dropdown components
+]]>
+</system-out>
+</testcase>
+<testcase name="Component Functionality Tests › Tables have proper header and body structure" classname="ui-ux-verification.spec.ts" time="0.083">
+</testcase>
+</testsuite>
 </testsuites>

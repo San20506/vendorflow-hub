@@ -10,22 +10,26 @@ See: .paul/PROJECT.md (updated 2026-04-07)
 ## Current Position
 
 Milestone: v0.2 Data Management & Extensions
-Phase: 1 of 3 (Data Import Pipeline) — Executing
-Plan: 06-01 (Bulk Data Import System) — APPLY COMPLETE
-Status: APPLY complete, ready for UNIFY/COMMIT
-Last activity: 2026-04-12 — Completed 06-01-APPLY phase (UI + pipeline + ingestion)
+Phase: 2 of 3 (Bulk Data Operations) — Executing
+Plan: 07-02 (Delete Safety with Rollback) — COMPLETE
+Status: UNIFY complete, ready for next PLAN (07-03 or phase transition)
+Last activity: 2026-04-12 — Completed 07-02-UNIFY phase (soft-delete + 5-level rollback versioning)
 
 Progress:
 - v0.1 Milestone: [██████████████████] 100% ✓ SHIPPED
-- v0.2 Milestone: [███░░░░░░░░░░░░░░░] 15% (Phase 1 apply complete)
-- Phase 1: [██████████░░░░░░░░░░] 50% (APPLY done, UNIFY/COMMIT pending)
+- v0.2 Milestone: [████████░░░░░░░░░░] 40% (Phase 1 complete, Phase 2 in progress)
+- Phase 1 (Import): [██████████████████] 100% ✓ COMPLETE
+- Phase 2 (Bulk Ops): [██████████░░░░░░░░] 67% (Plan 07-01 & 07-02 complete, Plan 07-03 pending)
 
 ## Loop Position
 
 Current loop state:
 ```
-PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ○     [Plan 06-01 APPLY complete; create summary + commit]
+Plan 07-01: PLAN ──▶ APPLY ──▶ UNIFY
+              ✓        ✓        ✓     [Complete]
+
+Plan 07-02: PLAN ──▶ APPLY ──▶ UNIFY
+              ✓        ✓        ✓     [Complete; ready for Plan 07-03 or commit]
 ```
 
 ## Accumulated Context
@@ -61,19 +65,22 @@ None — Phase 1 complete, build passing, ready for Phase 2 (Backend Integration
 
 ## Session Continuity
 
-Last session: 2026-04-12 10:30 UTC
-Stopped at: Plan 06-01 APPLY complete (bulk data import feature)
+Last session: 2026-04-12 12:21 UTC
+Stopped at: Plan 07-02 UNIFY complete (soft-delete + 5-level rollback versioning)
 Completed:
-  - Created schema-mapper.ts (entity detection + field validation)
-  - Created import-pipeline.ts (format detection + multi-format parsing)
-  - Created import-ingestion.ts (Gemini error fixing + workflow orchestration)
-  - Created ImportMetrics.tsx (vendor-friendly metrics dashboard)
-  - Created supabase/functions/process-import/index.ts (edge function for bulk insert)
-  - Updated DataImport.tsx (integrated pipeline + metrics display)
-  - Created 06-01-SUMMARY.md documenting all decisions
+  - Created migration: add_soft_delete_and_versioning.sql (is_deleted, deleted_at, deleted_records_history table)
+  - Created BulkDeleteModal.tsx (delete preview + history display)
+  - Created DeleteHistoryPanel.tsx (version timeline + restore workflow)
+  - Created bulk-delete edge function (FIFO versioning + audit logging)
+  - Created bulk-restore edge function (restore from snapshot + audit logging)
+  - Created delete-history edge function (fetch history for UI)
+  - Extended bulk-operations.ts (bulkDeleteRecords, bulkRestoreRecords, fetchDeleteHistory)
+  - Updated BulkSelectToolbar.tsx (added Delete button)
+  - Updated BulkOperations.tsx (integrated delete modal + history panel)
+  - Created 07-02-SUMMARY.md documenting all decisions
   - Verified build passes (no TypeScript errors)
-Next action: Commit changes via /paul:unify, then Phase 2 (Bulk corrections & reconciliation)
-Resume file: .paul/phases/06-data-management/06-01-SUMMARY.md
+Next action: Execute /paul:plan for Plan 07-03 (Data Export & Audit Trails), or commit Phase 07 to main
+Resume file: .paul/phases/07-bulk-operations/07-02-SUMMARY.md
 
 ---
 *STATE.md — Updated after every significant action*

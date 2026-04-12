@@ -304,6 +304,87 @@ export async function seedDemoData() {
       console.log('Created 20 expenses');
     }
 
+    // 8. Create alert sensitivity settings
+    if (vendorData) {
+      const { data: existingSensitivity } = await supabaseAdmin
+        .from('alert_sensitivity_settings')
+        .select('vendor_id')
+        .eq('vendor_id', vendorData.vendor_id)
+        .single();
+
+      if (!existingSensitivity) {
+        const { error: sensitivityError } = await supabaseAdmin
+          .from('alert_sensitivity_settings')
+          .insert({
+            vendor_id: vendorData.vendor_id,
+            revenue_drop_sensitivity: 6,
+            stockout_risk_sensitivity: 5,
+            trend_reversal_sensitivity: 6,
+            channel_shift_sensitivity: 5,
+            cost_anomaly_sensitivity: 7,
+          });
+
+        if (sensitivityError) {
+          console.warn('Failed to create alert sensitivity settings:', sensitivityError.message);
+        } else {
+          console.log('Created alert sensitivity settings');
+        }
+      }
+    }
+
+    // 9. Create demo alerts with dismissal history for recommendations
+    if (vendorData) {
+      const alertTypes = ['revenue_drop', 'stockout_risk', 'trend_reversal', 'channel_shift', 'cost_anomaly'];
+
+      for (let i = 0; i < 50; i++) {
+        const { error: alertError } = await supabaseAdmin.from('alert_history').insert({
+          vendor_id: vendorData.vendor_id,
+          alert_type: alertTypes[i % alertTypes.length] as any,
+          severity: (i % 10) + 1,
+          message: `Demo alert ${i + 1}: ${alertTypes[i % alertTypes.length]}`,
+          metadata: {
+            change_pct: Math.random() * 50,
+            confidence: Math.random() * 100,
+            channel: ['Amazon', 'Shopify', 'eBay', 'WooCommerce'][i % 4],
+          },
+          dismissed_at: i % 3 === 0 ? new Date().toISOString() : null,
+          dismissed_by: i % 3 === 0 ? vendorData.vendor_id : null,
+          dismissal_reason: i % 3 === 0 ? ['false_positive', 'already_addressed', 'low_priority'][i % 3] : null,
+        });
+
+        if (alertError) {
+          console.warn(`Failed to create alert ${i}:`, alertError.message);
+        }
+      }
+      console.log('Created 50 demo alerts with dismissal history');
+    }
+
+    // 10. Create marketing campaigns
+    if (vendorData) {
+      const campaignTypes: Array<'email' | 'sms' | 'in_app'> = ['email', 'sms', 'in_app'];
+      const campaignStatuses: Array<'draft' | 'scheduled' | 'sent' | 'paused'> = ['draft', 'scheduled', 'sent', 'paused'];
+
+      for (let i = 0; i < 10; i++) {
+        const { error: campaignError } = await supabaseAdmin.from('campaigns').insert({
+          vendor_id: vendorData.vendor_id,
+          name: `Demo Campaign ${i + 1}`,
+          type: campaignTypes[i % campaignTypes.length],
+          status: campaignStatuses[i % campaignStatuses.length],
+          segment_config: {
+            filters: {
+              min_order_value: 100 + i * 50,
+              country: 'US',
+            },
+          },
+        });
+
+        if (campaignError) {
+          console.warn(`Failed to create campaign ${i}:`, campaignError.message);
+        }
+      }
+      console.log('Created 10 demo marketing campaigns');
+    }
+
     console.log('Demo data seed completed successfully!');
     return { success: true };
   } catch (error) {
