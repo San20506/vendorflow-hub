@@ -10,45 +10,45 @@
 
 @layer base {
   :root {
-    --background: 276 38% 94%;
-    --foreground: 270 30% 12%;
+    --background: 210 40% 97%;
+    --foreground: 210 25% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 270 30% 12%;
+    --card-foreground: 210 25% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 270 30% 12%;
+    --popover-foreground: 210 25% 20%;
 
-    /* #2B0D3E */
-    --primary: 276 65% 15%;
-    --primary-foreground: 276 38% 96%;
+    /* Deep Ocean Blue */
+    --primary: 210 80% 32%;
+    --primary-foreground: 210 40% 96%;
 
-    --secondary: 276 30% 91%;
-    --secondary-foreground: 270 30% 15%;
+    --secondary: 190 60% 88%;
+    --secondary-foreground: 210 25% 20%;
 
-    --muted: 280 30% 90%;
-    --muted-foreground: 270 20% 30%;
+    --muted: 210 20% 88%;
+    --muted-foreground: 210 15% 45%;
 
-    /* #7A3F91 */
-    --accent: 284 40% 41%;
+    /* Vibrant Teal */
+    --accent: 162 72% 45%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 68% 55%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 158 58% 42%;
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 88% 52%;
-    --warning-foreground: 38 88% 10%;
+    --warning: 43 96% 56%;
+    --warning-foreground: 43 96% 12%;
 
-    --info: 220 75% 55%;
+    --info: 221 83% 53%;
     --info-foreground: 0 0% 100%;
 
-    /* #C59DD9 tinted borders */
-    --border: 280 28% 86%;
-    --input: 280 28% 84%;
-    --ring: 284 40% 41%;
+    /* Teal borders */
+    --border: 190 60% 90%;
+    --input: 190 60% 88%;
+    --ring: 162 72% 45%;
 
     --radius: 1rem;
 
@@ -61,11 +61,11 @@
     --nykaa: 330 70% 50%;
     --ajio: 210 70% 45%;
 
-    --chart-1: 276 65% 15%;
-    --chart-2: 284 40% 41%;
-    --chart-3: 280 40% 73%;
-    --chart-4: 38 88% 52%;
-    --chart-5: 158 58% 42%;
+    --chart-1: 210 80% 32%;
+    --chart-2: 162 72% 45%;
+    --chart-3: 190 60% 70%;
+    --chart-4: 43 96% 56%;
+    --chart-5: 142 71% 45%;
 
     /* Liquid Glass Tokens */
     --glass-bg: rgba(255, 255, 255, 0.12);
@@ -79,31 +79,31 @@
     --glass-blur-heavy: 40px;
 
     /* Gradient Palette */
-    --gradient-primary: linear-gradient(135deg, #C59DD9 0%, #7A3F91 100%);
-    --gradient-primary-hover: linear-gradient(135deg, #d4aee3 0%, #8a4fa1 100%);
-    --gradient-deep: linear-gradient(135deg, #7A3F91 0%, #2B0D3E 100%);
-    --gradient-card: linear-gradient(160deg, rgba(255,255,255,0.5) 0%, rgba(242,234,247,0.3) 100%);
-    --gradient-glow: linear-gradient(135deg, rgba(197,157,217,0.4) 0%, rgba(122,63,145,0.2) 100%);
+    --gradient-primary: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+    --gradient-primary-hover: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+    --gradient-deep: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+    --gradient-card: linear-gradient(160deg, rgba(255,255,255,0.5) 0%, rgba(224,242,254,0.3) 100%);
+    --gradient-glow: linear-gradient(135deg, rgba(30,136,229,0.3) 0%, rgba(21,101,192,0.15) 100%);
     --gradient-surface: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
 
-    /* Purple glow shadows */
-    --shadow-sm: 0 2px 8px -2px rgba(122, 63, 145, 0.08);
-    --shadow-md: 0 8px 24px -6px rgba(122, 63, 145, 0.12), 0 4px 12px -4px rgba(43, 13, 62, 0.06);
-    --shadow-lg: 0 16px 40px -8px rgba(122, 63, 145, 0.16), 0 8px 20px -6px rgba(43, 13, 62, 0.08);
-    --shadow-xl: 0 24px 56px -12px rgba(122, 63, 145, 0.2), 0 12px 28px -8px rgba(43, 13, 62, 0.1);
-    --shadow-glow: 0 0 20px rgba(197, 157, 217, 0.3), 0 0 40px rgba(122, 63, 145, 0.15);
-    --shadow-glow-strong: 0 0 30px rgba(197, 157, 217, 0.45), 0 0 60px rgba(122, 63, 145, 0.2);
-    --shadow-inner-glass: inset 0 1px 2px rgba(255, 255, 255, 0.3), inset 0 -1px 2px rgba(43, 13, 62, 0.05);
+    /* Ocean blue shadows */
+    --shadow-sm: 0 2px 8px -2px rgba(21, 101, 192, 0.08);
+    --shadow-md: 0 8px 24px -6px rgba(21, 101, 192, 0.12), 0 4px 12px -4px rgba(13, 71, 161, 0.06);
+    --shadow-lg: 0 16px 40px -8px rgba(21, 101, 192, 0.16), 0 8px 20px -6px rgba(13, 71, 161, 0.08);
+    --shadow-xl: 0 24px 56px -12px rgba(21, 101, 192, 0.2), 0 12px 28px -8px rgba(13, 71, 161, 0.1);
+    --shadow-glow: 0 0 20px rgba(30, 136, 229, 0.3), 0 0 40px rgba(21, 101, 192, 0.15);
+    --shadow-glow-strong: 0 0 30px rgba(30, 136, 229, 0.45), 0 0 60px rgba(21, 101, 192, 0.2);
+    --shadow-inner-glass: inset 0 1px 2px rgba(255, 255, 255, 0.3), inset 0 -1px 2px rgba(13, 71, 161, 0.05);
 
     /* Sidebar */
-    --sidebar-background: 276 65% 12%;
-    --sidebar-foreground: 276 20% 92%;
-    --sidebar-primary: 284 40% 41%;
+    --sidebar-background: 210 50% 15%;
+    --sidebar-foreground: 210 20% 95%;
+    --sidebar-primary: 162 72% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 276 50% 20%;
-    --sidebar-accent-foreground: 276 20% 92%;
-    --sidebar-border: 276 55% 18%;
-    --sidebar-ring: 284 40% 41%;
+    --sidebar-accent: 210 60% 35%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 210 45% 25%;
+    --sidebar-ring: 162 72% 50%;
   }
 
   .dark {
@@ -185,7 +185,7 @@
     font-size: 14px;
     line-height: 1.6;
     color: hsl(var(--foreground));
-    background: linear-gradient(160deg, #F2EAF7 0%, #e8d8f0 30%, #f0e6f5 60%, #F2EAF7 100%);
+    background: linear-gradient(160deg, #f0f8ff 0%, #e0f2fe 30%, #f0fdfa 60%, #f0f8ff 100%);
     background-attachment: fixed;
   }
 

@@ -322,21 +322,21 @@ export function AppSidebar() {
         {filteredSections.map((section, sectionIndex) => (
           <div key={section.heading}>
             {!isCollapsed && (
-              <div className={`px-3 py-2.5 ${sectionIndex > 0 ? 'mt-3 pt-4 border-t border-purple-400/8' : ''}`}>
-                <span className="text-xs font-bold uppercase tracking-wider text-purple-200/85">
+              <div className={`px-3 py-2.5 ${sectionIndex > 0 ? 'mt-3 pt-4 border-t border-sidebar-foreground/20' : ''}`}>
+                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-sidebar-foreground/75">
                   {section.heading}
                 </span>
               </div>
             )}
             {isCollapsed && sectionIndex > 0 && (
-              <div className="my-2 mx-2 border-t border-purple-400/8" />
+              <div className="my-2 mx-2 border-t border-sidebar-foreground/20" />
             )}
             {section.groups.map((group, index) => (
               <Collapsible key={group.label} defaultOpen={sectionIndex === 0 && index < 2} className="group/collapsible">
                 <SidebarGroup className="p-0">
                   {!isCollapsed ? (
                     <CollapsibleTrigger
-                      className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors text-purple-200/80 hover:text-purple-200"
+                      className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors text-sidebar-foreground/85 hover:text-sidebar-foreground"
                     >
                       {group.label}
                       <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-data-[state=closed]/collapsible:rotate-[-90deg]" />
@@ -362,8 +362,8 @@ export function AppSidebar() {
                                   }}
                                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
                                     isActive
-                                      ? 'bg-gradient-to-r from-purple-400/25 to-purple-700/25 text-white font-medium shadow-lg shadow-purple-500/20'
-                                      : 'text-white/90 hover:text-white hover:bg-slate-700/30'
+                                      ? 'bg-gradient-to-r from-purple-500/40 to-purple-700/40 text-white font-semibold shadow-md shadow-purple-900/40 ring-1 ring-purple-400/30'
+                                      : 'text-white/80 hover:text-white hover:bg-white/8'
                                   }`}
                                 >
                                   <item.icon className="w-4 h-4 shrink-0" />
