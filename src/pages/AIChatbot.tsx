@@ -11,6 +11,7 @@ import ReactMarkdown from 'react-markdown';
 import { MessageSquare, Brain, Workflow, Lock, Sparkles, FolderOpen, Zap, BarChart3, Package, RotateCcw, CreditCard, Users, Bell, Star, ThumbsDown, Search, Bot, Send, Loader2, User, Plus, Trash2, History, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { getSupabaseAnonKey, getSupabaseUrl } from '@/integrations/supabase/env';
 import { chatConversationsDb, automationSettingsDb } from '@/services/database';
 
 interface AutomationFeature {
@@ -58,7 +59,7 @@ const mockKeywords = [
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string };
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+const CHAT_URL = `${getSupabaseUrl()}/functions/v1/chat`;
 
 async function streamChat({ messages, onDelta, onDone, onError }: {
   messages: ChatMessage[];
@@ -67,11 +68,12 @@ async function streamChat({ messages, onDelta, onDone, onError }: {
   onError: (err: string) => void;
 }) {
   const resp = await fetch(CHAT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-    },
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: getSupabaseAnonKey(),
+        Authorization: `Bearer ${getSupabaseAnonKey()}`,
+      },
     body: JSON.stringify({ messages }),
   });
 
