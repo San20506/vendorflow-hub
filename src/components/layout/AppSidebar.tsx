@@ -336,7 +336,7 @@ export function AppSidebar() {
                 <SidebarGroup className="p-0">
                   {!isCollapsed ? (
                     <CollapsibleTrigger
-                      className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors text-sidebar-foreground/85 hover:text-sidebar-foreground"
+                      className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors text-white hover:text-white"
                     >
                       {group.label}
                       <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-data-[state=closed]/collapsible:rotate-[-90deg]" />
