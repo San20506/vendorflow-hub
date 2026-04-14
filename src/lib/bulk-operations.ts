@@ -244,3 +244,122 @@ export async function fetchDeleteHistory(
     return [];
   }
 }
+
+export interface AuditLogEntry {
+  operation_type: string;
+  entity_type?: string;
+  record_id?: string;
+  record_count?: number;
+  user_id: string;
+  userName: string;
+  timestamp: string;
+  metadata?: any;
+  status: string;
+}
+
+export interface AuditLogsFilter {
+  operationType?: string;
+  entityType?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  limit?: number;
+}
+
+interface AuditLogsResponse {
+  logs: AuditLogEntry[];
+  total: number;
+  hasMore: boolean;
+}
+
+/**
+ * Fetch audit logs with filtering support
+ */
+export async function fetchAuditLogs(filters: AuditLogsFilter = {}): Promise<AuditLogsResponse> {
+  try {
+    const token = localStorage.getItem('sb-auth-token') || '';
+
+    const response = await fetch('/functions/v1/fetch-audit-logs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        operationType: filters.operationType,
+        entityType: filters.entityType,
+        dateFrom: filters.dateFrom,
+        dateTo: filters.dateTo,
+        page: filters.page || 1,
+        limit: filters.limit || 20,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('Fetch audit logs error:', response.statusText);
+      return { logs: [], total: 0, hasMore: false };
+    }
+
+    const result = await response.json();
+    return {
+      logs: result.logs || [],
+      total: result.total || 0,
+      hasMore: result.hasMore || false,
+    };
+  } catch (error) {
+    console.error('Fetch audit logs failed:', error);
+    return { logs: [], total: 0, hasMore: false };
+  }
+}
+
+/**
+ * Export deleted records in specified format
+ */
+export async function bulkExportDeleted(
+  entityType: 'products' | 'orders' | 'settlements' | 'all',
+  format: 'csv' | 'json' | 'pdf'
+): Promise<void> {
+  try {
+    const token = localStorage.getItem('sb-auth-token') || '';
+
+    const response = await fetch('/functions/v1/export-deleted-records', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        entityType,
+        format,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Export failed');
+    }
+
+    // Handle file download
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+
+    // Extract filename from Content-Disposition header if available
+    const contentDisposition = response.headers.get('content-disposition');
+    let filename = `deleted-records.${format === 'json' ? 'json' : format}`;
+    if (contentDisposition) {
+      const match = contentDisposition.match(/filename="?([^"]+)"?/);
+      if (match) filename = match[1];
+    }
+
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  } catch (error) {
+    console.error('Export deleted records failed:', error);
+    throw error;
+  }
+}

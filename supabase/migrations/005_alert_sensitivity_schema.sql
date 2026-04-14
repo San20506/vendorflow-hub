@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS alert_sensitivity_settings (
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
 
   UNIQUE(vendor_id),
-  FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE
+  FOREIGN KEY (vendor_id) REFERENCES vendors(vendor_id) ON DELETE CASCADE
 );
 
 -- Index for quick lookups
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS alert_sensitivity_audit (
   changed_by text, -- user identifier (optional)
   changed_at timestamp with time zone NOT NULL DEFAULT now(),
 
-  FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE
+  FOREIGN KEY (vendor_id) REFERENCES vendors(vendor_id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_alert_sensitivity_audit_vendor_id ON alert_sensitivity_audit(vendor_id);

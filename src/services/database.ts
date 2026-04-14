@@ -481,24 +481,58 @@ export const customersDb = {
 };
 
 // ==================== INVENTORY ====================
+// Portal mapping by SKU prefix
+const SKU_PORTAL_MAP: Record<string, string> = {
+  'SKU-AMZ': 'amazon', 'SKU-FLK': 'flipkart', 'SKU-MSH': 'meesho',
+  'SKU-BLK': 'blinkit', 'SKU-NKA': 'nykaa', 'SKU-FCR': 'firstcry',
+};
+function skuToPortal(sku: string): string {
+  for (const [prefix, portal] of Object.entries(SKU_PORTAL_MAP)) {
+    if (sku.startsWith(prefix)) return portal;
+  }
+  return 'amazon';
+}
+
 export const inventoryDb = {
   async getAll(filters?: { portal?: string; warehouse?: string; search?: string }) {
-    let query = supabase.from('inventory' as any).select('*').order('updated_at', { ascending: false });
-    if (filters?.portal) query = query.eq('portal', filters.portal);
-    if (filters?.warehouse) query = query.eq('warehouse', filters.warehouse);
-    if (filters?.search) query = query.or(`product_name.ilike.%${filters.search}%,sku_id.ilike.%${filters.search}%`);
+    let query = supabase.from('products').select('*').order('created_at', { ascending: false });
+    if (filters?.search) query = query.or(`name.ilike.%${filters.search}%,sku.ilike.%${filters.search}%`);
     const { data, error } = await query;
     if (error) throw error;
-    return data as any[];
+    const rows = (data || []).map((p: any) => ({
+      id: p.product_id,
+      sku_id: p.sku,
+      product_name: p.name,
+      brand: p.brand || '',
+      portal: skuToPortal(p.sku),
+      warehouse: 'Main Warehouse',
+      available_quantity: p.stock ?? 0,
+      master_quantity: p.stock ?? 0,
+      reserved_quantity: 0,
+      low_stock_threshold: 10,
+      channel_allocations: {},
+      aging_days: 0,
+      updated_at: p.created_at,
+    }));
+    if (filters?.portal) return rows.filter((r: any) => r.portal === filters.portal);
+    return rows;
   },
   async create(item: any) {
     const userId = await getCurrentUserId();
-    const { data, error } = await supabase.from('inventory' as any).insert({ ...item, vendor_id: userId }).select().single();
+    const { data, error } = await supabase.from('products').insert({
+      vendor_id: userId,
+      sku: item.sku_id,
+      name: item.product_name,
+      price: 0,
+      stock: item.available_quantity ?? 0,
+    }).select().single();
     if (error) throw error;
     return data;
   },
   async update(id: string, updates: any) {
-    const { data, error } = await supabase.from('inventory' as any).update(updates).eq('id', id).select().single();
+    const { data, error } = await supabase.from('products').update({
+      stock: updates.available_quantity,
+    }).eq('product_id', id).select().single();
     if (error) throw error;
     return data;
   },

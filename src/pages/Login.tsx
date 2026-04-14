@@ -48,13 +48,12 @@ export default function Login() {
       await new Promise(resolve => setTimeout(resolve, 100));
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data: roleData } = await supabase
-          .from('user_roles')
+        const { data: userProfile } = await supabase
+          .from('users')
           .select('role')
-          .eq('user_id', user.id)
-          .eq('role', selectedRole)
+          .eq('id', user.id)
           .maybeSingle();
-        if (!roleData) {
+        if (!userProfile || userProfile.role !== selectedRole) {
           await supabase.auth.signOut();
           setError('Role mismatch. Contact administrator.');
           setIsLoading(false);

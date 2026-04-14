@@ -52,10 +52,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Set up auth listener
+    let mounted = true;
+
+    // Step 1: fast initial check from localStorage — resolves loading immediately
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      if (!session) {
+        setIsLoading(false);
+        return;
+      }
+      // Build user from session without waiting for DB query
+      setUser({
+        id: session.user.id,
+        email: session.user.email ?? '',
+        role: 'admin', // temporary until profile loads
+      });
+      setIsLoading(false);
+
+      // Step 2: enrich with DB profile in the background (deferred)
+      setTimeout(async () => {
+        if (!mounted) return;
+        try {
+          const appUser = await buildAppUser(session);
+          if (mounted && appUser) setUser(appUser);
+        } catch { /* keep the minimal user object */ }
+      }, 0);
+    });
+
+    // Step 3: handle sign-in / sign-out events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session) {
+      (event, session) => {
+        if (event === 'INITIAL_SESSION') return; // already handled above
+        if (!session) {
+          if (mounted) { setUser(null); setError(null); setIsLoading(false); }
+          return;
+        }
+        setTimeout(async () => {
+          if (!mounted) return;
           try {
             const appUser = await buildAppUser(session);
             setUser(appUser);
@@ -63,37 +96,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } catch (err) {
             setUser(null);
             setError(err instanceof Error ? err.message : 'Failed to load user');
+          } finally {
+            setIsLoading(false);
           }
-        } else {
-          setUser(null);
-          setError(null);
-        }
-        setIsLoading(false);
+        }, 0);
       }
     );
 
-    // Check existing session
-    supabase.auth.getSession().then(async ({ data: { session }, error: sessionError }) => {
-      if (sessionError) {
-        setError(sessionError.message);
-        setIsLoading(false);
-        return;
-      }
-
-      if (session) {
-        try {
-          const appUser = await buildAppUser(session);
-          setUser(appUser);
-          setError(null);
-        } catch (err) {
-          setUser(null);
-          setError(err instanceof Error ? err.message : 'Failed to load user');
-        }
-      }
-      setIsLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => { mounted = false; subscription.unsubscribe(); };
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {

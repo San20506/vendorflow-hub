@@ -1,7 +1,7 @@
 -- Report preferences table for vendor-configured report schedules
 CREATE TABLE report_preferences (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  vendor_id UUID NOT NULL REFERENCES vendors(id) ON DELETE CASCADE,
+  vendor_id UUID NOT NULL REFERENCES vendors(vendor_id) ON DELETE CASCADE,
   report_type VARCHAR NOT NULL CHECK (report_type IN ('daily', 'weekly')),
   enabled BOOLEAN DEFAULT true,
   channels JSONB DEFAULT '["email"]'::jsonb,
@@ -17,7 +17,7 @@ CREATE TABLE report_preferences (
 -- Report execution history and audit trail
 CREATE TABLE report_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  vendor_id UUID NOT NULL REFERENCES vendors(id) ON DELETE CASCADE,
+  vendor_id UUID NOT NULL REFERENCES vendors(vendor_id) ON DELETE CASCADE,
   report_type VARCHAR NOT NULL CHECK (report_type IN ('daily', 'weekly')),
   generated_at TIMESTAMP NOT NULL,
   sent_at TIMESTAMP,

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Users, RefreshCw, CheckCircle2, AlertCircle, Loader2, Eye, EyeOff, Shield } from 'lucide-react';
 
@@ -14,6 +15,7 @@ const TEST_ACCOUNTS = [
 
 export default function AdminTools() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isResetting, setIsResetting] = useState(false);
   const [isProvisioning, setIsProvisioning] = useState(false);
   const [results, setResults] = useState<{ email: string; role: string; status: string }[] | null>(null);

@@ -2,7 +2,6 @@ import { useState, useRef, useCallback } from 'react';
 import { processImport, PipelineResult } from '@/lib/import-pipeline';
 import { processImportWorkflow, IngestionResult } from '@/lib/import-ingestion';
 import { ImportMetrics } from '@/components/ImportMetrics';
-import { DemoDataLoader } from '@/components/DemoDataLoader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -112,20 +111,6 @@ export default function DataImport() {
         </div>
         <Badge variant="outline">v0.2</Badge>
       </div>
-
-      {/* Demo Data Loader */}
-      {user?.vendor_id ? (
-        <DemoDataLoader vendorId={user.vendor_id} />
-      ) : (
-        <Card className="glass-card border-0 bg-yellow/10 border border-yellow/30">
-          <CardHeader>
-            <CardTitle className="text-lg">Demo Data</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Please log in to load demo data</p>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Display metrics after import completes */}
       {ingestionResult && (

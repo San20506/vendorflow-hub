@@ -107,17 +107,14 @@ export default function Brands() {
           <h1 className="text-2xl font-bold">Brands</h1>
           <p className="text-muted-foreground text-sm mt-1">Manage your product brands, logos, and descriptions.</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); setDialogOpen(open); }}
-          modal
-        >
+        <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); setDialogOpen(open); }}>
           <DialogTrigger asChild>
             <Button className="gap-2" style={{ background: 'var(--gradient-deep)', color: 'white' }}>
               <Plus className="w-4 h-4" /> Add Brand
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md glass-card"
-            onOpenAutoFocus={(e) => { /* allow default focus */ }}
-            style={{ overflow: 'auto', maxHeight: '90vh' }}
+          <DialogContent className="sm:max-w-md glass-card max-h-[90vh] overflow-y-auto"
+            onOpenAutoFocus={(e) => e.preventDefault()}
           >
             <DialogHeader>
               <DialogTitle>{editingBrand ? 'Edit Brand' : 'Add New Brand'}</DialogTitle>

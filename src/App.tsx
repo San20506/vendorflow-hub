@@ -22,6 +22,7 @@ const SKUMapping = lazy(() => import('./pages/SKUMapping'));
 const Reconciliation = lazy(() => import('./pages/Reconciliation'));
 const DataImport = lazy(() => import('./pages/DataImport'));
 const BulkOperations = lazy(() => import('./pages/BulkOperations'));
+const AuditTrails = lazy(() => import('./pages/AuditTrails'));
 const SocialInsights = lazy(() => import('./pages/SocialInsights'));
 const Subscription = lazy(() => import('./pages/Subscription'));
 const Support = lazy(() => import('./pages/Support'));
@@ -113,6 +114,7 @@ const App = () => (
               <Route path="/affiliated" element={<AppLayout><Affiliated /></AppLayout>} />
               <Route path="/data-import" element={<AppLayout><DataImport /></AppLayout>} />
               <Route path="/bulk-operations" element={<AppLayout><BulkOperations /></AppLayout>} />
+              <Route path="/audit-trails" element={<AppLayout><AuditTrails /></AppLayout>} />
               <Route path="/social-insights" element={<AppLayout><SocialInsights /></AppLayout>} />
               <Route path="/subscription" element={<AppLayout><Subscription /></AppLayout>} />
               <Route path="/support" element={<AppLayout><Support /></AppLayout>} />

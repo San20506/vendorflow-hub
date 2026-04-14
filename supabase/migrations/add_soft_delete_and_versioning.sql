@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS deleted_records_history (
   CONSTRAINT unique_vendor_record_version UNIQUE (vendor_id, record_id, version_number),
 
   -- Foreign key to vendor (implicit through vendor_id usage)
-  CONSTRAINT fk_vendor_id FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE
+  CONSTRAINT fk_vendor_id FOREIGN KEY (vendor_id) REFERENCES vendors(vendor_id) ON DELETE CASCADE
 );
 
 -- Create index for fast version lookup by vendor, record, and version order

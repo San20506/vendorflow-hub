@@ -3,6 +3,7 @@ import { AlertCircle, Clock, User } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { bulkDeleteRecords, fetchDeleteHistory } from '@/lib/bulk-operations';
 
 interface DeleteHistoryRecord {
@@ -30,6 +31,7 @@ export function BulkDeleteModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteHistory, setDeleteHistory] = useState<Record<string, DeleteHistoryRecord[]>>({});
+  const [deletionReason, setDeletionReason] = useState<string>('');
 
   useEffect(() => {
     if (isOpen && recordIds.length > 0) {
@@ -127,6 +129,23 @@ export function BulkDeleteModal({
               </div>
             </div>
           )}
+
+          {/* Deletion reason */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Reason (Optional)</label>
+            <Select value={deletionReason} onValueChange={setDeletionReason}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a reason..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">No reason</SelectItem>
+                <SelectItem value="Duplicate">Duplicate</SelectItem>
+                <SelectItem value="Discontinued">Discontinued</SelectItem>
+                <SelectItem value="Error">Error</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Error state */}
           {error && (

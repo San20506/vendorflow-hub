@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS campaign_templates (
   subject text, -- for email
   content text NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
-  FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE
+  FOREIGN KEY (vendor_id) REFERENCES vendors(vendor_id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_campaign_templates_vendor_id ON campaign_templates(vendor_id);
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS campaigns (
   sent_at timestamp with time zone,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE,
+  FOREIGN KEY (vendor_id) REFERENCES vendors(vendor_id) ON DELETE CASCADE,
   FOREIGN KEY (template_id) REFERENCES campaign_templates(id) ON DELETE RESTRICT
 );
 

@@ -1,7 +1,7 @@
 -- Alerts table for real-time anomaly detection
 CREATE TABLE alerts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  vendor_id UUID NOT NULL REFERENCES vendors(id) ON DELETE CASCADE,
+  vendor_id UUID NOT NULL REFERENCES vendors(vendor_id) ON DELETE CASCADE,
   alert_type VARCHAR NOT NULL,
   severity VARCHAR NOT NULL DEFAULT 'warning', -- 'critical', 'warning', 'info'
   metric VARCHAR NOT NULL,
@@ -27,7 +27,7 @@ CREATE INDEX idx_alerts_created_at ON alerts(created_at DESC);
 CREATE TABLE alert_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   alert_id UUID REFERENCES alerts(id) ON DELETE SET NULL,
-  vendor_id UUID NOT NULL REFERENCES vendors(id) ON DELETE CASCADE,
+  vendor_id UUID NOT NULL REFERENCES vendors(vendor_id) ON DELETE CASCADE,
   action VARCHAR NOT NULL, -- 'created', 'updated', 'dismissed', 'resolved'
   old_status VARCHAR,
   new_status VARCHAR,

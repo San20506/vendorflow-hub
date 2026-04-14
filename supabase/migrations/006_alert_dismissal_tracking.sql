@@ -17,21 +17,22 @@ WHERE dismissed_at IS NOT NULL;
 -- Shows dismissal rate per vendor per anomaly type
 CREATE OR REPLACE VIEW alert_fatigue_metrics AS
 SELECT
-  vendor_id,
-  alert_type,
+  ah.vendor_id,
+  a.alert_type,
   COUNT(*) as total_alerts,
-  COUNT(CASE WHEN dismissed_at IS NOT NULL THEN 1 END) as dismissed_count,
+  COUNT(CASE WHEN ah.dismissed_at IS NOT NULL THEN 1 END) as dismissed_count,
   ROUND(
-    COUNT(CASE WHEN dismissed_at IS NOT NULL THEN 1 END)::numeric / NULLIF(COUNT(*), 0) * 100,
+    COUNT(CASE WHEN ah.dismissed_at IS NOT NULL THEN 1 END)::numeric / NULLIF(COUNT(*), 0) * 100,
     2
   ) as dismiss_rate,
-  AVG(CASE WHEN dismissed_at IS NOT NULL THEN
-    EXTRACT(EPOCH FROM (dismissed_at - created_at)) / 3600.0
+  AVG(CASE WHEN ah.dismissed_at IS NOT NULL THEN
+    EXTRACT(EPOCH FROM (ah.dismissed_at - ah.timestamp)) / 3600.0
   END) as avg_time_to_dismiss_hours,
-  MAX(created_at) as last_alert_at
-FROM alert_history
-WHERE created_at >= now() - interval '30 days'
-GROUP BY vendor_id, alert_type;
+  MAX(ah.timestamp) as last_alert_at
+FROM alert_history ah
+LEFT JOIN alerts a ON ah.alert_id = a.id
+WHERE ah.timestamp >= now() - interval '30 days'
+GROUP BY ah.vendor_id, a.alert_type;
 
 -- Recommendation tracking table
 CREATE TABLE IF NOT EXISTS recommendation_history (
@@ -50,7 +51,7 @@ CREATE TABLE IF NOT EXISTS recommendation_history (
   applied_at timestamp with time zone,
   dismissed_at timestamp with time zone,
 
-  FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE
+  FOREIGN KEY (vendor_id) REFERENCES vendors(vendor_id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_recommendation_vendor_id ON recommendation_history(vendor_id);
