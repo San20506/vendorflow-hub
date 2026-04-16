@@ -11,57 +11,73 @@ import { supabase } from '../integrations/supabase/client'
 
 export class InsightEngine {
   /**
-   * Generate insights for all insight types
+   * Generate all insights in a single Gemini API call to avoid rate limits.
    */
   async generateAllInsights(vendorId: string): Promise<InsightCard[]> {
-    const insightTypes: InsightType[] = [
-      'performance',
-      'channel_comparison',
-      'inventory',
-      'revenue',
-      'trends',
-      'recommendations'
-    ]
+    const vendorData = await this.collectVendorData(vendorId, 'performance')
+    if (!vendorData.channels.length) return []
 
-    const insights: InsightCard[] = []
+    const { GoogleGenerativeAI } = await import('@google/generative-ai')
+    const key = import.meta.env.VITE_GEMINI_API_KEY
+    if (!key) throw new Error('VITE_GEMINI_API_KEY not set')
 
-    for (const insightType of insightTypes) {
-      const insight = await this.generateInsight(vendorId, insightType)
-      if (insight) {
-        insights.push(insight)
-      }
+    const genAI = new GoogleGenerativeAI(key)
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+
+    const channelsSummary = vendorData.channels
+      .map(
+        (ch) =>
+          `• ${ch.name}: ₹${ch.totalRevenue.toLocaleString()} revenue, ` +
+          `${ch.stockLevel} units, ${(ch.growth * 100).toFixed(1)}% growth\n` +
+          `  Top products: ${ch.topProducts.map((p) => p.name).join(', ')}`
+      )
+      .join('\n')
+
+    const prompt = `You are a business analyst for an Indian e-commerce vendor selling baby/maternity products (pregnancy pillows, breastfeeding pillows, nursing covers, baby cradles) on Amazon and Firstcry.
+
+Channel data:
+${channelsSummary}
+
+Generate exactly 5 insights in this JSON format (respond ONLY with valid JSON, no markdown):
+[
+  {"type":"performance","title":"...","context":"...","metric":"...","recommendation":"...","actionItems":["...","..."]},
+  {"type":"channel_comparison","title":"...","context":"...","metric":"...","recommendation":"...","actionItems":["...","..."]},
+  {"type":"revenue","title":"...","context":"...","metric":"...","recommendation":"...","actionItems":["...","..."]},
+  {"type":"inventory","title":"...","context":"...","metric":"...","recommendation":"...","actionItems":["...","..."]},
+  {"type":"recommendations","title":"...","context":"...","metric":"...","recommendation":"...","actionItems":["...","..."]}
+]
+
+Each insight must reference the actual product names and numbers from the data above.`
+
+    try {
+      const result = await model.generateContent(prompt)
+      const text = result.response.text().trim()
+      const json = text.startsWith('[') ? text : text.slice(text.indexOf('['), text.lastIndexOf(']') + 1)
+      const parsed: Array<{ type: string; title: string; context: string; metric: string; recommendation: string; actionItems: string[] }> = JSON.parse(json)
+
+      return parsed.map((item) => ({
+        id: `${item.type}-${Date.now()}`,
+        title: item.title,
+        context: item.context,
+        metric: item.metric,
+        recommendation: item.recommendation,
+        insightType: item.type as InsightType,
+        actionItems: item.actionItems ?? [],
+        confidence: 0.9,
+        timestamp: new Date().toISOString()
+      }))
+    } catch (error) {
+      console.error('Insight generation failed:', error)
+      return []
     }
-
-    return insights
   }
 
   /**
-   * Generate a specific insight type
+   * Generate a specific insight type (single call, kept for compatibility)
    */
   async generateInsight(vendorId: string, insightType: InsightType): Promise<InsightCard | null> {
-    try {
-      const vendorData = await this.collectVendorData(vendorId, insightType)
-      if (!vendorData.channels.length) {
-        return null
-      }
-
-      const response = await geminiClient.generateInsight(vendorData)
-
-      return {
-        id: `${insightType}-${Date.now()}`,
-        title: this.extractTitle(response.insight, insightType),
-        context: this.extractContext(response.insight),
-        metric: this.extractMetric(response.insight),
-        recommendation: this.extractRecommendation(response.insight),
-        insightType,
-        actionItems: response.actionItems,
-        confidence: response.confidence,
-        timestamp: new Date().toISOString()
-      }
-    } catch (error) {
-      console.error(`Error generating ${insightType} insight:`, error)
-      return null
-    }
+    const all = await this.generateAllInsights(vendorId)
+    return all.find((i) => i.insightType === insightType) ?? null
   }
 
   /**
