@@ -65,41 +65,98 @@ export class InsightEngine {
   }
 
   /**
-   * Collect vendor data from Supabase
+   * Collect vendor data from Supabase.
+   * Reads from platform_orders / platform_settlements (imported data),
+   * falling back to legacy channels/orders tables if platform_orders is empty.
    */
   private async collectVendorData(vendorId: string, contextType: InsightType): Promise<VendorData> {
-    const channels = await getChannelsForVendor(vendorId)
-    const orders = await getOrdersForVendor(vendorId)
-    const products = await getProducts(vendorId)
+    // Query platform_orders grouped by platform
+    const { data: platformOrders } = await supabase
+      .from('platform_orders')
+      .select('platform, platform_order_id, product_name, sku, quantity, sale_amount, mrp, status, order_date')
+      .eq('vendor_id', vendorId)
+
+    const { data: platformSettlements } = await supabase
+      .from('platform_settlements')
+      .select('platform, net_settlement, sale_amount')
+      .eq('vendor_id', vendorId)
 
     const channelData: ChannelData[] = []
 
-    for (const channel of channels) {
-      const channelProducts = await getChannelProducts(channel.channel_id, 10)
-      const channelOrders = orders.filter((o) => o.channel_id === channel.channel_id)
+    if (platformOrders && platformOrders.length > 0) {
+      // Derive channel data from platform_orders
+      const platforms = [...new Set(platformOrders.map((o) => o.platform).filter(Boolean))]
 
-      const totalRevenue = channelOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0)
+      for (const platform of platforms) {
+        const orders = platformOrders.filter((o) => o.platform === platform)
+        const settlements = platformSettlements?.filter((s) => s.platform === platform) ?? []
 
-      const topProducts = channelProducts
-        .map((p) => ({
-          name: p.name || 'Unknown',
-          sales: channelOrders.filter((o) => o.product_id === p.product_id).length
-        }))
-        .sort((a, b) => b.sales - a.sales)
-        .slice(0, 5)
+        // Revenue: prefer settlements net_settlement, else sum sale_amount from orders
+        const totalRevenue =
+          settlements.length > 0
+            ? settlements.reduce((sum, s) => sum + (s.net_settlement ?? s.sale_amount ?? 0), 0)
+            : orders.reduce((sum, o) => sum + (o.sale_amount ?? 0), 0)
 
-      const stockLevel = channelProducts.reduce((sum, p) => sum + (p.quantity || 0), 0)
+        // Top products by order count
+        const productSales: Record<string, number> = {}
+        for (const o of orders) {
+          const key = o.product_name || o.sku || 'Unknown'
+          productSales[key] = (productSales[key] ?? 0) + (o.quantity ?? 1)
+        }
+        const topProducts = Object.entries(productSales)
+          .map(([name, sales]) => ({ name, sales }))
+          .sort((a, b) => b.sales - a.sales)
+          .slice(0, 5)
 
-      // Calculate growth (mock - would be actual period-over-period)
-      const growth = Math.random() * 0.5 - 0.1 // -10% to +40%
+        // Growth: compare last 30 days vs prior 30 days
+        const now = Date.now()
+        const ms30 = 30 * 24 * 60 * 60 * 1000
+        const recent = orders.filter(
+          (o) => o.order_date && now - new Date(o.order_date).getTime() < ms30
+        )
+        const prior = orders.filter((o) => {
+          if (!o.order_date) return false
+          const age = now - new Date(o.order_date).getTime()
+          return age >= ms30 && age < ms30 * 2
+        })
+        const recentRev = recent.reduce((s, o) => s + (o.sale_amount ?? 0), 0)
+        const priorRev = prior.reduce((s, o) => s + (o.sale_amount ?? 0), 0)
+        const growth = priorRev > 0 ? (recentRev - priorRev) / priorRev : 0
 
-      channelData.push({
-        name: channel.platform || 'Unknown Channel',
-        totalRevenue,
-        topProducts,
-        stockLevel,
-        growth
-      })
+        channelData.push({
+          name: platform.charAt(0).toUpperCase() + platform.slice(1),
+          totalRevenue,
+          topProducts,
+          stockLevel: orders.reduce((s, o) => s + (o.quantity ?? 0), 0),
+          growth
+        })
+      }
+    } else {
+      // Fallback to legacy channels/orders tables
+      const channels = await getChannelsForVendor(vendorId)
+      const orders = await getOrdersForVendor(vendorId)
+      const products = await getProducts(vendorId)
+
+      for (const channel of channels) {
+        const channelProducts = await getChannelProducts(channel.channel_id, 10)
+        const channelOrders = orders.filter((o) => o.channel_id === channel.channel_id)
+        const totalRevenue = channelOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0)
+        const topProducts = channelProducts
+          .map((p) => ({
+            name: p.name || 'Unknown',
+            sales: channelOrders.filter((o) => o.product_id === p.product_id).length
+          }))
+          .sort((a, b) => b.sales - a.sales)
+          .slice(0, 5)
+        const stockLevel = channelProducts.reduce((sum, p) => sum + (p.quantity || 0), 0)
+        channelData.push({
+          name: channel.platform || 'Unknown Channel',
+          totalRevenue,
+          topProducts,
+          stockLevel,
+          growth: 0
+        })
+      }
     }
 
     return {
@@ -114,66 +171,113 @@ export class InsightEngine {
    * Calculate metrics for dashboard display
    */
   async calculateMetrics(vendorId: string): Promise<InsightMetrics> {
+    const { data: platformOrders } = await supabase
+      .from('platform_orders')
+      .select('platform, product_name, sku, quantity, sale_amount, order_date')
+      .eq('vendor_id', vendorId)
+
+    const { data: platformSettlements } = await supabase
+      .from('platform_settlements')
+      .select('platform, net_settlement, sale_amount')
+      .eq('vendor_id', vendorId)
+
+    if (platformOrders && platformOrders.length > 0) {
+      const platforms = [...new Set(platformOrders.map((o) => o.platform).filter(Boolean))]
+      const channelData: InsightMetrics['channelData'] = []
+      let totalRevenue = 0
+
+      const now = Date.now()
+      const ms30 = 30 * 24 * 60 * 60 * 1000
+
+      for (const platform of platforms) {
+        const orders = platformOrders.filter((o) => o.platform === platform)
+        const settlements = platformSettlements?.filter((s) => s.platform === platform) ?? []
+        const channelRevenue =
+          settlements.length > 0
+            ? settlements.reduce((s, r) => s + (r.net_settlement ?? r.sale_amount ?? 0), 0)
+            : orders.reduce((s, o) => s + (o.sale_amount ?? 0), 0)
+        totalRevenue += channelRevenue
+
+        const recent = orders.filter(
+          (o) => o.order_date && now - new Date(o.order_date).getTime() < ms30
+        )
+        const prior = orders.filter((o) => {
+          if (!o.order_date) return false
+          const age = now - new Date(o.order_date).getTime()
+          return age >= ms30 && age < ms30 * 2
+        })
+        const recentRev = recent.reduce((s, o) => s + (o.sale_amount ?? 0), 0)
+        const priorRev = prior.reduce((s, o) => s + (o.sale_amount ?? 0), 0)
+        const growth = priorRev > 0 ? ((recentRev - priorRev) / priorRev) * 100 : 0
+
+        channelData.push({
+          channel: platform.charAt(0).toUpperCase() + platform.slice(1),
+          revenue: channelRevenue,
+          percentage: 0,
+          growth
+        })
+      }
+
+      channelData.forEach((cd) => {
+        cd.percentage = totalRevenue > 0 ? (cd.revenue / totalRevenue) * 100 : 0
+      })
+
+      // Aggregate top products
+      const productSales: Record<string, number> = {}
+      for (const o of platformOrders) {
+        const key = o.product_name || o.sku || 'Unknown'
+        productSales[key] = (productSales[key] ?? 0) + (o.quantity ?? 1)
+      }
+      const topProducts = Object.entries(productSales)
+        .map(([name, sales]) => ({ name, sales, growth: 0 }))
+        .sort((a, b) => b.sales - a.sales)
+        .slice(0, 5)
+
+      const sorted = [...channelData].sort((a, b) => b.revenue - a.revenue)
+
+      return {
+        totalRevenue,
+        topProducts,
+        channelData,
+        inventoryStatus: {
+          totalUnits: platformOrders.reduce((s, o) => s + (o.quantity ?? 0), 0),
+          lowStockItems: 0,
+          estimatedStockoutRisk: []
+        },
+        trends: {
+          period: 'last_30_days',
+          growth: channelData.reduce((s, c) => s + c.growth, 0) / (channelData.length || 1),
+          topPerformer: sorted[0]?.channel || 'N/A',
+          underperformer: sorted[sorted.length - 1]?.channel || 'N/A'
+        }
+      }
+    }
+
+    // Fallback: legacy tables
     const channels = await getChannelsForVendor(vendorId)
     const orders = await getOrdersForVendor(vendorId)
     const products = await getProducts(vendorId)
-
     let totalRevenue = 0
     const channelData: InsightMetrics['channelData'] = []
-
     for (const channel of channels) {
       const channelOrders = orders.filter((o) => o.channel_id === channel.channel_id)
       const channelRevenue = channelOrders.reduce((sum, o) => sum + (o.total_amount || 0), 0)
       totalRevenue += channelRevenue
-
-      channelData.push({
-        channel: channel.platform || 'Unknown',
-        revenue: channelRevenue,
-        percentage: 0, // Will be calculated after total
-        growth: (Math.random() * 0.5 - 0.1) * 100 // Mock growth %
-      })
+      channelData.push({ channel: channel.platform || 'Unknown', revenue: channelRevenue, percentage: 0, growth: 0 })
     }
-
-    // Calculate percentages
-    channelData.forEach((cd) => {
-      cd.percentage = totalRevenue > 0 ? (cd.revenue / totalRevenue) * 100 : 0
-    })
-
+    channelData.forEach((cd) => { cd.percentage = totalRevenue > 0 ? (cd.revenue / totalRevenue) * 100 : 0 })
     const topProducts = products
-      .map((p) => {
-        const productOrders = orders.filter((o) => o.product_id === p.product_id)
-        const sales = productOrders.length
-        const growth = (Math.random() * 0.5 - 0.1) * 100
-        return {
-          name: p.name || 'Unknown',
-          sales,
-          growth
-        }
-      })
-      .sort((a, b) => b.sales - a.sales)
-      .slice(0, 5)
-
-    const lowStockItems = products.filter((p) => (p.quantity || 0) < 10).length
-    const estimatedStockoutRisk = products
-      .filter((p) => (p.quantity || 0) < 5)
-      .map((p) => p.name || 'Unknown')
-      .slice(0, 5)
-
+      .map((p) => ({ name: p.name || 'Unknown', sales: orders.filter((o) => o.product_id === p.product_id).length, growth: 0 }))
+      .sort((a, b) => b.sales - a.sales).slice(0, 5)
+    const sorted = [...channelData].sort((a, b) => b.revenue - a.revenue)
     return {
-      totalRevenue,
-      topProducts,
-      channelData,
+      totalRevenue, topProducts, channelData,
       inventoryStatus: {
-        totalUnits: products.reduce((sum, p) => sum + (p.quantity || 0), 0),
-        lowStockItems,
-        estimatedStockoutRisk
+        totalUnits: products.reduce((s, p) => s + (p.quantity || 0), 0),
+        lowStockItems: products.filter((p) => (p.quantity || 0) < 10).length,
+        estimatedStockoutRisk: products.filter((p) => (p.quantity || 0) < 5).map((p) => p.name || 'Unknown').slice(0, 5)
       },
-      trends: {
-        period: 'last_30_days',
-        growth: (Math.random() * 0.4 - 0.05) * 100,
-        topPerformer: channelData.sort((a, b) => b.revenue - a.revenue)[0]?.channel || 'N/A',
-        underperformer: channelData.sort((a, b) => a.revenue - b.revenue)[0]?.channel || 'N/A'
-      }
+      trends: { period: 'last_30_days', growth: 0, topPerformer: sorted[0]?.channel || 'N/A', underperformer: sorted[sorted.length - 1]?.channel || 'N/A' }
     }
   }
 
