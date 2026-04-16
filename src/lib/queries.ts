@@ -1,185 +1,156 @@
 /**
  * Database query functions for Supabase
  * These functions encapsulate all database access patterns
+ * Reads from platform_orders and platform_settlements (real data tables)
  */
 
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/types/database';
 
-// Type aliases for cleaner return types
-type Product = Database['public']['Tables']['products']['Row'];
-type Order = Database['public']['Tables']['orders']['Row'];
-type Settlement = Database['public']['Tables']['settlements']['Row'];
-type Return = Database['public']['Tables']['returns']['Row'];
-type Expense = Database['public']['Tables']['expenses']['Row'];
+// Keep type alias for getCurrentVendor return type
+type VendorRow = Database['public']['Tables']['vendors']['Row'];
 
 /**
- * Get all products for a vendor
+ * Resolve vendor_id from either a user_id (auth uid) or a vendor_id.
+ * Queries the vendors table: first tries user_id, then vendor_id.
  */
-export async function getProducts(vendorId: string): Promise<Product[]> {
+export async function resolveVendorId(userId: string): Promise<string | null> {
+  // Try matching user_id first
+  const { data: byUser } = await supabase
+    .from('vendors')
+    .select('vendor_id')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (byUser?.vendor_id) return byUser.vendor_id;
+
+  // Fallback: maybe userId already is the vendor_id
+  const { data: byVendor } = await supabase
+    .from('vendors')
+    .select('vendor_id')
+    .eq('vendor_id', userId)
+    .maybeSingle();
+
+  return byVendor?.vendor_id ?? null;
+}
+
+/**
+ * Get all orders for a vendor from platform_orders.
+ * Accepts either user_id or vendor_id — resolves internally.
+ */
+export async function getOrdersForVendor(userId: string): Promise<any[]> {
+  const vendorId = await resolveVendorId(userId);
+  if (!vendorId) return [];
+
   const { data, error } = await supabase
-    .from('products')
+    .from('platform_orders' as any)
     .select('*')
     .eq('vendor_id', vendorId)
-    .order('created_at', { ascending: false });
+    .order('order_date', { ascending: false });
 
   if (error) {
-    console.error('Error fetching products:', error);
+    console.error('Error fetching platform_orders:', error);
     throw error;
   }
 
-  return data || [];
+  // Map to the shape expected by useOrders consumers (Dashboard.tsx etc.)
+  return (data || []).map((row: any) => ({
+    ...row,
+    // Legacy field mappings
+    total_amount: row.sale_amount,
+    status: (row.status || '').toLowerCase(),
+    created_at: row.order_date,
+    portal: row.platform,
+    order_date: row.order_date,
+    product_name: row.product_name,
+    sku: row.sku,
+    // Optional legacy fields (null ok)
+    product_id: null,
+    channel_id: null,
+    order_number: row.platform_order_id,
+    customer_name: null,
+  }));
 }
 
 /**
- * Get all orders for a vendor
+ * Get all settlements for a vendor from platform_settlements.
  */
-export async function getOrders(vendorId: string): Promise<Order[]> {
+export async function getSettlements(userId: string): Promise<any[]> {
+  const vendorId = await resolveVendorId(userId);
+  if (!vendorId) return [];
+
   const { data, error } = await supabase
-    .from('orders')
-    .select(`
-      *,
-      product:products(
-        product_id,
-        name,
-        sku,
-        vendor_id
-      )
-    `)
-    .eq('products.vendor_id', vendorId)
-    .order('created_at', { ascending: false });
+    .from('platform_settlements' as any)
+    .select('*')
+    .eq('vendor_id', vendorId)
+    .order('payment_date', { ascending: false });
 
   if (error) {
-    console.error('Error fetching orders:', error);
+    console.error('Error fetching platform_settlements:', error);
     throw error;
   }
 
-  return data || [];
+  return (data || []).map((row: any) => ({
+    ...row,
+    // Legacy field mappings
+    status: (row.net_settlement ?? 0) > 0 ? 'completed' : 'pending',
+    amount: row.net_settlement ?? row.sale_amount,
+    portal: row.platform,
+    order_id: row.platform_order_id,
+    created_at: row.payment_date,
+  }));
 }
 
 /**
- * Get all orders for a vendor (simplified, no joins for reliability)
+ * Derive unique products from platform_orders (group by sku + product_name).
  */
-export async function getOrdersForVendor(vendorId: string): Promise<(Order & { product_name?: string })[]> {
-  // Get all products for this vendor
-  const { data: products } = await supabase
-    .from('products')
-    .select('product_id, name')
+export async function getProducts(userId: string): Promise<any[]> {
+  const vendorId = await resolveVendorId(userId);
+  if (!vendorId) return [];
+
+  const { data, error } = await supabase
+    .from('platform_orders' as any)
+    .select('sku, product_name, quantity, sale_amount, vendor_id')
     .eq('vendor_id', vendorId);
 
-  if (!products || products.length === 0) {
-    return [];
-  }
-
-  const productIds = products.map(p => p.product_id);
-
-  // Get all orders for those products
-  const { data, error } = await supabase
-    .from('orders')
-    .select('*')
-    .in('product_id', productIds)
-    .order('created_at', { ascending: false });
-
   if (error) {
-    console.error('Error fetching orders:', error);
+    console.error('Error fetching products from platform_orders:', error);
     throw error;
   }
 
-  // Enrich orders with product names
-  const enrichedOrders = (data || []).map(order => {
-    const product = products.find(p => p.product_id === order.product_id);
-    return {
-      ...order,
-      product_name: product?.name,
-    };
-  });
+  // Group by sku + product_name
+  const map = new Map<string, { sku: string; product_name: string; total_qty: number; total_sale: number; count: number; vendor_id: string }>();
 
-  return enrichedOrders;
-}
-
-/**
- * Get all settlements for a vendor
- */
-export async function getSettlements(vendorId: string): Promise<Settlement[]> {
-  const { data, error } = await supabase
-    .from('settlements')
-    .select('*')
-    .eq('vendor_id', vendorId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Error fetching settlements:', error);
-    throw error;
+  for (const row of (data || []) as any[]) {
+    const key = `${row.sku}__${row.product_name}`;
+    const existing = map.get(key);
+    const qty = Number(row.quantity) || 0;
+    const sale = Number(row.sale_amount) || 0;
+    if (existing) {
+      existing.total_qty += qty;
+      existing.total_sale += sale;
+      existing.count += 1;
+    } else {
+      map.set(key, { sku: row.sku, product_name: row.product_name, total_qty: qty, total_sale: sale, count: 1, vendor_id: row.vendor_id });
+    }
   }
 
-  return data || [];
-}
-
-/**
- * Get all returns for a vendor's orders
- */
-export async function getReturns(vendorId: string): Promise<Return[]> {
-  // Get product IDs for this vendor
-  const { data: products } = await supabase
-    .from('products')
-    .select('product_id')
-    .eq('vendor_id', vendorId);
-
-  if (!products || products.length === 0) {
-    return [];
-  }
-
-  const productIds = products.map(p => p.product_id);
-
-  // Get all orders for those products
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('order_id')
-    .in('product_id', productIds);
-
-  if (!orders || orders.length === 0) {
-    return [];
-  }
-
-  const orderIds = orders.map(o => o.order_id);
-
-  // Get all returns for those orders
-  const { data, error } = await supabase
-    .from('returns')
-    .select('*')
-    .in('order_id', orderIds)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Error fetching returns:', error);
-    throw error;
-  }
-
-  return data || [];
-}
-
-/**
- * Get all expenses for a vendor
- */
-export async function getExpenses(vendorId: string): Promise<Expense[]> {
-  const { data, error } = await supabase
-    .from('expenses')
-    .select('*')
-    .eq('vendor_id', vendorId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Error fetching expenses:', error);
-    throw error;
-  }
-
-  return data || [];
+  return Array.from(map.values()).map(p => ({
+    product_id: p.sku,
+    name: p.product_name,
+    sku: p.sku,
+    stock: p.total_qty,
+    quantity: p.total_qty,
+    price: p.count > 0 ? p.total_sale / p.count : 0,
+    vendor_id: p.vendor_id,
+    created_at: new Date().toISOString(),
+  }));
 }
 
 /**
  * Get vendor info for authenticated user
  */
-export async function getCurrentVendor(): Promise<Database['public']['Tables']['vendors']['Row'] | null> {
+export async function getCurrentVendor(): Promise<VendorRow | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
@@ -195,4 +166,17 @@ export async function getCurrentVendor(): Promise<Database['public']['Tables']['
   }
 
   return data;
+}
+
+// Keep legacy exports so any other callers don't break
+export async function getOrders(vendorId: string): Promise<any[]> {
+  return getOrdersForVendor(vendorId);
+}
+
+export async function getReturns(_vendorId: string): Promise<any[]> {
+  return [];
+}
+
+export async function getExpenses(_vendorId: string): Promise<any[]> {
+  return [];
 }

@@ -7,14 +7,71 @@ async function getCurrentUserId(): Promise<string | null> {
   return data.user?.id ?? null;
 }
 
+// Resolve vendor_id from auth user_id via vendors table
+async function resolveVendorId(userId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from('vendors')
+    .select('vendor_id')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (data?.vendor_id) return data.vendor_id;
+  // fallback: userId might already be a vendor_id
+  const { data: d2 } = await supabase
+    .from('vendors')
+    .select('vendor_id')
+    .eq('vendor_id', userId)
+    .maybeSingle();
+  return d2?.vendor_id ?? null;
+}
+
 // ==================== PRODUCTS ====================
 export const productsDb = {
-  async getAll(search?: string) {
-    let query = supabase.from('products').select('*').order('created_at', { ascending: false });
-    if (search) query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%,brand.ilike.%${search}%`);
-    const { data, error } = await query;
+  async getAll(search?: string): Promise<any[]> {
+    const userId = await getCurrentUserId();
+    const vendorId = userId ? await resolveVendorId(userId) : null;
+    if (!vendorId) return [];
+
+    const { data, error } = await (supabase as any)
+      .from('platform_orders')
+      .select('sku, product_name, quantity, sale_amount, vendor_id')
+      .eq('vendor_id', vendorId);
+
     if (error) throw error;
-    return data;
+
+    // Group by sku + product_name
+    const map = new Map<string, any>();
+    for (const row of (data || []) as any[]) {
+      const key = `${row.sku}__${row.product_name}`;
+      const existing = map.get(key);
+      const qty = Number(row.quantity) || 0;
+      const sale = Number(row.sale_amount) || 0;
+      if (existing) {
+        existing.total_qty += qty;
+        existing.total_sale += sale;
+        existing.count += 1;
+      } else {
+        map.set(key, { sku: row.sku, name: row.product_name, total_qty: qty, total_sale: sale, count: 1, vendor_id: row.vendor_id });
+      }
+    }
+
+    let products = Array.from(map.values()).map(p => ({
+      id: p.sku,
+      product_id: p.sku,
+      name: p.name,
+      sku: p.sku,
+      stock: p.total_qty,
+      quantity: p.total_qty,
+      price: p.count > 0 ? p.total_sale / p.count : 0,
+      vendor_id: p.vendor_id,
+      created_at: new Date().toISOString(),
+    }));
+
+    if (search) {
+      const q = search.toLowerCase();
+      products = products.filter(p => p.name?.toLowerCase().includes(q) || p.sku?.toLowerCase().includes(q));
+    }
+
+    return products;
   },
   async getById(id: string) {
     const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
@@ -40,16 +97,37 @@ export const productsDb = {
 
 // ==================== ORDERS ====================
 export const ordersDb = {
-  async getAll(filters?: { portal?: string; status?: string; from?: string; to?: string; search?: string }) {
-    let query = supabase.from('orders').select('*').order('order_date', { ascending: false });
-    if (filters?.portal) query = query.eq('portal', filters.portal);
-    if (filters?.status) query = query.eq('status', filters.status as any);
+  async getAll(filters?: { portal?: string; status?: string; from?: string; to?: string; search?: string }): Promise<any[]> {
+    const userId = await getCurrentUserId();
+    const vendorId = userId ? await resolveVendorId(userId) : null;
+    if (!vendorId) return [];
+
+    let query = (supabase as any)
+      .from('platform_orders')
+      .select('*')
+      .eq('vendor_id', vendorId)
+      .order('order_date', { ascending: false });
+
+    if (filters?.portal) query = query.eq('platform', filters.portal);
+    if (filters?.status) query = query.ilike('status', filters.status);
     if (filters?.from) query = query.gte('order_date', filters.from);
     if (filters?.to) query = query.lte('order_date', filters.to);
-    if (filters?.search) query = query.or(`order_number.ilike.%${filters.search}%,customer_name.ilike.%${filters.search}%`);
+    if (filters?.search) query = query.or(`platform_order_id.ilike.%${filters.search}%,product_name.ilike.%${filters.search}%`);
+
     const { data, error } = await query;
     if (error) throw error;
-    return data;
+
+    return (data || []).map((row: any) => ({
+      ...row,
+      order_number: row.platform_order_id,
+      portal: row.platform,
+      status: (row.status || '').toLowerCase(),
+      total_amount: row.sale_amount,
+      created_at: row.order_date,
+      customer_name: null,
+      product_name: row.product_name,
+      sku: row.sku,
+    }));
   },
   async getById(id: string) {
     const { data, error } = await supabase.from('orders').select('*, order_items(*)').eq('id', id).single();
@@ -96,15 +174,37 @@ export const orderItemsDb = {
 
 // ==================== RETURNS ====================
 export const returnsDb = {
-  async getAll(filters?: { portal?: string; status?: string; from?: string; to?: string }) {
-    let query = supabase.from('returns').select('*').order('created_at', { ascending: false });
-    if (filters?.portal) query = query.eq('portal', filters.portal);
-    if (filters?.status) query = query.eq('status', filters.status as any);
-    if (filters?.from) query = query.gte('requested_at', filters.from);
-    if (filters?.to) query = query.lte('requested_at', filters.to);
+  async getAll(filters?: { portal?: string; status?: string; from?: string; to?: string }): Promise<any[]> {
+    const userId = await getCurrentUserId();
+    const vendorId = userId ? await resolveVendorId(userId) : null;
+    if (!vendorId) return [];
+
+    let query = (supabase as any)
+      .from('platform_orders')
+      .select('*')
+      .eq('vendor_id', vendorId)
+      .eq('status', 'RETURNED')
+      .order('order_date', { ascending: false });
+
+    if (filters?.portal) query = query.eq('platform', filters.portal);
+    if (filters?.from) query = query.gte('order_date', filters.from);
+    if (filters?.to) query = query.lte('order_date', filters.to);
+
     const { data, error } = await query;
     if (error) throw error;
-    return data;
+
+    return (data || []).map((row: any) => ({
+      ...row,
+      id: row.id,
+      portal: row.platform,
+      order_id: row.platform_order_id,
+      status: 'pending',
+      reason: row.return_reason,
+      requested_at: row.order_date,
+      created_at: row.order_date,
+      product_name: row.product_name,
+      sku: row.sku,
+    }));
   },
   async create(returnData: TablesInsert<'returns'>) {
     const userId = await getCurrentUserId();
@@ -185,15 +285,39 @@ export const creditNotesDb = {
 
 // ==================== SETTLEMENTS ====================
 export const settlementsDb = {
-  async getAll(filters?: { portal?: string; status?: string; from?: string; to?: string }) {
-    let query = supabase.from('settlements').select('*').order('created_at', { ascending: false });
-    if (filters?.portal) query = query.eq('portal', filters.portal);
-    if (filters?.status) query = query.eq('status', filters.status as any);
-    if (filters?.from) query = query.gte('settlement_date', filters.from);
-    if (filters?.to) query = query.lte('settlement_date', filters.to);
+  async getAll(filters?: { portal?: string; status?: string; from?: string; to?: string }): Promise<any[]> {
+    const userId = await getCurrentUserId();
+    const vendorId = userId ? await resolveVendorId(userId) : null;
+    if (!vendorId) return [];
+
+    let query = (supabase as any)
+      .from('platform_settlements')
+      .select('*')
+      .eq('vendor_id', vendorId)
+      .order('payment_date', { ascending: false });
+
+    if (filters?.portal) query = query.eq('platform', filters.portal);
+    if (filters?.from) query = query.gte('payment_date', filters.from);
+    if (filters?.to) query = query.lte('payment_date', filters.to);
+
     const { data, error } = await query;
     if (error) throw error;
-    return data;
+
+    const rows = (data || []).map((row: any) => ({
+      ...row,
+      status: (row.net_settlement ?? 0) > 0 ? 'completed' : 'pending',
+      amount: row.net_settlement ?? row.sale_amount,
+      portal: row.platform,
+      order_id: row.platform_order_id,
+      created_at: row.payment_date,
+    }));
+
+    // status filter applied in-memory (platform_settlements has no status column)
+    if (filters?.status) {
+      return rows.filter((r: any) => r.status === filters.status);
+    }
+
+    return rows;
   },
 };
 
