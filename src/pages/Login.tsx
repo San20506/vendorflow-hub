@@ -20,20 +20,33 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [signupRole, setSignupRole] = useState<UserRole>('vendor');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showVerifyScreen, setShowVerifyScreen] = useState(false);
+  const [resendStatus, setResendStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
-  const { login, signup, emailNotVerified, logout } = useAuth();
+  const { login, signup, emailNotVerified, logout, resendVerificationEmail, resetPassword } = useAuth();
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
-  const [showVerifyScreen, setShowVerifyScreen] = useState(false);
 
   useEffect(() => {
-    if (authUser) {
+    if (authUser && !emailNotVerified) {
       navigate('/dashboard', { replace: true });
     }
-  }, [authUser, navigate]);
+  }, [authUser, emailNotVerified, navigate]);
+
+  const handleResend = async () => {
+    setResendStatus('loading');
+    try {
+      await resendVerificationEmail(email);
+      setResendStatus('success');
+    } catch (err: any) {
+      setError(err.message || 'Failed to resend. Please try again.');
+      setResendStatus('error');
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +85,7 @@ export default function Login() {
     setSuccess('');
     setIsLoading(true);
     try {
-      await signup(email, password, name);
+      await signup(email, password, name, signupRole);
       setShowVerifyScreen(true);
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');
@@ -111,16 +124,36 @@ export default function Login() {
                 ✉️ Verification email sent successfully
               </p>
             </div>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => {
-                setShowVerifyScreen(false);
-                if (emailNotVerified) logout();
-              }}
-            >
-              Back to Sign In
-            </Button>
+            {resendStatus === 'error' && error && (
+              <div className="p-3 rounded-xl mb-6 text-sm font-medium animate-fade-in bg-destructive/10 text-destructive">{error}</div>
+            )}
+            <div className="space-y-3">
+              <Button
+                variant="default"
+                className="w-full bg-purple-600 hover:bg-purple-700"
+                onClick={handleResend}
+                disabled={resendStatus === 'loading' || resendStatus === 'success'}
+              >
+                {resendStatus === 'loading' ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Resending...</>
+                ) : resendStatus === 'success' ? (
+                  'Email Resent!'
+                ) : (
+                  'Resend verification email'
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setShowVerifyScreen(false);
+                  setResendStatus('idle');
+                  if (emailNotVerified) logout();
+                }}
+              >
+                Back to Sign In
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -245,7 +278,32 @@ export default function Login() {
                     <Input id="login-email" type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-sm font-semibold text-foreground/80">Password</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="login-password" className="text-sm font-semibold text-foreground/80">Password</Label>
+                      <button 
+                        type="button" 
+                        onClick={async () => {
+                          if (!email) {
+                            setError('Please enter your email address to reset password');
+                            return;
+                          }
+                          setIsLoading(true);
+                          setError('');
+                          setSuccess('');
+                          try {
+                            await resetPassword(email);
+                            setSuccess('Password reset link sent to your email.');
+                          } catch (err: any) {
+                            setError(err.message || 'Failed to send reset link.');
+                          } finally {
+                            setIsLoading(false);
+                          }
+                        }}
+                        className="text-xs font-semibold text-purple-600 hover:text-purple-700 transition-colors"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
                     <Input id="login-password" type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-11" />
                   </div>
 
@@ -271,6 +329,42 @@ export default function Login() {
                     <Input id="signup-name" type="text" placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} required className="h-11" />
                   </div>
                   <div className="space-y-2">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-semibold text-foreground/80">Select Role</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {roles.filter(r => r.id !== "admin").map((role) => {
+                        const Icon = role.icon;
+                        const isSelected = signupRole === role.id;
+                        return (
+                          <button
+                            key={role.id}
+                            type="button"
+                            onClick={() => setSignupRole(role.id as UserRole)}
+                            className="relative flex flex-col items-center p-3.5 rounded-xl transition-all duration-300 hover:scale-[1.03]"
+                            style={{
+                              background: isSelected ? "rgba(122, 63, 145, 0.12)" : "var(--glass-bg)",
+                              border: isSelected ? "2px solid rgba(122, 63, 145, 0.5)" : "2px solid var(--glass-border)",
+                              boxShadow: isSelected ? "0 0 20px rgba(197, 157, 217, 0.3)" : "var(--shadow-inner-glass)",
+                              backdropFilter: "blur(16px)",
+                            }}
+                          >
+                            <div
+                              className="p-2 rounded-lg mb-1.5 transition-all duration-300"
+                              style={{ background: isSelected ? "rgba(122, 63, 145, 0.2)" : "var(--glass-bg-medium)" }}
+                            >
+                              <Icon className={`w-5 h-5 transition-colors duration-300 ${isSelected ? "text-purple-700" : "text-muted-foreground"}`} />
+                            </div>
+                            <span className={`text-xs font-semibold transition-colors duration-300 ${isSelected ? "text-purple-700" : "text-foreground/70"}`}>
+                              {role.label}
+                            </span>
+                            <span className={`text-[10px] mt-0.5 transition-colors duration-300 ${isSelected ? "text-purple-600/70" : "text-muted-foreground/60"}`}>
+                              {role.description}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                     <Label htmlFor="signup-email" className="text-sm font-semibold text-foreground/80">Email</Label>
                     <Input id="signup-email" type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11" />
                   </div>

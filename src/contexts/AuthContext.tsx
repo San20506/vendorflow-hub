@@ -18,9 +18,11 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, role: UserRole) => Promise<void>;
+  signup: (email: string, password: string, name: string, role: UserRole) => Promise<void>;
+  emailNotVerified: boolean;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  resendVerificationEmail: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [emailNotVerified, setEmailNotVerified] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -83,6 +86,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (event === 'INITIAL_SESSION') return; // already handled above
+        
+        if (event === 'SIGNED_IN') {
+          if (mounted) setEmailNotVerified(false);
+        }
+        
         if (!session) {
           if (mounted) { setUser(null); setError(null); setIsLoading(false); }
           return;
@@ -121,14 +129,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const signup = useCallback(async (email: string, password: string, role: UserRole = 'vendor') => {
+  const signup = useCallback(async (email: string, password: string, name: string, role: UserRole = 'vendor') => {
+    setEmailNotVerified(false);
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
+        options: { data: { name } },
         password,
       });
       if (authError) throw authError;
       if (!authData.user) throw new Error('Failed to create user');
+      if (authData.user.identities && authData.user.identities.length === 0) {
+        setEmailNotVerified(true);
+      }
 
       // Create user profile
       const { error: profileError } = await supabase.from('users').insert({
@@ -165,9 +178,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         redirectTo: `${window.location.origin}/reset-password`,
       });
       if (resetError) throw resetError;
-      setError(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Password reset failed';
+      setError(message);
+      throw new Error(message);
+    }
+  }, []);
+
+  const resendVerificationEmail = useCallback(async (email: string) => {
+    try {
+      const { error: resendError } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`,
+        },
+      });
+      if (resendError) throw resendError;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to resend verification email';
       setError(message);
       throw new Error(message);
     }
@@ -181,7 +210,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     login,
     signup,
     logout,
+    emailNotVerified,
     resetPassword,
+    resendVerificationEmail,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
