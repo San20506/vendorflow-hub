@@ -40,7 +40,7 @@ export function parseFirstcryOrderRow(headers: string[], row: unknown[]): Parsed
     platform_order_id: String(poid),
     order_date: get('OrderDate') ? String(get('OrderDate')) : undefined,
     sku: get('VendorStyleCode') ? String(get('VendorStyleCode')) : get('ProductID') ? String(get('ProductID')) : undefined,
-    product_name: get('Brand Name') ? String(get('Brand Name')) : undefined,
+    product_name: get('VendorStyleCode') ? String(get('VendorStyleCode')) : get('ProductID') ? String(get('ProductID')) : undefined,
     quantity: qty != null ? Number(qty) : 1,
     mrp: mrp != null ? Number(mrp) : undefined,
     sale_amount: mrpSales != null ? Number(mrpSales) : mrp != null ? Number(mrp) : undefined,
