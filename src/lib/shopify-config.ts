@@ -16,8 +16,8 @@ interface ShopifyConfig {
  * These are placeholder values - users should configure their own app
  */
 const TEST_APP_CREDENTIALS = {
-  clientId: process.env.VITE_SHOPIFY_CLIENT_ID || 'test-client-id-12345',
-  clientSecret: process.env.VITE_SHOPIFY_CLIENT_SECRET || 'test-client-secret-67890',
+  clientId: import.meta.env.VITE_SHOPIFY_CLIENT_ID || 'test-client-id-12345',
+  clientSecret: import.meta.env.VITE_SHOPIFY_CLIENT_SECRET || 'test-client-secret-67890',
 };
 
 /**

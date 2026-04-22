@@ -46,7 +46,7 @@ export async function fixErrorWithGemini(
   context: Record<string, any>
 ): Promise<GeminiFixResponse | null> {
   try {
-    const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     if (!apiKey) {
       console.error('Gemini API key not configured');
       return null;

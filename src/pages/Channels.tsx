@@ -47,7 +47,8 @@ export default function Channels() {
     enabled: !!user?.id,
     refetchInterval: (data) => {
       // Auto-refetch while syncing
-      const isSyncing = data?.some((c: Channel) => c.sync_status === 'syncing');
+      if (!data || !Array.isArray(data)) return false;
+      const isSyncing = data.some((c: Channel) => c.sync_status === 'syncing');
       return isSyncing ? 2000 : false;  // Refetch every 2s if syncing
     },
   });

@@ -54,7 +54,7 @@ const navigationSections: NavSection[] = [
         label: 'Dashboard',
         items: [
           { title: 'Insights', url: '/insights', icon: PieChart, roles: ['admin', 'vendor', 'operations'] },
-          { title: 'Channels', url: '/channels', icon: Store, roles: ['admin'] },
+          { title: 'Channels', url: '/channels', icon: Store, roles: ['admin', 'vendor'] },
         ],
       },
       {
@@ -174,19 +174,15 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
-  const [isEditingBrand, setIsEditingBrand] = useState(false);
-  const [brandName, setBrandName] = useState('VendorFlow');
-  const [brandSubtitle, setBrandSubtitle] = useState('v1.0 • VMS Platform');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  const roleFilteredSections = navigationSections.map(section => ({
+  const roleFilteredSections = useMemo(() => navigationSections.map(section => ({
     ...section,
     groups: section.groups.map(group => ({
       ...group,
       items: group.items.filter(item => user && item.roles.includes(user.role)),
     })).filter(group => group.items.length > 0),
-  })).filter(section => section.groups.length > 0);
+  })).filter(section => section.groups.length > 0), [user]);
 
   const allItems = useMemo(() =>
     roleFilteredSections.flatMap(s => s.groups.flatMap(g => g.items)),
@@ -199,7 +195,7 @@ export function AppSidebar() {
     return allItems.filter(item => item.title.toLowerCase().includes(q));
   }, [searchQuery, allItems]);
 
-  const filteredSections = searchQuery.trim()
+  const filteredSections = useMemo(() => searchQuery.trim()
     ? roleFilteredSections.map(section => ({
         ...section,
         groups: section.groups.map(group => ({
@@ -209,80 +205,55 @@ export function AppSidebar() {
           ),
         })).filter(group => group.items.length > 0),
       })).filter(section => section.groups.length > 0)
-    : roleFilteredSections;
+    : roleFilteredSections,
+  [searchQuery, roleFilteredSections]);
 
   return (
     <Sidebar
-      className="border-r border-purple-400/12 bg-gradient-to-b from-slate-950/95 to-slate-950/98 backdrop-blur-xl"
+      className="border-r border-sidebar-accent/12 bg-gradient-to-b from-sidebar to-sidebar/95 backdrop-blur-xl"
       collapsible="icon"
     >
       <SidebarHeader className="p-4 border-b border-sidebar-accent/12">
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => !isCollapsed && setIsEditingBrand(!isEditingBrand)}
-            className="flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 hover:scale-105 cursor-pointer bg-gradient-to-br from-purple-400 to-purple-700 shadow-lg hover:shadow-xl"
-            title="Click to edit branding"
-            aria-label="Edit branding"
-          >
-            <Package className="w-5 h-5 text-white" />
-          </button>
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-purple-400 to-purple-700 shadow-lg shrink-0">
+            <Package className="w-5 h-5 text-sidebar-primary-foreground" />
+          </div>
           {!isCollapsed && (
-            isEditingBrand ? (
-              <div className="flex flex-col gap-1">
-                <input
-                  className="text-sm font-semibold rounded-lg px-2 py-1 w-28 bg-purple-500/15 text-white border border-purple-500/30 focus:outline-none focus:ring-1 focus:ring-purple-400"
-                  value={brandName}
-                  onChange={(e) => setBrandName(e.target.value)}
-                  onBlur={() => setIsEditingBrand(false)}
-                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingBrand(false)}
-                  autoFocus
-                  aria-label="Brand name"
-                />
-                <input
-                  className="text-xs rounded-lg px-2 py-1 w-28 bg-purple-500/10 text-purple-300 border border-purple-500/20 focus:outline-none focus:ring-1 focus:ring-purple-400"
-                  value={brandSubtitle}
-                  onChange={(e) => setBrandSubtitle(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingBrand(false)}
-                  aria-label="Brand subtitle"
-                />
-              </div>
-            ) : (
-              <div className="flex flex-col cursor-pointer" onClick={() => setIsEditingBrand(true)} title="Click to edit" role="button" tabIndex={0}>
-                <span className="font-bold text-white">{brandName}</span>
-                <span className="text-xs text-purple-300/70">{brandSubtitle}</span>
-              </div>
-            )
+            <div className="flex flex-col">
+              <span className="font-bold text-sidebar-foreground">VendorFlow</span>
+              <span className="text-xs text-sidebar-foreground/60">v1.0 • VMS Platform</span>
+            </div>
           )}
         </div>
       </SidebarHeader>
 
       {/* Search Bar */}
       {!isCollapsed && (
-        <div className="px-3 pb-2 pt-2 border-b border-purple-400/8">
+        <div className="relative px-3 pb-2 pt-2 border-b border-purple-400/8 overflow-visible">
           <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-purple-400/50" />
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-sidebar-foreground/50" />
             <input
               placeholder="Search tabs..."
               value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              onFocus={() => setIsSearchOpen(true)}
+              onChange={e => {
+                console.log('[Sidebar] Search query changed:', e.target.value);
+                setSearchQuery(e.target.value);
+              }}
               onKeyDown={e => {
                 if (e.key === 'Enter' && searchResults.length > 0) {
                   navigate(searchResults[0].url);
                   setSearchQuery('');
-                  setIsSearchOpen(false);
                 } else if (e.key === 'Escape') {
                   setSearchQuery('');
-                  setIsSearchOpen(false);
                 }
               }}
-              className="w-full h-8 pl-8 pr-8 text-xs rounded-xl bg-purple-400/8 border border-purple-400/12 text-white placeholder-purple-400/50 outline-none transition-all duration-200 focus:ring-1 focus:ring-purple-400/50"
+              className="w-full h-8 pl-8 pr-8 text-xs rounded-xl bg-sidebar-accent border border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/60 outline-none transition-all duration-200 focus:ring-1 focus:ring-sidebar-ring"
               aria-label="Search navigation"
             />
             {searchQuery && (
               <button
-                onClick={() => { setSearchQuery(''); setIsSearchOpen(false); }}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors text-purple-400/50 hover:text-purple-400"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors text-sidebar-foreground/50 hover:text-sidebar-foreground"
                 aria-label="Clear search"
               >
                 <X className="w-3.5 h-3.5" />
@@ -290,22 +261,20 @@ export function AppSidebar() {
             )}
           </div>
           {searchQuery.trim() && searchResults.length > 0 && (
-            <div
-              className="mt-1.5 rounded-xl py-1 max-h-60 overflow-y-auto z-50 bg-slate-900/95 border border-purple-400/15 shadow-lg"
-            >
+            <div className="absolute left-3 right-3 top-full mt-1 rounded-xl py-1 max-h-60 overflow-y-auto z-[200] bg-sidebar border border-sidebar-accent shadow-2xl">
               {searchResults.map(item => {
                 const isActive = location.pathname === item.url;
                 return (
                   <button
                     key={item.url}
-                    onClick={() => { navigate(item.url); setSearchQuery(''); setIsSearchOpen(false); }}
+                    onClick={() => { navigate(item.url); setSearchQuery(''); }}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-all duration-200 ${
                       isActive
-                        ? 'bg-purple-400/12 text-purple-300 font-medium'
-                        : 'text-white/70 hover:text-white hover:bg-slate-800/50'
+                        ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                        : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
                     }`}
                   >
-                    <item.icon className="w-4 h-4 shrink-0" />
+                    <item.icon className="w-4 h-4 shrink-0 text-sidebar-accent" />
                     <span>{item.title}</span>
                   </button>
                 );
@@ -313,7 +282,7 @@ export function AppSidebar() {
             </div>
           )}
           {searchQuery.trim() && searchResults.length === 0 && (
-            <p className="text-xs text-center py-2 text-purple-400/40">No tabs found</p>
+            <p className="text-xs text-center py-2 text-sidebar-foreground/40">No tabs found</p>
           )}
         </div>
       )}
@@ -323,7 +292,7 @@ export function AppSidebar() {
           <div key={section.heading}>
             {!isCollapsed && (
               <div className={`px-3 py-2.5 ${sectionIndex > 0 ? 'mt-3 pt-4 border-t border-sidebar-foreground/20' : ''}`}>
-                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-sidebar-foreground/75">
+                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-sidebar-foreground">
                   {section.heading}
                 </span>
               </div>
@@ -336,7 +305,7 @@ export function AppSidebar() {
                 <SidebarGroup className="p-0">
                   {!isCollapsed ? (
                     <CollapsibleTrigger
-                      className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors text-white hover:text-white"
+                      className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wider transition-colors text-sidebar-foreground"
                     >
                       {group.label}
                       <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-data-[state=closed]/collapsible:rotate-[-90deg]" />
@@ -362,8 +331,8 @@ export function AppSidebar() {
                                   }}
                                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
                                     isActive
-                                      ? 'bg-gradient-to-r from-purple-500/40 to-purple-700/40 text-white font-semibold shadow-md shadow-purple-900/40 ring-1 ring-purple-400/30'
-                                      : 'text-white/80 hover:text-white hover:bg-white/8'
+                                      ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold shadow-md ring-1 ring-sidebar-accent/30'
+                                      : 'text-sidebar-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
                                   }`}
                                 >
                                   <item.icon className="w-4 h-4 shrink-0" />
