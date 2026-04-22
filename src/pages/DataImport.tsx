@@ -13,6 +13,7 @@ interface UploadedFileInfo {
   name: string;
   size: number;
   type: string;
+  file: File;
 }
 
 function formatFileSize(bytes: number) {
@@ -44,6 +45,7 @@ export default function DataImport() {
       name: f.name,
       size: f.size,
       type: f.type || 'application/octet-stream',
+      file: f,
     }));
     setUploadedFiles(prev => [...prev, ...newFiles]);
   }, []);
@@ -179,7 +181,7 @@ export default function DataImport() {
                       <div className="flex items-center gap-2">
                         <Button
                           size="sm"
-                          onClick={() => handleProcessFile(new File([new Blob()], file.name, { type: file.type }))}
+                          onClick={() => handleProcessFile(file.file)}
                           disabled={isProcessing}
                         >
                           {isProcessing ? (
