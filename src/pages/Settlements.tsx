@@ -109,12 +109,22 @@ export default function Settlements() {
   }, [selectedPortal, statusFilter]);
 
   const filteredOrderSettlements = useMemo(() => {
-    return mockOrderSettlements.filter(s => {
+    const normalizedOrderSettlements = allSettlements.map((s: any) => ({
+      orderId: s.order_id || s.order_number || s.settlementId,
+      portal: s.portal,
+      status: s.status,
+      expectedAmount: Number(s.amount || 0),
+      settledAmount: Number(s.netAmount || 0),
+      difference: Math.max(0, Number((s.amount || 0) - (s.netAmount || 0))),
+      settlementDate: s.settlementDate,
+    }));
+
+    return normalizedOrderSettlements.filter(s => {
       const matchesPortal = selectedPortal === 'all' || s.portal === selectedPortal;
       const matchesStatus = statusFilter === 'all' || s.status === statusFilter;
       return matchesPortal && matchesStatus;
     });
-  }, [selectedPortal, statusFilter]);
+  }, [allSettlements, selectedPortal, statusFilter]);
 
   const batchRowSelection = useRowSelection(filteredSettlements.map(s => s.settlementId));
   const orderRowSelection = useRowSelection(filteredOrderSettlements.map(s => s.orderId));
@@ -142,14 +152,17 @@ export default function Settlements() {
     };
   }, []);
 
-  const totalExpense = expenseCategories.reduce((s, e) => s + e.value, 0);
+  const toNumber = (value: unknown) => Number(value ?? 0) || 0;
 
-  const formatCurrency = (value: number) => {
-    if (value >= 100000) return `₹${(value / 100000).toFixed(2)}L`;
-    if (value >= 1000) return `₹${(value / 1000).toFixed(1)}K`;
-    return `₹${value.toLocaleString()}`;
+  const totalExpense = expenseCategories.reduce((s, e) => s + toNumber(e.value), 0);
+
+  const formatCurrency = (value: unknown) => {
+    const n = toNumber(value);
+    if (n >= 100000) return `₹${(n / 100000).toFixed(2)}L`;
+    if (n >= 1000) return `₹${(n / 1000).toFixed(1)}K`;
+    return `₹${n.toLocaleString()}`;
   };
-  const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  const formatDate = (dateStr: string | null | undefined) => dateStr ? new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
 
   const dateLabel = dateFilter === 'today' ? 'Today' : dateFilter === '7days' ? 'Last 7 Days' : dateFilter === '30days' ? 'Last 30 Days' : dateFilter === 'this_month' ? 'This Month' : dateFilter === 'this_year' ? 'This Year' : 'Custom';
   const activeSelection = viewTab === 'batch' ? batchRowSelection : orderRowSelection;
@@ -533,7 +546,7 @@ export default function Settlements() {
                   </TableHeader>
                   <TableBody>
                     {filteredSettlements.map((settlement) => {
-                      const status = settlementStatusConfig[settlement.status];
+                      const status = settlementStatusConfig[settlement.status as SettlementStatus] ?? settlementStatusConfig.completed;
                       const portal = portalConfigs.find(p => p.id === settlement.portal);
                       const StatusIcon = status.icon;
                       return (
@@ -542,10 +555,10 @@ export default function Settlements() {
                           <TableCell className="font-medium">{settlement.settlementId}</TableCell>
                           <TableCell><Badge variant="outline" className="gap-1"><ChannelIcon channelId={portal?.id || ""} fallbackIcon={portal?.icon} size={16} /> {portal?.name}</Badge></TableCell>
                           <TableCell className="text-sm">{formatDate(settlement.cycleStart)} - {formatDate(settlement.cycleEnd)}</TableCell>
-                          <TableCell className="text-right font-medium">₹{settlement.amount.toLocaleString()}</TableCell>
-                          <TableCell className="text-right text-destructive">-₹{settlement.commission.toLocaleString()}</TableCell>
-                          <TableCell className="text-right text-muted-foreground">-₹{settlement.fees.toLocaleString()}</TableCell>
-                          <TableCell className="text-right font-bold text-success">₹{settlement.netAmount.toLocaleString()}</TableCell>
+                           <TableCell className="text-right font-medium">{formatCurrency(settlement.amount)}</TableCell>
+                           <TableCell className="text-right text-destructive">-{formatCurrency(settlement.commission)}</TableCell>
+                           <TableCell className="text-right text-muted-foreground">-{formatCurrency(settlement.fees)}</TableCell>
+                           <TableCell className="text-right font-bold text-success">{formatCurrency(settlement.netAmount)}</TableCell>
                           <TableCell className="text-center"><Badge variant="secondary">{settlement.ordersCount}</Badge></TableCell>
                           <TableCell className="text-muted-foreground">{formatDate(settlement.expectedDate)}</TableCell>
                           <TableCell><Badge variant="secondary" className={`gap-1 ${status.color}`}><StatusIcon className="w-3 h-3" />{status.label}</Badge></TableCell>
@@ -581,7 +594,7 @@ export default function Settlements() {
                   </TableHeader>
                   <TableBody>
                     {filteredOrderSettlements.map((s) => {
-                      const status = settlementStatusConfig[s.status];
+                      const status = settlementStatusConfig[s.status as SettlementStatus] ?? settlementStatusConfig.completed;
                       const portal = portalConfigs.find(p => p.id === s.portal);
                       const StatusIcon = status.icon;
                       return (
@@ -589,10 +602,10 @@ export default function Settlements() {
                           <TableCell><RowCheckbox checked={orderRowSelection.isSelected(s.orderId)} onCheckedChange={() => orderRowSelection.toggle(s.orderId)} /></TableCell>
                           <TableCell className="font-medium">{s.orderId}</TableCell>
                           <TableCell><Badge variant="outline" className="gap-1"><ChannelIcon channelId={portal?.id || ""} fallbackIcon={portal?.icon} size={16} /> {portal?.name}</Badge></TableCell>
-                          <TableCell className="text-right font-medium">₹{s.amount.toLocaleString()}</TableCell>
-                          <TableCell className="text-right text-muted-foreground">-₹{s.fees.toLocaleString()}</TableCell>
-                          <TableCell className="text-right text-destructive">-₹{s.commission.toLocaleString()}</TableCell>
-                          <TableCell className="text-right font-bold text-success">₹{s.net.toLocaleString()}</TableCell>
+                           <TableCell className="text-right font-medium">{formatCurrency(s.amount)}</TableCell>
+                           <TableCell className="text-right text-muted-foreground">-{formatCurrency(s.fees)}</TableCell>
+                           <TableCell className="text-right text-destructive">-{formatCurrency(s.commission)}</TableCell>
+                           <TableCell className="text-right font-bold text-success">{formatCurrency(s.net)}</TableCell>
                           <TableCell><Badge variant="secondary" className={`gap-1 ${status.color}`}><StatusIcon className="w-3 h-3" />{status.label}</Badge></TableCell>
                         </TableRow>
                       );

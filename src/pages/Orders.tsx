@@ -38,13 +38,16 @@ export default function Orders() {
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {
       if (statusFilter !== 'all' && o.status !== statusFilter) return false;
-      if (searchQuery && !o.order_id.includes(searchQuery)) return false;
+      if (searchQuery && !((o.order_number || o.id || '').toString().includes(searchQuery))) return false;
       return true;
     });
   }, [orders, statusFilter, searchQuery]);
 
-  const formatCurrency = (amount: number) => `₹${amount.toFixed(2)}`;
-  const formatDate = (date: string) => new Date(date).toLocaleDateString();
+  const formatCurrency = (amount: number | string | null | undefined) => {
+    const value = Number(amount ?? 0) || 0;
+    return `₹${value.toFixed(2)}`;
+  };
+  const formatDate = (date: string | null | undefined) => date ? new Date(date).toLocaleDateString() : '—';
 
   if (!user) {
     return <div className="p-6 text-center">Please log in to view orders</div>;
@@ -130,8 +133,8 @@ export default function Orders() {
                     const StatusIcon = statusInfo.icon;
 
                     return (
-                      <TableRow key={order.order_id}>
-                        <TableCell className="font-medium">{order.order_id.slice(0, 8)}</TableCell>
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">{(order.order_number || order.id || '').toString().slice(0, 8)}</TableCell>
                         <TableCell>{order.product_name || 'N/A'}</TableCell>
                         <TableCell>{order.quantity}</TableCell>
                         <TableCell>{formatCurrency(order.total_amount)}</TableCell>
@@ -174,7 +177,7 @@ export default function Orders() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Order ID</p>
-                  <p className="font-medium">{selectedOrder.order_id}</p>
+                  <p className="font-medium">{selectedOrder.order_number || selectedOrder.id}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Status</p>
